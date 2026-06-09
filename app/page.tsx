@@ -1,14 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+
 import FileUploader from './components/FileUploader';
 import ScoreCard from './components/ScoreCard';
 import CertificateCard from './components/CertificateCard';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'verify' | 'lookup'>('verify');
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('uhrate_user');
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('uhrate_user');
+    setUser(null);
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -31,6 +43,34 @@ export default function Home() {
             >
               Dashboard
             </button>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 hidden sm:block">
+                  {user.full_name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.location.href = '/login'}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => window.location.href = '/register'}
+                  className="px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
             <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
               Live
             </span>
