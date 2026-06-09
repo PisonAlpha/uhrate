@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +36,8 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const { data: user, error } = await supabaseAdmin
       .from('users')
@@ -43,20 +47,28 @@ export async function POST(request: NextRequest) {
         password_hash: hashedPassword,
         role: 'individual',
         credits: 10,
+        email_verified: false,
+        verification_token: token,
+        token_expires_at: expiresAt.toISOString(),
       })
       .select()
       .single();
 
     if (error) throw error;
 
+    await sendVerificationEmail(email, full_name, token);
+
     return NextResponse.json({
       success: true,
+      requiresVerification: true,
+      message: 'Account created. Please check your email to verify your account.',
       user: {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
         role: user.role,
         credits: user.credits,
+        email_verified: false,
       },
     });
   } catch (error) {

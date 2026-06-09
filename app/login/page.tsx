@@ -1,12 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorMsg = params.get('error');
+    const successMsg = params.get('success');
+    if (errorMsg) setError(errorMsg);
+    if (successMsg) setSuccess(successMsg);
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -16,6 +25,7 @@ export default function Login() {
 
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -58,6 +68,12 @@ export default function Login() {
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-600 text-sm">
+              {success}
             </div>
           )}
 
