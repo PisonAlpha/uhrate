@@ -59,9 +59,9 @@ export async function POST(request: NextRequest) {
       trust_score: analysis.trust_score,
       rating: analysis.rating,
       certificate_id: certificateId,
-      blockchain_tx: blockchain.txHash,
+      blockchain_tx: blockchain.txHash ?? undefined,
       blockchain_chain: 'BNB Testnet',
-      ipfs_hash: null,
+      ipfs_hash: undefined,
     });
 
     return NextResponse.json({
