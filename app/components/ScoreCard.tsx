@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 
 interface ScoreCardProps {
   result: any;
@@ -61,6 +62,37 @@ function getRatingStyle(rating: string) {
 
 export default function ScoreCard({ result }: ScoreCardProps) {
   const { data, dna, analysis } = result;
+  const [minting, setMinting] = useState(false);
+  const [nftMinted, setNftMinted] = useState(false);
+  const [nftResult, setNftResult] = useState<any>(null);
+  const [walletAddress, setWalletAddress] = useState('');
+
+  const handleMintNFT = async () => {
+    const address = prompt('Enter your BNB wallet address to receive the NFT:');
+    if (!address) return;
+
+    setMinting(true);
+    try {
+      const response = await fetch('/api/nft/mint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          certificateId: data.certificate_id,
+          recipientAddress: address,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      setNftResult(result);
+      setNftMinted(true);
+    } catch (err: any) {
+      alert('Minting failed: ' + err.message);
+    } finally {
+      setMinting(false);
+    }
+  };
 
   const downloadCertificate = () => {
     const cert = {
@@ -162,12 +194,19 @@ export default function ScoreCard({ result }: ScoreCardProps) {
         </div>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <button
           onClick={downloadCertificate}
           className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
         >
           Download Certificate
+        </button>
+        <button
+          onClick={handleMintNFT}
+          disabled={minting || nftMinted}
+          className="flex-1 py-3 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+        >
+          {minting ? 'Minting...' : nftMinted ? 'NFT Minted!' : 'Mint NFT'}
         </button>
         <button
           onClick={() => window.location.reload()}
@@ -176,6 +215,17 @@ export default function ScoreCard({ result }: ScoreCardProps) {
           Verify Another File
         </button>
       </div>
+      {nftResult && (
+        <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
+          <p className="text-sm font-medium text-purple-900 mb-1">NFT Certificate Minted!</p>
+          <p
+            onClick={() => window.open("https://testnet.bscscan.com/tx/" + nftResult.txHash, '_blank')}
+            className="font-mono text-xs text-purple-600 hover:underline cursor-pointer truncate"
+          >
+            {nftResult.txHash}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
