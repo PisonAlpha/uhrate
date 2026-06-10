@@ -46,6 +46,9 @@ export default function Home() {
             <nav className="hidden md:flex items-center gap-6">
               <button onClick={() => window.location.href = '/verify'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Verify</button>
               <button onClick={() => window.location.href = '/registry'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Registry</button>
+              <button onClick={() => window.location.href = '/education'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Education</button>
+              <button onClick={() => window.location.href = '/legal'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Legal</button>
+              <button onClick={() => window.location.href = '/media'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Media</button>
               <button onClick={() => window.location.href = '/enterprise'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Enterprise</button>
               <button onClick={() => window.location.href = '/api-marketplace'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">API</button>
               <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Pricing</button>
@@ -98,6 +101,9 @@ export default function Home() {
         {[
           { label: 'Verify', href: '/verify' },
           { label: 'Registry', href: '/registry' },
+          { label: 'Education', href: '/education' },
+          { label: 'Legal', href: '/legal' },
+          { label: 'Media', href: '/media' },
           { label: 'Enterprise', href: '/enterprise' },
           { label: 'API', href: '/api-marketplace' },
           { label: 'Pricing', href: '/pricing' },
