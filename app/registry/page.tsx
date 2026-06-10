@@ -206,7 +206,15 @@ export default function Registry() {
             </div>
             <span className="font-semibold text-gray-900">UHRATE</span>
           </button>
-          <span className="text-sm text-gray-500 font-medium">Document Registry</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.location.href = '/registry/lookup'}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Verify Document
+            </button>
+            <span className="text-sm text-gray-500 font-medium">Document Registry</span>
+          </div>
         </div>
       </header>
 
