@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendVerificationEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +57,13 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    await sendVerificationEmail(email, full_name, token);
+    try {
+      await sendVerificationEmail(email, full_name, token);
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+    }
+
+    sendWelcomeEmail(email, full_name).catch(console.error);
 
     return NextResponse.json({
       success: true,

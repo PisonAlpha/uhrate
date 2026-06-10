@@ -5,6 +5,7 @@ import { saveVerification, getVerificationByHash } from '@/lib/supabase';
 import { registerOnBlockchain } from '@/lib/blockchain';
 import { uploadCertificateToIPFS } from '@/lib/ipfs';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendVerificationCompleteEmail } from '@/lib/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -121,6 +122,26 @@ export async function POST(request: NextRequest) {
       blockchain_chain: 'BNB Testnet',
       ipfs_hash: ipfsResult?.ipfsHash ?? undefined,
     });
+
+    if (userEmail) {
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('full_name')
+        .eq('email', userEmail)
+        .single();
+
+      if (user) {
+        sendVerificationCompleteEmail(
+          userEmail,
+          user.full_name,
+          file.name,
+          analysis.rating,
+          analysis.trust_score,
+          certificateId,
+          blockchain.txHash || null
+        ).catch(console.error);
+      }
+    }
 
     return NextResponse.json({
       success: true,
