@@ -51,6 +51,17 @@ export default function Home() {
               <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Pricing</button>
               <button onClick={() => window.location.href = '/dashboard'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Dashboard</button>
             </nav>
+            <button
+              onClick={() => {
+                const menu = document.getElementById('mobile-menu');
+                if (menu) menu.classList.toggle('hidden');
+              }}
+              className="md:hidden p-2 text-gray-600 bg-transparent border-0 cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
           <div className="flex items-center gap-3">
             {user ? (
@@ -82,6 +93,25 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <div id="mobile-menu" className="hidden md:hidden bg-white border-b border-gray-100 px-6 py-4 space-y-3">
+        {[
+          { label: 'Verify', href: '/verify' },
+          { label: 'Registry', href: '/registry' },
+          { label: 'Enterprise', href: '/enterprise' },
+          { label: 'API', href: '/api-marketplace' },
+          { label: 'Pricing', href: '/pricing' },
+          { label: 'Dashboard', href: '/dashboard' },
+        ].map(item => (
+          <button
+            key={item.label}
+            onClick={() => window.location.href = item.href}
+            className="block w-full text-left text-sm text-gray-700 hover:text-gray-900 bg-transparent border-0 cursor-pointer py-2 border-b border-gray-50"
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-16">
