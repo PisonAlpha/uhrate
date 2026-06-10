@@ -1,6 +1,12 @@
 'use client';
 import { useState } from 'react';
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 interface ScoreCardProps {
   result: any;
 }
@@ -68,17 +74,44 @@ export default function ScoreCard({ result }: ScoreCardProps) {
   const [walletAddress, setWalletAddress] = useState('');
 
   const handleMintNFT = async () => {
-    const address = prompt('Enter your BNB wallet address to receive the NFT:');
-    if (!address) return;
-
-    setMinting(true);
     try {
+      if (!window.ethereum) {
+        alert('Please install MetaMask to mint NFTs');
+        return;
+      }
+
+      setMinting(true);
+
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+
+      const userAddress = accounts[0];
+
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x61' }],
+      }).catch(async (error: any) => {
+        if (error.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x61',
+              chainName: 'BSC Testnet',
+              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+              rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
+              blockExplorerUrls: ['https://testnet.bscscan.com'],
+            }],
+          });
+        }
+      });
+
       const response = await fetch('/api/nft/mint', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           certificateId: data.certificate_id,
-          recipientAddress: address,
+          recipientAddress: userAddress,
         }),
       });
 
