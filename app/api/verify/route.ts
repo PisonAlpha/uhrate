@@ -3,6 +3,7 @@ import { generateDigitalDNA, generateCertificateId } from '@/lib/hasher';
 import { analyzeFile } from '@/lib/deepfake';
 import { saveVerification, getVerificationByHash } from '@/lib/supabase';
 import { registerOnBlockchain } from '@/lib/blockchain';
+import { uploadCertificateToIPFS } from '@/lib/ipfs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,6 +48,31 @@ export async function POST(request: NextRequest) {
       analysis.rating
     );
 
+    const certificateData = {
+      platform: 'UHRATE',
+      certificate_id: certificateId,
+      file_name: file.name,
+      file_type: file.type,
+      file_size: file.size,
+      sha256_hash: dna.sha256,
+      perceptual_hash: dna.perceptual,
+      originality_score: analysis.originality_score,
+      ai_score: analysis.ai_score,
+      deepfake_score: analysis.deepfake_score,
+      manipulation_score: analysis.manipulation_score,
+      trust_score: analysis.trust_score,
+      rating: analysis.rating,
+      summary: analysis.summary,
+      blockchain_tx: blockchain.txHash,
+      blockchain_chain: 'BNB Testnet',
+      verified_at: new Date().toISOString(),
+    };
+
+    const ipfsResult = await uploadCertificateToIPFS(
+      certificateData,
+      certificateId
+    );
+
     const verification = await saveVerification({
       file_name: file.name,
       file_type: file.type,
@@ -61,7 +87,7 @@ export async function POST(request: NextRequest) {
       certificate_id: certificateId,
       blockchain_tx: blockchain.txHash ?? undefined,
       blockchain_chain: 'BNB Testnet',
-      ipfs_hash: undefined,
+      ipfs_hash: ipfsResult?.ipfsHash ?? undefined,
     });
 
     return NextResponse.json({
@@ -71,6 +97,7 @@ export async function POST(request: NextRequest) {
       dna,
       analysis,
       blockchain,
+      ipfs: ipfsResult,
     });
   } catch (error) {
     console.error('Verification error:', error);
