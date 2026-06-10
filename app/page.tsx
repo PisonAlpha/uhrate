@@ -50,6 +50,12 @@ export default function Home() {
               Enterprise
             </button>
             <button
+              onClick={() => window.location.href = '/api-marketplace'}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              API
+            </button>
+            <button
               onClick={() => window.location.href = '/pricing'}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
             >
