@@ -37,11 +37,17 @@ export default function Home() {
             </span>
           </div>
          <div className="flex items-center gap-2">
-            <button
+           <button
               onClick={() => window.location.href = '/verify'}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Public Verify
+            </button>
+            <button
+              onClick={() => window.location.href = '/enterprise'}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+            >
+              Enterprise
             </button>
             <button
               onClick={() => window.location.href = '/pricing'}
