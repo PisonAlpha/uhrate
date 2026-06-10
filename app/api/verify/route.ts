@@ -4,6 +4,7 @@ import { analyzeFile } from '@/lib/deepfake';
 import { saveVerification, getVerificationByHash } from '@/lib/supabase';
 import { registerOnBlockchain } from '@/lib/blockchain';
 import { uploadCertificateToIPFS } from '@/lib/ipfs';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +16,37 @@ export async function POST(request: NextRequest) {
         { error: 'No file provided' },
         { status: 400 }
       );
+    }
+
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    const userEmail = formData.get('userEmail') as string;
+
+    if (userEmail) {
+      const { data: user } = await supabaseAdmin
+        .from('users')
+        .select('credits, role')
+        .eq('email', userEmail)
+        .single();
+
+      if (user && user.role === 'individual' && user.credits <= 0) {
+        return NextResponse.json(
+          { error: 'You have used all your free verifications. Please upgrade to Pro.' },
+          { status: 403 }
+        );
+      }
+
+      if (user && user.role === 'individual') {
+        await supabaseAdmin
+          .from('users')
+          .update({ credits: user.credits - 1 })
+          .eq('email', userEmail);
+      }
     }
 
     const bytes = await file.arrayBuffer();

@@ -30,8 +30,14 @@ export default function FileUploader({ onResult, onLoading }: FileUploaderProps)
 
       setProgress('Computing confidence scores...');
 
-      const formData = new FormData();
+     const formData = new FormData();
       formData.append('file', file);
+
+      const stored = localStorage.getItem('uhrate_user');
+      if (stored) {
+        const user = JSON.parse(stored);
+        formData.append('userEmail', user.email);
+      }
 
       const response = await fetch('/api/verify', {
         method: 'POST',
