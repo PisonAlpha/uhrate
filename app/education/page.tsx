@@ -236,7 +236,7 @@ export default function Education() {
                   type="text"
                   value={form.institutionName}
                   onChange={e => setForm(p => ({ ...p, institutionName: e.target.value }))}
-                  placeholder="University of Lagos"
+                  placeholder="Harvard University"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -246,7 +246,7 @@ export default function Education() {
                   type="email"
                   value={form.institutionEmail}
                   onChange={e => setForm(p => ({ ...p, institutionEmail: e.target.value }))}
-                  placeholder="registrar@university.edu"
+                  placeholder="registrar@harvard.edu"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>

@@ -307,7 +307,7 @@ export default function Legal() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Jurisdiction</label>
                 <input type="text" value={form.jurisdiction} onChange={e => setForm(p => ({ ...p, jurisdiction: e.target.value }))}
-                  placeholder="e.g. Lagos, Nigeria" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
+                  placeholder="e.g. New York, USA" className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Reference Number</label>
