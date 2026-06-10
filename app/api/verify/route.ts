@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateDigitalDNA, generateCertificateId } from '@/lib/hasher';
-import { analyzeWithClaude } from '@/lib/analyzer';
+import { analyzeFile } from '@/lib/deepfake';
 import { saveVerification, getVerificationByHash } from '@/lib/supabase';
 import { registerOnBlockchain } from '@/lib/blockchain';
 
@@ -31,10 +31,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const analysis = await analyzeWithClaude(
+    const analysis = await analyzeFile(
+      buffer,
       file.name,
       file.type,
-      file.size,
       dna.sha256
     );
 
