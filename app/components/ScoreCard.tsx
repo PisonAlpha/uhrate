@@ -107,19 +107,53 @@ export default function ScoreCard({ result }: ScoreCardProps) {
         }
       });
 
-      const response = await fetch('/api/nft/mint', {
+      const tokenURIResponse = await fetch('/api/nft/prepare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ certificateId: data.certificate_id }),
+      });
+
+      const prepData = await tokenURIResponse.json();
+      if (!tokenURIResponse.ok) throw new Error(prepData.error);
+
+      const contractAddress = prepData.contractAddress;
+      const abi = [
+        "function mintCertificate(address to, string memory certificateId, string memory fileHash, string memory fileName, string memory rating, string memory tokenURIData) public returns (uint256)"
+      ];
+
+      const iface = new (await import('ethers')).Interface(abi);
+      const txData = iface.encodeFunctionData('mintCertificate', [
+        userAddress,
+        prepData.certificateId,
+        prepData.fileHash,
+        prepData.fileName,
+        prepData.rating,
+        prepData.tokenURI,
+      ]);
+
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: userAddress,
+          to: contractAddress,
+          data: txData,
+          value: '0x0',
+        }],
+      });
+
+      const saveResponse = await fetch('/api/nft/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           certificateId: data.certificate_id,
-          recipientAddress: userAddress,
+          txHash,
         }),
       });
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error);
+      const saveData = await saveResponse.json();
+      if (!saveResponse.ok) throw new Error(saveData.error);
 
-      setNftResult(result);
+      setNftResult({ txHash });
       setNftMinted(true);
     } catch (err: any) {
       alert('Minting failed: ' + err.message);
