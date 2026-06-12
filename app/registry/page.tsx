@@ -163,7 +163,7 @@ export default function Registry() {
         method: 'eth_sendTransaction',
         params: [{
           from: accounts[0],
-          to: accounts[0],
+          to: '0x5dD548e385B1Eaa1bcD0e55809Cc3B9A81bcDDDB',
           value: '0x0',
           data: dataHex,
           gas: '0x186A0',
