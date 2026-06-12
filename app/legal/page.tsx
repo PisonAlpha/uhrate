@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { SUPPORTED_CHAINS } from '@/lib/registry';
 
@@ -29,6 +29,14 @@ export default function Legal() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [selectedChain, setSelectedChain] = useState('bnb-testnet');
+  const [user, setUser] = useState<any>(null);
+  const [checkedAuth, setCheckedAuth] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('uhrate_user');
+    if (stored) setUser(JSON.parse(stored));
+    setCheckedAuth(true);
+  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [sha256Hash, setSha256Hash] = useState('');
 
@@ -207,6 +215,21 @@ export default function Legal() {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-12">
+        {checkedAuth && !user && (
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center mb-8">
+            <div className="text-4xl mb-3">🔒</div>
+            <h3 className="font-semibold text-gray-900 text-lg mb-2">Login Required</h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Create a free account to register legal documents on the blockchain and manage your registry history.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => window.location.href = '/login'} className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">Login</button>
+              <button onClick={() => window.location.href = '/register'} className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Sign up free</button>
+            </div>
+          </div>
+        )}
+        {user && (
+        <>
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Legal Document Registry</h1>
           <p className="text-gray-500 max-w-xl mx-auto">
@@ -418,6 +441,8 @@ export default function Legal() {
               </div>
             )}
           </div>
+        )}
+      </>
         )}
       </div>
     </main>
