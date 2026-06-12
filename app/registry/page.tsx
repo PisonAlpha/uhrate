@@ -28,7 +28,7 @@ export default function Registry() {
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [documentType, setDocumentType] = useState('');
-  const [selectedChain, setSelectedChain] = useState('bnb-testnet');
+  const [selectedChain, setSelectedChain] = useState('bnb');
   const [metadata, setMetadata] = useState<Record<string, string>>({});
   const [metaKey, setMetaKey] = useState('');
   const [metaValue, setMetaValue] = useState('');

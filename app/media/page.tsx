@@ -26,7 +26,7 @@ export default function Media() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
-  const [selectedChain, setSelectedChain] = useState('bnb-testnet');
+  const [selectedChain, setSelectedChain] = useState('bnb');
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
 

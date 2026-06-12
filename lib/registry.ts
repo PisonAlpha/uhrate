@@ -10,15 +10,7 @@ export const SUPPORTED_CHAINS = [
     explorer: 'https://bscscan.com',
     testnet: false,
   },
-  {
-    id: 'bnb-testnet',
-    name: 'BNB Testnet',
-    symbol: 'tBNB',
-    chainId: 97,
-    rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-    explorer: 'https://testnet.bscscan.com',
-    testnet: true,
-  },
+
   {
     id: 'ethereum',
     name: 'Ethereum',
