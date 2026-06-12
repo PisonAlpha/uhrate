@@ -38,7 +38,7 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
 
 function BlockchainLink({ tx }: { tx: string | null }) {
   if (!tx) return <p className="text-xs text-gray-500 mt-0.5">Permanent proof record created</p>;
-  const url = "https://testnet.bscscan.com/tx/" + tx;
+  const url = "https://bscscan.com/tx/" + tx;
   return (
     <p
       onClick={() => window.open(url, '_blank')}
@@ -72,7 +72,6 @@ export default function ScoreCard({ result }: ScoreCardProps) {
   const [minting, setMinting] = useState(false);
   const [nftMinted, setNftMinted] = useState(false);
   const [nftResult, setNftResult] = useState<any>(null);
-  const [walletAddress, setWalletAddress] = useState('');
 
   const handleMintNFT = async () => {
     try {
@@ -91,17 +90,17 @@ export default function ScoreCard({ result }: ScoreCardProps) {
 
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x61' }],
+        params: [{ chainId: '0x38' }],
       }).catch(async (error: any) => {
         if (error.code === 4902) {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: '0x61',
-              chainName: 'BSC Testnet',
+              chainId: '0x38',
+              chainName: 'BNB Smart Chain',
               nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-              rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
-              blockExplorerUrls: ['https://testnet.bscscan.com'],
+              rpcUrls: ['https://bsc-dataseed.binance.org'],
+              blockExplorerUrls: ['https://bscscan.com'],
             }],
           });
         }
@@ -345,11 +344,12 @@ export default function ScoreCard({ result }: ScoreCardProps) {
           </div>
         </div>
       )}
+
       {nftResult && (
         <div className="p-4 bg-purple-50 border border-purple-200 rounded-xl">
           <p className="text-sm font-medium text-purple-900 mb-1">NFT Certificate Minted!</p>
           <p
-            onClick={() => window.open("https://testnet.bscscan.com/tx/" + nftResult.txHash, '_blank')}
+            onClick={() => window.open("https://bscscan.com/tx/" + nftResult.txHash, '_blank')}
             className="font-mono text-xs text-purple-600 hover:underline cursor-pointer truncate"
           >
             {nftResult.txHash}

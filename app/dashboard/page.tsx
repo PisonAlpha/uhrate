@@ -165,7 +165,7 @@ export default function Dashboard() {
                       <td className="px-6 py-4">
                         {v.blockchain_tx ? (
                           <p
-                            onClick={() => window.open("https://testnet.bscscan.com/tx/" + v.blockchain_tx, '_blank')}
+                           onClick={() => window.open("https://bscscan.com/tx/" + v.blockchain_tx, '_blank')}
                             className="font-mono text-xs text-blue-600 hover:underline cursor-pointer max-w-32 truncate"
                           >
                             {v.blockchain_tx}

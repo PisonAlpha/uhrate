@@ -332,7 +332,7 @@ export default function PublicVerify() {
                 <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
                   <span className="text-gray-500">Transaction</span>
                   <p
-                    onClick={() => window.open("https://testnet.bscscan.com/tx/" + result.verification.blockchain_tx, '_blank')}
+                    onClick={() => window.open("https://bscscan.com/tx/" + result.verification.blockchain_tx, '_blank')}
                     className="font-mono text-xs text-blue-600 hover:underline cursor-pointer truncate max-w-48"
                   >
                     {result.verification.blockchain_tx}

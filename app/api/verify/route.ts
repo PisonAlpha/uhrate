@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       rating: analysis.rating,
       summary: analysis.summary,
       blockchain_tx: blockchain.txHash,
-      blockchain_chain: 'BNB Testnet',
+      blockchain_chain: 'BNB Chain',
       verified_at: new Date().toISOString(),
     };
 
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       rating: analysis.rating,
       certificate_id: certificateId,
       blockchain_tx: blockchain.txHash ?? undefined,
-      blockchain_chain: 'BNB Testnet',
+      blockchain_chain: 'BNB Chain',
       ipfs_hash: ipfsResult?.ipfsHash ?? undefined,
     });
 
