@@ -415,7 +415,10 @@ export default function Home() {
                 </svg>
               </button>
             </div>
-            <p className="text-xs text-gray-400">Built on BNB Chain · IPFS · AI</p>
+            <div className="flex items-center gap-4">
+              <button onClick={() => window.location.href = '/terms'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Terms</button>
+              <button onClick={() => window.location.href = '/privacy'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Privacy</button>
+            </div>
           </div>
         </div>
       </footer>
