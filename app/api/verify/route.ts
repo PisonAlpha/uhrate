@@ -87,12 +87,7 @@ export async function POST(request: NextRequest) {
 
     const certificateId = generateCertificateId();
 
-    const blockchain = await registerOnBlockchain(
-      certificateId,
-      dna.sha256,
-      file.name,
-      analysis.rating
-    );
+    const blockchain = { txHash: null, success: false };
 
     const certificateData = {
       platform: 'UHRATE',
@@ -109,8 +104,8 @@ export async function POST(request: NextRequest) {
       trust_score: analysis.trust_score,
       rating: analysis.rating,
       summary: analysis.summary,
-      blockchain_tx: blockchain.txHash,
-      blockchain_chain: 'BNB Chain',
+      blockchain_tx: null,
+      blockchain_chain: null,
       verified_at: new Date().toISOString(),
     };
 
@@ -131,8 +126,8 @@ export async function POST(request: NextRequest) {
       trust_score: analysis.trust_score,
       rating: analysis.rating,
       certificate_id: certificateId,
-      blockchain_tx: blockchain.txHash ?? undefined,
-      blockchain_chain: 'BNB Chain',
+      blockchain_tx: undefined,
+      blockchain_chain: undefined,
       ipfs_hash: ipfsResult?.ipfsHash ?? undefined,
       user_email: userEmail || undefined,
     });

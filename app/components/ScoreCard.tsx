@@ -36,19 +36,6 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
   );
 }
 
-function BlockchainLink({ tx }: { tx: string | null }) {
-  if (!tx) return <p className="text-xs text-gray-500 mt-0.5">Permanent proof record created</p>;
-  const url = "https://bscscan.com/tx/" + tx;
-  return (
-    <p
-      onClick={() => window.open(url, '_blank')}
-      className="text-xs text-blue-600 hover:underline font-mono mt-0.5 block truncate cursor-pointer"
-    >
-      {tx}
-    </p>
-  );
-}
-
 function getRatingStyle(rating: string) {
   switch (rating) {
     case 'Verified Original':
@@ -174,7 +161,6 @@ export default function ScoreCard({ result }: ScoreCardProps) {
       manipulation_score: data.manipulation_score,
       trust_score: data.trust_score,
       rating: data.rating,
-      blockchain_chain: data.blockchain_chain,
       issued_at: data.created_at,
       digital_dna: dna,
       platform: 'UHRATE — Decentralized Authenticity Network',
@@ -242,21 +228,6 @@ export default function ScoreCard({ result }: ScoreCardProps) {
           <div>
             <span className="text-gray-900 font-medium">Certificate ID</span>
             <p className="mt-1 text-blue-600">{data.certificate_id}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <h4 className="text-sm font-medium text-gray-700 mb-3">Blockchain Registration</h4>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">Registered on {data.blockchain_chain}</p>
-            <BlockchainLink tx={data.blockchain_tx} />
           </div>
         </div>
       </div>
