@@ -211,10 +211,10 @@ export default function Pricing() {
                 </button>
               ) : plan.key === 'enterprise' ? (
                 <button
-                  onClick={() => window.location.href = '/contact'}
-                  className="w-full py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                  onClick={() => setSelectedPlan(plan.key)}
+                  className="w-full py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
-                  {plan.cta}
+                  Upgrade to Enterprise
                 </button>
               ) : (
                 <button
