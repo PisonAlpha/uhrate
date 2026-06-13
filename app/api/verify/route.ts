@@ -31,21 +31,34 @@ export async function POST(request: NextRequest) {
     if (userEmail) {
       const { data: user } = await supabaseAdmin
         .from('users')
-        .select('credits, role')
+        .select('credits, role, plan_expires_at')
         .eq('email', userEmail)
         .single();
 
-      if (user && user.role === 'individual' && user.credits <= 0) {
+      let effectiveRole = user?.role || 'individual';
+
+      if (user && (user.role === 'pro' || user.role === 'enterprise')) {
+        const expired = user.plan_expires_at && new Date(user.plan_expires_at) < new Date();
+        if (expired) {
+          effectiveRole = 'individual';
+          await supabaseAdmin
+            .from('users')
+            .update({ role: 'individual', credits: 10 })
+            .eq('email', userEmail);
+        }
+      }
+
+      if (user && effectiveRole === 'individual' && user.credits <= 0) {
         return NextResponse.json(
           { error: 'You have used all your free verifications. Please upgrade to Pro.' },
           { status: 403 }
         );
       }
 
-      if (user && user.role === 'individual') {
+      if (user && effectiveRole === 'individual') {
         await supabaseAdmin
           .from('users')
-          .update({ credits: user.credits - 1 })
+          .update({ credits: (user.role === effectiveRole ? user.credits : 10) - 1 })
           .eq('email', userEmail);
       }
     }
