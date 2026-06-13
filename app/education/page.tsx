@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { SUPPORTED_CHAINS } from '@/lib/registry';
 
 declare global {
@@ -28,6 +29,25 @@ export default function Education() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [selectedChain, setSelectedChain] = useState('bnb');
+  const [file, setFile] = useState<File | null>(null);
+  const [sha256Hash, setSha256Hash] = useState('');
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const f = acceptedFiles[0];
+    if (!f) return;
+    setFile(f);
+    const bytes = await f.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    setSha256Hash(hash);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    maxSize: 20 * 1024 * 1024,
+  });
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
 
@@ -138,7 +158,7 @@ export default function Education() {
       const response = await fetch('/api/education/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, chainId: selectedChain, txHash }),
+        body: JSON.stringify({ ...form, sha256Hash, chainId: selectedChain, txHash }),
       });
 
       const data = await response.json();
@@ -251,7 +271,31 @@ export default function Education() {
                 )}
               </div>
             )}
-
+<div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Certificate/Document <span className="text-gray-400 font-normal">(optional — generates SHA-256 fingerprint)</span>
+              </label>
+              <div
+                {...getRootProps()}
+                className={"border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all " + (
+                  isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+                )}
+              >
+                <input {...getInputProps()} />
+                {file ? (
+                  <div>
+                    <p className="font-medium text-gray-900">{file.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{(file.size / 1024).toFixed(1)} KB</p>
+                    <p className="text-xs text-gray-500 font-mono mt-1 break-all">{sha256Hash}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-gray-700 font-medium">Drop certificate image/PDF here</p>
+                    <p className="text-sm text-gray-400 mt-1">Images, PDF — max 20MB</p>
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Institution Name *</label>

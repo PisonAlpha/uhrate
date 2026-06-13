@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       fieldOfStudy,
       graduationYear,
       certificateNumber,
+      sha256Hash,
       chainId,
       txHash,
     } = body;
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
       field_of_study: fieldOfStudy,
       graduation_year: graduationYear,
       certificate_number: certificateNumber || null,
+      sha256_hash: sha256Hash || null,
       chain: chain?.name,
       tx_hash: txHash,
       issued_at: new Date().toISOString(),
@@ -58,6 +60,7 @@ export async function POST(request: NextRequest) {
         field_of_study: fieldOfStudy,
         graduation_year: graduationYear,
         certificate_number: certificateNumber || null,
+        sha256_hash: sha256Hash || null,
         chain_id: chainId,
         chain_name: chain?.name,
         tx_hash: txHash,
