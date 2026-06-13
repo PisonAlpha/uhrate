@@ -6,16 +6,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
 
-    if (!email) {
-      return NextResponse.json({ error: 'Email required' }, { status: 400 });
-    }
-
-    const { data: verifications, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('verifications')
       .select('*')
-      .eq('user_email', email)
       .order('created_at', { ascending: false })
       .limit(100);
+
+    if (email) {
+      query = query.eq('user_email', email);
+    }
+
+    const { data: verifications, error } = await query;
 
     if (error) throw error;
 
