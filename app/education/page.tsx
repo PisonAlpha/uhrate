@@ -514,7 +514,7 @@ export default function Education() {
                     </div>
                     {cred.tx_hash && (
                       <p
-                        onClick={() => window.open('https://testnet.bscscan.com/tx/' + cred.tx_hash, '_blank')}
+                        onClick={() => window.open('https://bscscan.com/tx/' + cred.tx_hash, '_blank')}
                         className="font-mono text-xs text-blue-600 mt-3 cursor-pointer hover:underline truncate"
                       >
                         {cred.tx_hash}
