@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email required' }, { status: 400 });
+    }
+
     const { data: verifications, error } = await supabaseAdmin
       .from('verifications')
       .select('*')
+      .eq('user_email', email)
       .order('created_at', { ascending: false })
       .limit(100);
 

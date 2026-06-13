@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [verifications, setVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [checkedAuth, setCheckedAuth] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     verified: 0,
@@ -37,12 +39,20 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    fetchVerifications();
+    const stored = localStorage.getItem('uhrate_user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      setUser(u);
+      fetchVerifications(u.email);
+    } else {
+      setLoading(false);
+    }
+    setCheckedAuth(true);
   }, []);
 
-  const fetchVerifications = async () => {
+  const fetchVerifications = async (email: string) => {
     try {
-      const response = await fetch('/api/dashboard');
+      const response = await fetch('/api/dashboard?email=' + encodeURIComponent(email));
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setVerifications(data.verifications);
@@ -57,7 +67,7 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => window.location.href = '/'}
@@ -80,7 +90,23 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+        {checkedAuth && !user && (
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
+            <div className="text-4xl mb-3">🔒</div>
+            <h3 className="font-semibold text-gray-900 text-lg mb-2">Login Required</h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Log in to view your personal verification history and stats.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => window.location.href = '/login'} className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">Login</button>
+              <button onClick={() => window.location.href = '/register'} className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Sign up free</button>
+            </div>
+          </div>
+        )}
+
+        {user && (
+        <>
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Verification Dashboard</h1>
           <p className="text-gray-500 text-sm mt-1">All files verified through UHRATE</p>
@@ -126,65 +152,110 @@ export default function Dashboard() {
         )}
 
         {!loading && verifications.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">File</th>
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Rating</th>
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Trust</th>
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Certificate</th>
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Blockchain</th>
-                    <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {verifications.map((v, i) => (
-                    <tr
-                      key={v.id}
-                      className={"border-b border-gray-50 hover:bg-gray-50 transition-colors " + (i === verifications.length - 1 ? 'border-0' : '')}
-                    >
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-900 max-w-48 truncate">{v.file_name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{v.file_type}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={"px-2 py-1 rounded-full text-xs font-medium " + getRatingStyle(v.rating)}>
-                          {v.rating}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={"text-sm font-bold " + getTrustColor(v.trust_score)}>
-                          {v.trust_score}/100
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-xs text-blue-600">{v.certificate_id}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {v.blockchain_tx ? (
-                          <p
-                           onClick={() => window.open("https://bscscan.com/tx/" + v.blockchain_tx, '_blank')}
-                            className="font-mono text-xs text-blue-600 hover:underline cursor-pointer max-w-32 truncate"
-                          >
-                            {v.blockchain_tx}
-                          </p>
-                        ) : (
-                          <span className="text-xs text-gray-400">Pending</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs text-gray-500">
-                          {new Date(v.created_at).toLocaleDateString()}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <>
+            <div className="sm:hidden space-y-3">
+              {verifications.map(v => (
+                <div key={v.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="flex items-start justify-between mb-2 gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{v.file_name}</p>
+                      <p className="text-xs text-gray-400">{v.file_type}</p>
+                    </div>
+                    <span className={"px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap " + getRatingStyle(v.rating)}>
+                      {v.rating}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-gray-500">Trust Score</span>
+                    <span className={"font-bold " + getTrustColor(v.trust_score)}>{v.trust_score}/100</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mb-2 gap-2">
+                    <span className="text-gray-500 flex-shrink-0">Certificate</span>
+                    <span className="font-mono text-xs text-blue-600 truncate">{v.certificate_id}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm mb-2 gap-2">
+                    <span className="text-gray-500 flex-shrink-0">Blockchain</span>
+                    {v.blockchain_tx ? (
+                      <p
+                        onClick={() => window.open("https://bscscan.com/tx/" + v.blockchain_tx, '_blank')}
+                        className="font-mono text-xs text-blue-600 hover:underline cursor-pointer truncate"
+                      >
+                        {v.blockchain_tx}
+                      </p>
+                    ) : (
+                      <span className="text-xs text-gray-400">Pending</span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Date</span>
+                    <span className="text-xs text-gray-500">{new Date(v.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+
+            <div className="hidden sm:block bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-100">
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">File</th>
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Rating</th>
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Trust</th>
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Certificate</th>
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Blockchain</th>
+                      <th className="text-left px-6 py-4 text-xs font-medium text-gray-500">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {verifications.map((v, i) => (
+                      <tr
+                        key={v.id}
+                        className={"border-b border-gray-50 hover:bg-gray-50 transition-colors " + (i === verifications.length - 1 ? 'border-0' : '')}
+                      >
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-900 max-w-48 truncate">{v.file_name}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{v.file_type}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + getRatingStyle(v.rating)}>
+                            {v.rating}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={"text-sm font-bold " + getTrustColor(v.trust_score)}>
+                            {v.trust_score}/100
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="font-mono text-xs text-blue-600">{v.certificate_id}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {v.blockchain_tx ? (
+                            <p
+                             onClick={() => window.open("https://bscscan.com/tx/" + v.blockchain_tx, '_blank')}
+                              className="font-mono text-xs text-blue-600 hover:underline cursor-pointer max-w-32 truncate"
+                            >
+                              {v.blockchain_tx}
+                            </p>
+                          ) : (
+                            <span className="text-xs text-gray-400">Pending</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs text-gray-500">
+                            {new Date(v.created_at).toLocaleDateString()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+        </>
         )}
       </div>
     </main>

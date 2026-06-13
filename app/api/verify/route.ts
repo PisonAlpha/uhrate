@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
       blockchain_tx: blockchain.txHash ?? undefined,
       blockchain_chain: 'BNB Chain',
       ipfs_hash: ipfsResult?.ipfsHash ?? undefined,
+      user_email: userEmail || undefined,
     });
 
     if (userEmail) {

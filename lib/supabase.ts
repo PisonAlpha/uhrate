@@ -23,6 +23,7 @@ export async function saveVerification(data: {
   blockchain_tx?: string;
   blockchain_chain?: string;
   ipfs_hash?: string;
+  user_email?: string;
 }) {
   const { data: result, error } = await supabaseAdmin
     .from('verifications')
