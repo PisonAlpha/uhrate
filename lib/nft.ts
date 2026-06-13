@@ -8,7 +8,7 @@ const CONTRACT_ABI = [
   "event CertificateMinted(uint256 indexed tokenId, string certificateId, string fileHash, address owner)",
 ];
 
-const BNB_TESTNET_RPC = 'https://data-seed-prebsc-1-s1.binance.org:8545';
+const BNB_TESTNET_RPC = 'https://bsc-dataseed.binance.org';
 
 export function generateTokenURI(
   certificateId: string,
@@ -20,7 +20,7 @@ export function generateTokenURI(
   const metadata = {
     name: "UHRATE Authenticity Certificate",
     description: "This NFT certifies the authenticity of a digital file verified by UHRATE.",
-    image: "https://uhrate.xyz/nft-image.png",
+    image: "https://uhrate.xyz/nft-image.svg",
     attributes: [
       { trait_type: "Certificate ID", value: certificateId },
       { trait_type: "File Name", value: fileName },
