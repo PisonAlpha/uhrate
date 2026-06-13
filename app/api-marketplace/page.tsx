@@ -10,14 +10,18 @@ export default function APIMarketplace() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'docs' | 'keys'>('docs');
+  const [user, setUser] = useState<any>(null);
+  const [checkedAuth, setCheckedAuth] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('uhrate_user');
     if (stored) {
-      const user = JSON.parse(stored);
-      setEmail(user.email);
-      fetchKeys(user.email);
+      const u = JSON.parse(stored);
+      setUser(u);
+      setEmail(u.email);
+      fetchKeys(u.email);
     }
+    setCheckedAuth(true);
   }, []);
 
   const fetchKeys = async (userEmail: string) => {
@@ -104,7 +108,7 @@ export default function APIMarketplace() {
   return (
     <main className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => window.location.href = '/'}
             className="flex items-center gap-3 bg-transparent border-0 cursor-pointer p-0"
@@ -118,7 +122,22 @@ export default function APIMarketplace() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {checkedAuth && !user && (
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center mb-8">
+            <div className="text-4xl mb-3">🔒</div>
+            <h3 className="font-semibold text-gray-900 text-lg mb-2">Login Required</h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Create a free account to access the API marketplace and generate API keys.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => window.location.href = '/login'} className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">Login</button>
+              <button onClick={() => window.location.href = '/register'} className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">Sign up free</button>
+            </div>
+          </div>
+        )}
+        {user && (
+        <>
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             UHRATE API
@@ -149,29 +168,29 @@ export default function APIMarketplace() {
 
         {activeTab === 'docs' && (
           <div className="space-y-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Base URL</h3>
-              <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm">
+              <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm overflow-x-auto">
                 https://uhrate.xyz
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Authentication</h3>
               <p className="text-gray-500 text-sm mb-4">
                 Include your API key in the request header:
               </p>
-              <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm">
+              <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm overflow-x-auto">
                 {`x-api-key: uhr_your_api_key_here`}
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-6">Endpoints</h3>
               <div className="space-y-6">
                 {endpoints.map((endpoint, i) => (
-                  <div key={i} className="border border-gray-100 rounded-xl p-5">
-                    <div className="flex items-center gap-3 mb-3">
+                  <div key={i} className="border border-gray-100 rounded-xl p-4 sm:p-5">
+                    <div className="flex items-center gap-3 mb-3 flex-wrap">
                       <span className={"px-2 py-1 rounded text-xs font-bold " + (
                         endpoint.method === 'GET'
                           ? 'bg-blue-100 text-blue-700'
@@ -179,13 +198,13 @@ export default function APIMarketplace() {
                       )}>
                         {endpoint.method}
                       </span>
-                      <span className="font-mono text-sm text-gray-900">{endpoint.path}</span>
+                      <span className="font-mono text-sm text-gray-900 break-all">{endpoint.path}</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{endpoint.description}</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <p className="text-xs font-medium text-gray-500 mb-1">Request Body</p>
-                        <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600">
+                        <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-600 break-all">
                           {endpoint.body}
                         </div>
                       </div>
@@ -201,7 +220,7 @@ export default function APIMarketplace() {
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Example — Verify a file</h3>
               <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm overflow-x-auto">
                 <pre>{`const formData = new FormData();
@@ -223,7 +242,7 @@ console.log(result.data.rating);
 
         {activeTab === 'keys' && (
           <div className="space-y-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Generate API Key</h3>
 
               {newKey && (
@@ -276,15 +295,15 @@ console.log(result.data.rating);
 
             {keys.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
+                <div className="p-4 sm:p-6 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-900">Your API Keys</h3>
                 </div>
                 <div className="divide-y divide-gray-50">
                   {keys.map(key => (
-                    <div key={key.id} className="p-4 flex items-center gap-4">
-                      <div className="flex-1">
+                    <div key={key.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                      <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{key.key_name}</p>
-                        <p className="font-mono text-xs text-gray-500 mt-0.5">{key.api_key}</p>
+                        <p className="font-mono text-xs text-gray-500 mt-0.5 break-all">{key.api_key}</p>
                         <p className="text-xs text-gray-400 mt-1">
                           {key.calls_used}/{key.calls_limit} calls used
                         </p>
@@ -310,6 +329,8 @@ console.log(result.data.rating);
               </div>
             )}
           </div>
+        )}
+        </>
         )}
       </div>
     </main>
