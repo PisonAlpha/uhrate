@@ -45,11 +45,28 @@ export default function Home() {
             </div>
             <nav className="hidden md:flex items-center gap-6">
               <button onClick={() => window.location.href = '/verify'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Verify</button>
-              <button onClick={() => window.location.href = '/registry'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Registry</button>
-              <button onClick={() => window.location.href = '/education'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Education</button>
-              <button onClick={() => window.location.href = '/legal'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Legal</button>
-              <button onClick={() => window.location.href = '/media'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Media</button>
-              <button onClick={() => window.location.href = '/identity'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Identity</button>
+              <div className="relative group">
+                <button className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer flex items-center gap-1">
+                  Registry
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  {[
+                    { label: '📄 Document Registry', href: '/registry' },
+                    { label: '🎓 Education', href: '/education' },
+                    { label: '⚖️ Legal', href: '/legal' },
+                    { label: '📰 Media', href: '/media' },
+                    { label: '🪪 Identity', href: '/identity' },
+                  ].map(item => (
+                    <button key={item.href} onClick={() => window.location.href = item.href}
+                      className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 bg-transparent border-0 cursor-pointer first:rounded-t-xl last:rounded-b-xl">
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <button onClick={() => window.location.href = '/enterprise'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Enterprise</button>
               <button onClick={() => window.location.href = '/api-marketplace'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">API</button>
               <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Pricing</button>
@@ -390,7 +407,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-400">© 2024 UHRATE. All rights reserved.</p>
+            <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <button
                 onClick={() => window.open('https://x.com/Uhrate', '_blank')}
