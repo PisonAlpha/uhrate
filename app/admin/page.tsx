@@ -26,6 +26,9 @@ export default function Admin() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [badges, setBadges] = useState<any[]>([]);
+  const [badgeLoading, setBadgeLoading] = useState(false);
+  const [badgeMessage, setBadgeMessage] = useState<string | null>(null);
 
   const login = async () => {
     setLoading(true);
@@ -44,6 +47,45 @@ export default function Admin() {
       setLoading(false);
     }
   };
+
+  const fetchBadges = async () => {
+    setBadgeLoading(true);
+    try {
+      const response = await fetch('/api/admin/badges', {
+        headers: { 'x-admin-secret': secret },
+      });
+      const result = await response.json();
+      if (result.badges) setBadges(result.badges);
+    } catch {
+    } finally {
+      setBadgeLoading(false);
+    }
+  };
+
+  const approveBadge = async (badgeId: string) => {
+    try {
+      const response = await fetch('/api/identity/verify-badge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ badgeId, adminSecret: secret }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        setBadgeMessage('Badge ' + badgeId + ' approved successfully!');
+        fetchBadges();
+      } else {
+        setBadgeMessage('Failed: ' + result.error);
+      }
+    } catch {
+      setBadgeMessage('Failed to approve badge.');
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && activeTab === 'badges') {
+      fetchBadges();
+    }
+  }, [authenticated, activeTab]);
 
   if (!authenticated) {
     return (
@@ -135,8 +177,8 @@ export default function Admin() {
           ))}
         </div>
 
-        <div className="flex gap-2 mb-6">
-          {['overview', 'verifications', 'users', 'payments'].map(tab => (
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {['overview', 'verifications', 'users', 'payments', 'badges'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -146,7 +188,7 @@ export default function Admin() {
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               )}
             >
-              {tab}
+              {tab === 'badges' ? '🪪 Badges' : tab}
             </button>
           ))}
         </div>
@@ -320,6 +362,78 @@ export default function Admin() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'badges' && (
+          <div className="space-y-4">
+            {badgeMessage && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+                {badgeMessage}
+              </div>
+            )}
+            {badgeLoading ? (
+              <div className="text-center py-20">
+                <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-500 text-sm">Loading badge applications...</p>
+              </div>
+            ) : badges.length === 0 ? (
+              <div className="text-center py-20 bg-white border border-gray-200 rounded-xl">
+                <p className="text-gray-500">No badge applications yet.</p>
+              </div>
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">Badge Applications ({badges.length})</h3>
+                  <button onClick={fetchBadges} className="text-sm text-blue-600 hover:underline bg-transparent border-0 cursor-pointer">Refresh</button>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {badges.map((badge: any) => (
+                    <div key={badge.id} className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold text-gray-900">{badge.full_name}</p>
+                            <span className={"px-2 py-0.5 rounded-full text-xs font-medium " + (
+                              badge.is_verified
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-amber-100 text-amber-700'
+                            )}>
+                              {badge.is_verified ? '✓ Verified' : '⏳ Pending'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500">{badge.user_email}</p>
+                          <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-500">
+                            <span className="capitalize">🏷️ {badge.badge_type}</span>
+                            {badge.organization && <span>🏢 {badge.organization}</span>}
+                            {badge.website && <span>🌐 {badge.website}</span>}
+                            <span>📋 {badge.verification_method?.replace(/_/g, ' ')}</span>
+                          </div>
+                          {badge.verification_data && (
+                            <p className="text-xs text-gray-400 mt-1 italic">{badge.verification_data}</p>
+                          )}
+                          <p className="font-mono text-xs text-gray-400 mt-1">{badge.badge_id}</p>
+                          <p className="text-xs text-gray-400">Applied: {new Date(badge.created_at).toLocaleDateString()}</p>
+                        </div>
+                        {!badge.is_verified && (
+                          <button
+                            onClick={() => approveBadge(badge.badge_id)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors whitespace-nowrap"
+                          >
+                            ✓ Approve Badge
+                          </button>
+                        )}
+                        {badge.is_verified && (
+                          <span className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-sm font-medium whitespace-nowrap">
+                            ✓ Approved
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
