@@ -186,14 +186,14 @@ export default function ScoreCard({ result }: ScoreCardProps) {
       )}
 
       <div className="bg-white border border-gray-200 rounded-xl p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 text-lg">{data.file_name}</h3>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-gray-900 text-lg truncate">{data.file_name}</h3>
             <p className="text-sm text-gray-500 mt-1">
               {data.file_type} · {(data.file_size / 1024).toFixed(1)} KB
             </p>
           </div>
-          <span className={"px-3 py-1 rounded-full text-sm font-medium border " + getRatingStyle(data.rating)}>
+          <span className={"px-3 py-1 rounded-full text-sm font-medium border self-start whitespace-nowrap " + getRatingStyle(data.rating)}>
             {data.rating}
           </span>
         </div>
