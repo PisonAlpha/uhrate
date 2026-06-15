@@ -23,10 +23,10 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
   return (
     <div className="mb-4">
       <div className="flex justify-between mb-1">
-        <span className="text-sm text-gray-600">{label}</span>
-        <span className="text-sm font-medium">{value}/100</span>
+        <span className="text-sm font-medium text-gray-800">{label}</span>
+        <span className="text-sm font-bold text-gray-900">{value}/100</span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${colors[color]}`}
           style={{ width: `${value}%` }}
@@ -208,8 +208,8 @@ export default function ScoreCard({ result }: ScoreCardProps) {
         </div>
 
         {analysis?.summary && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">{analysis.summary}</p>
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg border border-gray-200">
+            <p className="text-sm font-medium text-gray-800">{analysis.summary}</p>
           </div>
         )}
       </div>
