@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 
 export default function Pricing() {
   const [bnbPrice, setBnbPrice] = useState<number>(0);
-  const [bnbProAmount, setBnbProAmount] = useState<string>('...');
-  const [bnbEnterpriseAmount, setBnbEnterpriseAmount] = useState<string>('...');
+  const [bnbProAmount, setBnbProAmount] = useState<string>('loading');
+  const [bnbEnterpriseAmount, setBnbEnterpriseAmount] = useState<string>('loading');
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'USDT' | 'BNB'>('USDT');
   const [txHash, setTxHash] = useState('');
@@ -187,7 +187,7 @@ export default function Pricing() {
                       <span className="text-base font-normal text-gray-500">/month</span>
                     </p>
                     <p className="text-sm text-gray-400 mt-1">
-                      or {plan.bnbPrice} BNB/month
+                      or {plan.bnbPrice === '...' ? '...' : plan.bnbPrice + ' BNB'}/month
                     </p>
                   </div>
                 )}
