@@ -68,9 +68,14 @@ export default function Home() {
             </button>
           </div>
           <div className="flex items-center gap-3">
-            {user ? (
+           {user ? (
               <>
-                <span className="text-sm text-gray-600 hidden sm:block">{user.full_name}</span>
+                <button
+                  onClick={() => window.location.href = '/profile'}
+                  className="text-sm text-gray-600 hidden sm:block hover:text-gray-900 bg-transparent border-0 cursor-pointer"
+                >
+                  {user.full_name}
+                </button>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
