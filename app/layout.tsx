@@ -13,6 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  verification: {
+    google: 'a0klwKIDkie4dA9WGC_mGnxMIfnBoH0A8LS8jxQsevA',
+  },
   title: "UHRATE — Decentralized Authenticity Network",
   description: "Verify whether any digital file is original, AI-generated, deepfaked, or manipulated. Powered by AI and blockchain technology.",
   keywords: "deepfake detection, AI content detection, document verification, blockchain authenticity, digital forensics, NFT certificates",
