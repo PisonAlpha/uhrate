@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateDigitalDNA, generateCertificateId } from '@/lib/hasher';
 import { analyzeFile } from '@/lib/deepfake';
 import { saveVerification, getVerificationByHash } from '@/lib/supabase';
-import { registerOnBlockchain } from '@/lib/blockchain';
+
 import { uploadCertificateToIPFS } from '@/lib/ipfs';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendVerificationCompleteEmail } from '@/lib/notifications';
