@@ -29,14 +29,10 @@ export default function Media() {
   const [selectedChain, setSelectedChain] = useState('bnb');
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('uhrate_user');
-    if (stored) setUser(JSON.parse(stored));
-    setCheckedAuth(true);
-  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [sha256Hash, setSha256Hash] = useState('');
+  const [extracting, setExtracting] = useState(false);
+  const [mismatches, setMismatches] = useState<any[]>([]);
 
   const [form, setForm] = useState({
     journalistName: '',
@@ -56,15 +52,48 @@ export default function Media() {
     sha256Hash: '',
   });
 
+  useEffect(() => {
+    const stored = localStorage.getItem('uhrate_user');
+    if (stored) setUser(JSON.parse(stored));
+    setCheckedAuth(true);
+  }, []);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const f = acceptedFiles[0];
     if (!f) return;
     setFile(f);
+    setMismatches([]);
+
     const bytes = await f.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     setSha256Hash(hash);
+
+    if (f.type.startsWith('image/')) {
+      setExtracting(true);
+      try {
+        const fd = new FormData();
+        fd.append('file', f);
+        const res = await fetch('/api/media/extract', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (res.ok && data.extracted) {
+          setForm(p => ({
+            journalistName: p.journalistName,
+            journalistEmail: p.journalistEmail,
+            mediaOrganization: data.extracted.mediaOrganization || p.mediaOrganization,
+            contentTitle: data.extracted.contentTitle || p.contentTitle,
+            contentType: data.extracted.contentType || p.contentType,
+            captureDate: data.extracted.captureDate || p.captureDate,
+            location: data.extracted.location || p.location,
+            description: data.extracted.description || p.description,
+          }));
+        }
+      } catch {
+      } finally {
+        setExtracting(false);
+      }
+    }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -82,8 +111,30 @@ export default function Media() {
 
     setLoading(true);
     setError(null);
+    setMismatches([]);
 
     try {
+      if (file && file.type.startsWith('image/')) {
+        const matchFd = new FormData();
+        matchFd.append('file', file);
+        matchFd.append('contentTitle', form.contentTitle);
+        matchFd.append('contentType', form.contentType);
+        matchFd.append('captureDate', form.captureDate);
+        matchFd.append('location', form.location);
+        matchFd.append('description', form.description);
+        matchFd.append('mediaOrganization', form.mediaOrganization);
+
+        const matchRes = await fetch('/api/media/verify-match', { method: 'POST', body: matchFd });
+        const matchData = await matchRes.json();
+
+        if (matchData.mismatches && matchData.mismatches.length > 0) {
+          setMismatches(matchData.mismatches);
+          setError('The submitted details do not match the uploaded media. Please review the highlighted fields below.');
+          setLoading(false);
+          return;
+        }
+      }
+
       if (!window.ethereum) {
         setError('Please install MetaMask to register on blockchain');
         setLoading(false);
@@ -93,25 +144,7 @@ export default function Media() {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const chain = SUPPORTED_CHAINS.find(c => c.id === selectedChain);
 
-      if (selectedChain === 'bnb-testnet') {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x61' }],
-        }).catch(async (err: any) => {
-          if (err.code === 4902) {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x61',
-                chainName: 'BSC Testnet',
-                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
-                blockExplorerUrls: ['https://testnet.bscscan.com'],
-              }],
-            });
-          }
-        });
-      } else if (chain) {
+      if (chain) {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x' + chain.chainId.toString(16) }],
@@ -262,6 +295,29 @@ export default function Media() {
               <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">{error}</div>
             )}
 
+            {mismatches.length > 0 && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+                <p className="font-medium text-amber-900 mb-3">⚠️ Mismatches found between form and media:</p>
+                <div className="space-y-2">
+                  {mismatches.map((m: any, i: number) => (
+                    <div key={i} className="bg-white border border-amber-200 rounded-lg p-3 text-sm">
+                      <p className="font-medium text-gray-900 capitalize mb-1">{m.field.replace(/([A-Z])/g, ' $1')}</p>
+                      <p className="text-gray-600">You entered: <span className="font-medium text-red-600">{m.submitted || '(empty)'}</span></p>
+                      <p className="text-gray-600">Media shows: <span className="font-medium text-green-700">{m.found || '(not found)'}</span></p>
+                      <p className="text-gray-500 text-xs mt-1">{m.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {extracting && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm mb-6 flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                Reading media with AI and auto-filling form...
+              </div>
+            )}
+
             {result?.type === 'register' && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-xl mb-6">
                 <p className="font-medium text-green-900 mb-2">✓ Media Content Registered!</p>
@@ -272,7 +328,7 @@ export default function Media() {
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Media File <span className="text-gray-400 font-normal">(optional — generates SHA-256 fingerprint)</span>
+                Upload Media File <span className="text-gray-400 font-normal">(optional — AI reads and auto-fills form)</span>
               </label>
               <div
                 {...getRootProps()}
@@ -440,7 +496,7 @@ export default function Media() {
                     {item.description && <p className="text-sm text-gray-600 mb-3">{item.description}</p>}
                     <p className="font-mono text-xs text-blue-600 mb-1">{item.registry_id}</p>
                     {item.tx_hash && (
-                      <p onClick={() => window.open('https://testnet.bscscan.com/tx/' + item.tx_hash, '_blank')}
+                      <p onClick={() => window.open('https://bscscan.com/tx/' + item.tx_hash, '_blank')}
                         className="font-mono text-xs text-blue-600 cursor-pointer hover:underline truncate">{item.tx_hash}</p>
                     )}
                   </div>
@@ -449,7 +505,7 @@ export default function Media() {
             )}
           </div>
         )}
-      </>
+        </>
         )}
       </div>
     </main>

@@ -31,14 +31,10 @@ export default function Legal() {
   const [selectedChain, setSelectedChain] = useState('bnb');
   const [user, setUser] = useState<any>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('uhrate_user');
-    if (stored) setUser(JSON.parse(stored));
-    setCheckedAuth(true);
-  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [sha256Hash, setSha256Hash] = useState('');
+  const [extracting, setExtracting] = useState(false);
+  const [mismatches, setMismatches] = useState<any[]>([]);
 
   const [form, setForm] = useState({
     firmName: '',
@@ -58,16 +54,48 @@ export default function Legal() {
     sha256Hash: '',
   });
 
+  useEffect(() => {
+    const stored = localStorage.getItem('uhrate_user');
+    if (stored) setUser(JSON.parse(stored));
+    setCheckedAuth(true);
+  }, []);
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const f = acceptedFiles[0];
     if (!f) return;
     setFile(f);
+    setMismatches([]);
 
     const bytes = await f.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     setSha256Hash(hash);
+
+    if (f.type.startsWith('image/')) {
+      setExtracting(true);
+      try {
+        const fd = new FormData();
+        fd.append('file', f);
+        const res = await fetch('/api/legal/extract', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (res.ok && data.extracted) {
+          setForm(p => ({
+            firmName: data.extracted.firmName || p.firmName,
+            firmEmail: p.firmEmail,
+            documentTitle: data.extracted.documentTitle || p.documentTitle,
+            documentType: data.extracted.documentType || p.documentType,
+            parties: data.extracted.parties || p.parties,
+            executionDate: data.extracted.executionDate || p.executionDate,
+            jurisdiction: data.extracted.jurisdiction || p.jurisdiction,
+            referenceNumber: data.extracted.referenceNumber || p.referenceNumber,
+          }));
+        }
+      } catch {
+      } finally {
+        setExtracting(false);
+      }
+    }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -85,8 +113,31 @@ export default function Legal() {
 
     setLoading(true);
     setError(null);
+    setMismatches([]);
 
     try {
+      if (file && file.type.startsWith('image/')) {
+        const matchFd = new FormData();
+        matchFd.append('file', file);
+        matchFd.append('firmName', form.firmName);
+        matchFd.append('documentTitle', form.documentTitle);
+        matchFd.append('documentType', form.documentType);
+        matchFd.append('parties', form.parties);
+        matchFd.append('executionDate', form.executionDate);
+        matchFd.append('jurisdiction', form.jurisdiction);
+        matchFd.append('referenceNumber', form.referenceNumber);
+
+        const matchRes = await fetch('/api/legal/verify-match', { method: 'POST', body: matchFd });
+        const matchData = await matchRes.json();
+
+        if (matchData.mismatches && matchData.mismatches.length > 0) {
+          setMismatches(matchData.mismatches);
+          setError('The submitted details do not match the uploaded document. Please review the highlighted fields below.');
+          setLoading(false);
+          return;
+        }
+      }
+
       if (!window.ethereum) {
         setError('Please install MetaMask to register on blockchain');
         setLoading(false);
@@ -96,25 +147,7 @@ export default function Legal() {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       const chain = SUPPORTED_CHAINS.find(c => c.id === selectedChain);
 
-      if (selectedChain === 'bnb-testnet') {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x61' }],
-        }).catch(async (err: any) => {
-          if (err.code === 4902) {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x61',
-                chainName: 'BSC Testnet',
-                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
-                blockExplorerUrls: ['https://testnet.bscscan.com'],
-              }],
-            });
-          }
-        });
-      } else if (chain) {
+      if (chain) {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: '0x' + chain.chainId.toString(16) }],
@@ -263,6 +296,29 @@ export default function Legal() {
               <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-6">{error}</div>
             )}
 
+            {mismatches.length > 0 && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+                <p className="font-medium text-amber-900 mb-3">⚠️ Mismatches found between form and document:</p>
+                <div className="space-y-2">
+                  {mismatches.map((m: any, i: number) => (
+                    <div key={i} className="bg-white border border-amber-200 rounded-lg p-3 text-sm">
+                      <p className="font-medium text-gray-900 capitalize mb-1">{m.field.replace(/([A-Z])/g, ' $1')}</p>
+                      <p className="text-gray-600">You entered: <span className="font-medium text-red-600">{m.submitted || '(empty)'}</span></p>
+                      <p className="text-gray-600">Document shows: <span className="font-medium text-green-700">{m.found || '(not found)'}</span></p>
+                      <p className="text-gray-500 text-xs mt-1">{m.reason}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {extracting && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm mb-6 flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                Reading document with AI and auto-filling form...
+              </div>
+            )}
+
             {result?.type === 'register' && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-xl mb-6">
                 <p className="font-medium text-green-900 mb-2">✓ Legal Document Registered!</p>
@@ -273,7 +329,7 @@ export default function Legal() {
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Document <span className="text-gray-400 font-normal">(optional — generates SHA-256 hash)</span>
+                Upload Document <span className="text-gray-400 font-normal">(optional — AI reads and auto-fills form)</span>
               </label>
               <div
                 {...getRootProps()}
@@ -285,10 +341,14 @@ export default function Legal() {
                 {file ? (
                   <div>
                     <p className="font-medium text-gray-900">{file.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{(file.size / 1024).toFixed(1)} KB</p>
                     <p className="text-xs text-gray-500 font-mono mt-1 break-all">{sha256Hash}</p>
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm">Drop document here to generate hash</p>
+                  <div>
+                    <p className="text-gray-700 font-medium">Drop legal document image here</p>
+                    <p className="text-sm text-gray-400 mt-1">Images, PDF — max 50MB</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -433,7 +493,7 @@ export default function Legal() {
                     </div>
                     <p className="font-mono text-xs text-blue-600 mb-1">{doc.registry_id}</p>
                     {doc.tx_hash && (
-                      <p onClick={() => window.open('https://testnet.bscscan.com/tx/' + doc.tx_hash, '_blank')}
+                      <p onClick={() => window.open('https://bscscan.com/tx/' + doc.tx_hash, '_blank')}
                         className="font-mono text-xs text-blue-600 cursor-pointer hover:underline truncate">{doc.tx_hash}</p>
                     )}
                   </div>
@@ -442,7 +502,7 @@ export default function Legal() {
             )}
           </div>
         )}
-      </>
+        </>
         )}
       </div>
     </main>
