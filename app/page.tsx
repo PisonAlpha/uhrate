@@ -67,6 +67,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              <button onClick={() => window.location.href = '/tokenomics'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Token</button>
               <button onClick={() => window.location.href = '/enterprise'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Enterprise</button>
               <button onClick={() => window.location.href = '/api-marketplace'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">API</button>
               <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Pricing</button>
@@ -438,6 +439,8 @@ export default function Home() {
               </button>
             </div>
             <div className="flex items-center gap-4">
+              <button onClick={() => window.location.href = '/whitepaper'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Whitepaper</button>
+              <button onClick={() => window.location.href = '/tokenomics'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Tokenomics</button>
               <button onClick={() => window.location.href = '/terms'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Terms</button>
               <button onClick={() => window.location.href = '/privacy'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Privacy</button>
             </div>
