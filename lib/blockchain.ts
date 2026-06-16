@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
-const BNB_TESTNET_RPC = 'https://data-seed-prebsc-1-s1.binance.org:8545';
-const CHAIN_ID = 97;
+const BNB_TESTNET_RPC = 'https://bsc-dataseed.binance.org';
+const CHAIN_ID = 56;
 
 export async function getProvider() {
   const provider = new ethers.JsonRpcProvider(BNB_TESTNET_RPC, {
