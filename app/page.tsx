@@ -18,11 +18,13 @@ export default function Home() {
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+    const fetchStats = async () => {
     try {
-      const response = await fetch('/api/dashboard');
+      const response = await fetch('/api/admin/stats', {
+        headers: { 'x-admin-secret': '' },
+      });
       const data = await response.json();
-      if (data.verifications) setTotalVerifications(data.verifications.length);
+      if (data.stats?.totalVerifications) setTotalVerifications(data.stats.totalVerifications);
     } catch {}
   };
 
@@ -179,9 +181,9 @@ export default function Home() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
           {[
-            { label: 'Files Verified', value: totalVerifications.toString() },
+                        { label: 'Files Verified', value: totalVerifications > 0 ? totalVerifications.toString() : '—' },
             { label: 'AI Models', value: '6' },
-            { label: 'Blockchains', value: '8' },
+            { label: 'Blockchains', value: '4' },
             { label: 'Accuracy', value: '94%' },
           ].map(stat => (
             <div key={stat.label} className="text-center">
