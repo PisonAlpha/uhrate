@@ -18,13 +18,11 @@ export default function Home() {
     fetchStats();
   }, []);
 
-    const fetchStats = async () => {
+      const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats', {
-        headers: { 'x-admin-secret': '' },
-      });
+      const response = await fetch('/api/stats');
       const data = await response.json();
-      if (data.stats?.totalVerifications) setTotalVerifications(data.stats.totalVerifications);
+      if (data.totalVerifications) setTotalVerifications(data.totalVerifications);
     } catch {}
   };
 
@@ -181,7 +179,7 @@ export default function Home() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
           {[
-                        { label: 'Files Verified', value: totalVerifications > 0 ? totalVerifications.toString() : '—' },
+                        { label: 'Files Verified', value: totalVerifications > 0 ? totalVerifications.toLocaleString() : '...' },
             { label: 'AI Models', value: '6' },
             { label: 'Blockchains', value: '4' },
             { label: 'Accuracy', value: '94%' },
