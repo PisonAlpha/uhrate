@@ -411,7 +411,7 @@ export default function Home() {
             <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <button
-                onClick={() => window.open('https://x.com/Uhrate', '_blank')}
+                onClick={() => window.open('https://x.com/uhrate_official', '_blank')}
                 className="text-gray-400 hover:text-gray-900 transition-colors bg-transparent border-0 cursor-pointer p-0"
                 aria-label="X (Twitter)"
               >
@@ -420,7 +420,7 @@ export default function Home() {
                 </svg>
               </button>
               <button
-                onClick={() => window.open('https://t.me/uhrate', '_blank')}
+                onClick={() => window.open('https://t.me/uhrateofficial', '_blank')}
                 className="text-gray-400 hover:text-gray-900 transition-colors bg-transparent border-0 cursor-pointer p-0"
                 aria-label="Telegram"
               >
