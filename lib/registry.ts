@@ -2,70 +2,60 @@ import { ethers } from 'ethers';
 
 export const SUPPORTED_CHAINS = [
   {
-    id: 'bnb',
-    name: 'BNB Chain',
-    symbol: 'BNB',
-    chainId: 56,
-    rpc: 'https://bsc-dataseed.binance.org',
-    explorer: 'https://bscscan.com',
-    testnet: false,
-  },
-
-  {
     id: 'ethereum',
     name: 'Ethereum',
     symbol: 'ETH',
     chainId: 1,
+    chainIdHex: '0x1',
     rpc: 'https://cloudflare-eth.com',
     explorer: 'https://etherscan.io',
+    color: '#627EEA',
+    icon: '⟠',
     testnet: false,
+    gasEstimate: '~$1-3',
   },
   {
-    id: 'polygon',
-    name: 'Polygon',
-    symbol: 'MATIC',
-    chainId: 137,
-    rpc: 'https://polygon-rpc.com',
-    explorer: 'https://polygonscan.com',
+    id: 'bnb',
+    name: 'BNB Chain',
+    symbol: 'BNB',
+    chainId: 56,
+    chainIdHex: '0x38',
+    rpc: 'https://bsc-dataseed.binance.org',
+    explorer: 'https://bscscan.com',
+    color: '#F3BA2F',
+    icon: '⬡',
     testnet: false,
-  },
-  {
-    id: 'arbitrum',
-    name: 'Arbitrum',
-    symbol: 'ETH',
-    chainId: 42161,
-    rpc: 'https://arb1.arbitrum.io/rpc',
-    explorer: 'https://arbiscan.io',
-    testnet: false,
-  },
-  {
-    id: 'optimism',
-    name: 'Optimism',
-    symbol: 'ETH',
-    chainId: 10,
-    rpc: 'https://mainnet.optimism.io',
-    explorer: 'https://optimistic.etherscan.io',
-    testnet: false,
+    gasEstimate: '~$0.10-0.30',
   },
   {
     id: 'base',
     name: 'Base',
     symbol: 'ETH',
     chainId: 8453,
+    chainIdHex: '0x2105',
     rpc: 'https://mainnet.base.org',
     explorer: 'https://basescan.org',
+    color: '#0052FF',
+    icon: '🔵',
     testnet: false,
+    gasEstimate: '~$0.01-0.05',
   },
   {
-    id: 'avalanche',
-    name: 'Avalanche',
-    symbol: 'AVAX',
-    chainId: 43114,
-    rpc: 'https://api.avax.network/ext/bc/C/rpc',
-    explorer: 'https://snowtrace.io',
+    id: 'polygon',
+    name: 'Polygon',
+    symbol: 'MATIC',
+    chainId: 137,
+    chainIdHex: '0x89',
+    rpc: 'https://polygon-rpc.com',
+    explorer: 'https://polygonscan.com',
+    color: '#8247E5',
+    icon: '⬡',
     testnet: false,
+    gasEstimate: '~$0.01-0.05',
   },
 ];
+
+export const PLATFORM_FEE_USD = 0.50;
 
 export function getChainById(chainId: string) {
   return SUPPORTED_CHAINS.find(c => c.id === chainId);
@@ -102,32 +92,26 @@ export async function verifyDocumentOnChain(
 
     let apiUrl = '';
 
-    if (chainId === 'bnb' || chainId === 'bnb-testnet') {
-      const baseUrl = chainId === 'bnb'
-        ? 'https://api.bscscan.com/api'
-        : 'https://api-testnet.bscscan.com/api';
-      apiUrl = `${baseUrl}?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${process.env.BSCSCAN_API_KEY}`;
+    if (chainId === 'bnb') {
+      apiUrl = `https://api.bscscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${process.env.BSCSCAN_API_KEY}`;
     } else if (chainId === 'ethereum') {
       apiUrl = `https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    } else if (chainId === 'base') {
+      apiUrl = `https://api.basescan.org/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    } else if (chainId === 'polygon') {
+      apiUrl = `https://api.polygonscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash=${txHash}&apikey=${process.env.POLYGONSCAN_API_KEY}`;
     } else {
       const provider = new ethers.JsonRpcProvider(chain.rpc);
       const tx = await provider.getTransaction(txHash);
       if (!tx) return { valid: false };
-
       const decoded = tx.data
         ? Buffer.from(tx.data.slice(2), 'hex').toString('utf8')
         : '';
-
-      return {
-        valid: true,
-        data: decoded,
-        blockNumber: tx.blockNumber || undefined,
-      };
+      return { valid: true, data: decoded, blockNumber: tx.blockNumber || undefined };
     }
 
     const response = await fetch(apiUrl);
     const result = await response.json();
-
     if (!result.result) return { valid: false };
 
     const decoded = result.result.input
