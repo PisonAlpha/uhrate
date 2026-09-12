@@ -7,8 +7,18 @@ export async function GET(request: NextRequest) {
     const email = searchParams.get('email');
     const userId = searchParams.get('userId');
 
-    if (!email && !userId) {
-      return NextResponse.json({ error: 'Email or userId required' }, { status: 400 });
+        if (!email && !userId) {
+      return NextResponse.json({ 
+        success: true,
+        verifications: [],
+        stats: { total: 0, verified: 0, aiGenerated: 0, highRisk: 0, mixed: 0, avgTrustScore: 0, nftMinted: 0, totalSpent: 0, deploymentsCount: 0 },
+        activityByDay: [],
+        fileTypeBreakdown: [],
+        ratingBreakdown: [],
+        recentActivity: [],
+        registryEntries: [],
+        deployments: [],
+      });
     }
 
     // Fetch verifications

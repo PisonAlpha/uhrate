@@ -156,12 +156,12 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'AI Generated', value: stats.aiGenerated, color: 'text-amber-600', icon: '🤖' },
-                { label: 'High Risk', value: stats.highRisk, color: 'text-red-600', icon: '⚠️' },
-                { label: 'Blockchain Deployments', value: stats.deploymentsCount, color: 'text-indigo-600', icon: '⛓️' },
-                { label: 'Total Spent', value: '$' + (stats.totalSpent || 0).toFixed(2), color: 'text-green-600', icon: '💰' },
+                { label: 'AI Detected', value: stats.aiGenerated, color: 'text-amber-600', icon: '🤖' },
+                { label: 'High Risk Caught', value: stats.highRisk, color: 'text-red-600', icon: '🛡️' },
+                { label: 'On-Chain Protected', value: stats.deploymentsCount, color: 'text-indigo-600', icon: '⛓️' },
+                { label: 'Registry Entries', value: dashData?.registryEntries?.length || 0, color: 'text-purple-600', icon: '📋' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-2">
@@ -447,14 +447,18 @@ export default function Dashboard() {
             {/* Deployments Tab */}
             {!loading && activeTab === 'deployments' && (
               <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h3 className="font-semibold text-gray-900">Blockchain Deployments</h3>
-                  <p className="text-xs text-gray-500 mt-1">Total spent: ${(stats.totalSpent || 0).toFixed(2)} in platform fees</p>
+                                <div className="p-6 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-900">⛓ On-Chain Protected Documents</h3>
+                  <p className="text-xs text-gray-500 mt-1">{stats.deploymentsCount} document{stats.deploymentsCount !== 1 ? 's' : ''} permanently secured on the blockchain</p>
                 </div>
                 {!dashData?.deployments?.length ? (
-                  <div className="text-center py-20">
-                    <p className="text-gray-500 text-sm mb-3">No blockchain deployments yet.</p>
-                    <p className="text-xs text-gray-400">Deploy a document to the blockchain for permanent on-chain identity ($0.50 fee)</p>
+                                    <div className="text-center py-20">
+                    <div className="text-4xl mb-4">⛓</div>
+                    <p className="text-gray-700 font-semibold mb-2">No documents protected on-chain yet</p>
+                    <p className="text-xs text-gray-400 mb-6 max-w-xs mx-auto">Give your verified documents a permanent, immutable blockchain identity. Verifiable by anyone, anywhere, forever.</p>
+                    <button onClick={() => window.location.href = '/registry'} className="px-6 py-3 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors">
+                      Protect a Document →
+                    </button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -463,7 +467,7 @@ export default function Dashboard() {
                         <tr className="border-b border-gray-100 bg-gray-50">
                           <th className="text-left px-6 py-3 text-xs font-medium text-gray-500">Chain</th>
                           <th className="text-left px-6 py-3 text-xs font-medium text-gray-500">Transaction</th>
-                          <th className="text-left px-6 py-3 text-xs font-medium text-gray-500">Fee</th>
+    
                           <th className="text-left px-6 py-3 text-xs font-medium text-gray-500">Date</th>
                         </tr>
                       </thead>
@@ -485,9 +489,7 @@ export default function Dashboard() {
                                 {p.tx_hash?.slice(0, 20)}...
                               </a>
                             </td>
-                            <td className="px-6 py-4">
-                              <span className="text-sm font-bold text-green-600">$0.50</span>
-                            </td>
+                            
                             <td className="px-6 py-4">
                               <span className="text-xs text-gray-500">{new Date(p.created_at).toLocaleDateString()}</span>
                             </td>
