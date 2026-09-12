@@ -1,0 +1,10 @@
+[33m867f4a0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Add MetaMask wallet signup to register page, wallet login to login page
+[33mfda5f74[m Add MetaMask wallet login alongside email login, wallet-nonce and wallet-login API routes, global ethereum type
+[33m3db1225[m Update admin panel - badge reject, deployment fee tracking, search, platform health stats
+[33m0925383[m Remove subscriptions - free platform, .50 blockchain deployment fee, update to ETH/BNB/Base/Polygon networks
+[33me7335da[m Add Token and Whitepaper links to navigation and footer
+[33m637a8f4[m Add whitepaper page with PDF viewer and download
+[33m31c78b1[m Add UHR tokenomics page with contract address
+[33mbf8a0c8[m Add sitemap.xml and Google Search Console verification
+[33m9269986[m Add Google Search Console verification
+[33mc9c4d97[m Fix BNB price display on pricing page, polish nav and auth pages
