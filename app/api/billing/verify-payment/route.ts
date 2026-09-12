@@ -103,6 +103,21 @@ export async function POST(request: NextRequest) {
       fee_usd: PLATFORM_FEE_USD,
     });
 
+       // Send blockchain deployment notification
+    try {
+      const { sendBlockchainDeploymentEmail } = await import('@/lib/notifications');
+      await sendBlockchainDeploymentEmail(
+        userEmail,
+        userEmail.split('@')[0],
+        documentId || 'Your document',
+        chainId,
+        txHash,
+        documentId || 'N/A'
+      );
+    } catch (notifError) {
+      console.error('Deployment notification error:', notifError);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Deployment fee verified. Your document is now being deployed to the blockchain.`,
