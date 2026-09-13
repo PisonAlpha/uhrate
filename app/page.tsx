@@ -70,7 +70,8 @@ export default function Home() {
               <button onClick={() => window.location.href = '/tokenomics'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Token</button>
               <button onClick={() => window.location.href = '/enterprise'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Enterprise</button>
               <button onClick={() => window.location.href = '/api-marketplace'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">API</button>
-              <button onClick={() => window.location.href = '/pricing'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Pricing</button>
+              <button onClick={() => window.location.href = '/presale'} className="text-sm text-red-600 font-bold hover:text-red-700 bg-transparent border-0 cursor-pointer">🔥 Presale</button>
+              <button onClick={() => window.location.href = '/swap'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Buy UHR</button>
               <button onClick={() => window.location.href = '/dashboard'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Dashboard</button>
             </nav>
             <button
@@ -131,7 +132,8 @@ export default function Home() {
           { label: 'Identity', href: '/identity' },
           { label: 'Enterprise', href: '/enterprise' },
           { label: 'API', href: '/api-marketplace' },
-          { label: 'Pricing', href: '/pricing' },
+          { label: '🔥 Presale', href: '/presale' },
+          { label: 'Buy UHR', href: '/swap' },
           { label: 'Dashboard', href: '/dashboard' },
         ].map(item => (
           <button
