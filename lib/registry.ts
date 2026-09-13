@@ -55,7 +55,16 @@ export const SUPPORTED_CHAINS = [
   },
 ];
 
-export const PLATFORM_FEE_USD = 0.50;
+export const PLATFORM_FEE_USD = 0.20;
+export const PLATFORM_FEE_UHR_USD = 0.10;
+export const UHR_CONTRACT = '0xFD8723F83F5A441EdB231F2ef1f89113B481E447';
+export const UHR_CHAIN_ID = 56; // BNB Chain
+export const PRESALE_WALLET = '0x2b2df01fcd78986c1ebdedfdbdaa909f0663ac6a';
+export const SWAP_WALLET = '0x6c55d7594a3a85cc142095153faeb9f5042c7863';
+export const PRESALE_PRICE_USD = 0.01;
+export const SWAP_PRICE_USD = 0.02;
+export const PRESALE_TOTAL_TOKENS = 80000000;
+export const SWAP_POOL_TOKENS = 20000000;
 
 export function getChainById(chainId: string) {
   return SUPPORTED_CHAINS.find(c => c.id === chainId);
