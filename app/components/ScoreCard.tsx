@@ -233,10 +233,19 @@ export default function ScoreCard({ result }: ScoreCardProps) {
       </div>
 
       {/* AI Analysis */}
-      {analysis && (
+            {analysis?.summary && (
         <div className="bg-white border border-gray-200 rounded-xl p-6">
           <h4 className="font-semibold text-gray-900 mb-3">AI Analysis</h4>
-          <p className="text-sm text-gray-700 leading-relaxed">{analysis}</p>
+          <p className="text-sm text-gray-700 leading-relaxed">{analysis.summary}</p>
+          {analysis.detected_issues?.length > 0 && (
+            <div className="mt-3 space-y-1">
+              {analysis.detected_issues.map((issue: string, i: number) => (
+                <p key={i} className="text-xs text-red-600 flex items-center gap-1">
+                  <span>⚠</span> {issue}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
