@@ -263,8 +263,27 @@ export default function Swap() {
           )}
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
-          ⚠️ Only send USDT on BNB Smart Chain (BEP20). Verify the contract address before transacting. This is not financial advice.
+               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700 mb-6">
+          ⚠️ Only send USDT on BNB Smart Chain (BEP20). Verify the contract address before transacting.
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <h3 className="font-bold text-gray-900 mb-4">What is UHR used for?</h3>
+          <div className="space-y-3">
+            {[
+              { icon: '💸', title: 'Cheaper Deployments', desc: 'Pay just $0.10 in UHR to deploy documents on-chain instead of $0.20 in ETH/BNB — 50% cheaper.' },
+              { icon: '🔥', title: 'Fee Burn', desc: '10% of all UHR collected as platform fees is permanently burned — reducing supply over time.' },
+             
+            ].map(item => (
+              <div key={item.title} className="flex items-start gap-3 py-2 border-b border-gray-50">
+                <span className="text-xl flex-shrink-0">{item.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>

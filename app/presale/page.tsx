@@ -214,7 +214,7 @@ export default function Presale() {
                       value={usdtAmount}
                       onChange={e => handleUsdtChange(e.target.value)}
                       placeholder="0.00"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-4 text-white text-xl font-bold focus:outline-none focus:border-yellow-400 transition-colors pr-20"
+                      className="w-full bg-white border border-white/20 rounded-xl px-4 py-4 text-gray-900 text-xl font-bold focus:outline-none focus:border-yellow-400 transition-colors pr-20 placeholder-gray-400"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">USDT</span>
                   </div>
@@ -232,7 +232,7 @@ export default function Presale() {
                       value={uhrAmount}
                       readOnly
                       placeholder="0"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-yellow-400 text-xl font-black focus:outline-none pr-16"
+                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-4 text-yellow-400 text-xl font-black focus:outline-none pr-16 placeholder-gray-600"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">UHR</span>
                   </div>
@@ -268,8 +268,8 @@ export default function Presale() {
                 {loading ? 'Processing...' : `Buy ${uhrAmount || '0'} UHR →`}
               </button>
 
-              <p className="text-xs text-gray-600 text-center mt-4">
-                Tokens will be sent to your wallet after presale ends. Make sure to add UHR contract to MetaMask.
+              <p className="text-xs text-gray-400 text-center mt-4">
+                UHR tokens are sent instantly to your wallet upon transaction confirmation. Make sure to add the UHR contract to MetaMask to see your balance.
               </p>
             </div>
           )}
@@ -312,9 +312,8 @@ export default function Presale() {
           <div className="space-y-4">
             {[
               { step: '1', title: 'Connect MetaMask', desc: 'Connect your wallet on BNB Smart Chain' },
-              { step: '2', title: 'Send USDT', desc: 'Pay with USDT (BEP20) — 1 USDT = 100 UHR' },
-              { step: '3', title: 'Receive UHR', desc: 'Tokens distributed to your wallet after presale ends' },
-              { step: '4', title: 'Use on UHRATE', desc: 'Pay $0.10 in UHR for document deployments (vs $0.20)' },
+              { step: '2', title: 'Enter USDT Amount', desc: 'Type how much USDT you want to swap — 1 USDT = 100 UHR' },
+              { step: '3', title: 'Confirm Transaction', desc: 'Approve the USDT transaction in MetaMask — UHR sent instantly to your wallet' },
             ].map(item => (
               <div key={item.step} className="flex items-start gap-3">
                 <div className="w-7 h-7 bg-yellow-400 text-black rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">
