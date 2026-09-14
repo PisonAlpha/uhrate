@@ -3,7 +3,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { getChainById } from '@/lib/registry';
 import { ethers } from 'ethers';
 
-const PLATFORM_FEE_USD = 0.50;
+const PLATFORM_FEE_USD = 0.20;
+const PLATFORM_FEE_UHR_USD = 0.10;
+const UHR_CONTRACT = '0xFD8723F83F5A441EdB231F2ef1f89113B481E447';
 const PAYMENT_WALLET = process.env.PAYMENT_WALLET!;
 
 async function verifyDeploymentFee(
