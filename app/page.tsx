@@ -278,7 +278,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Verify a file now</h2>
-            <p className="text-gray-500">Free for up to 10 files. No account required.</p>
+              <p className="text-gray-500">Free for everyone. No account required.</p>
           </div>
 
           <div className="flex gap-2 mb-8 justify-center">

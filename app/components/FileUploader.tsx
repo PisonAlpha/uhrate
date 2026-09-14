@@ -50,7 +50,7 @@ export default function FileUploader({ onResult, onLoading }: FileUploaderProps)
         throw new Error(result.error || 'Verification failed');
       }
 
-      setProgress('Registering on blockchain...');
+      setProgress('Generating certificate...');
       await new Promise(r => setTimeout(r, 600));
 
       onResult(result);
@@ -67,15 +67,7 @@ export default function FileUploader({ onResult, onLoading }: FileUploaderProps)
     onDrop,
     maxFiles: 1,
     maxSize: 50 * 1024 * 1024,
-    accept: {
-      'image/*': [],
-      'video/*': [],
-      'audio/*': [],
-      'application/pdf': [],
-      'application/msword': [],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
-      'text/plain': [],
-    },
+    accept: undefined,
   });
 
   return (
