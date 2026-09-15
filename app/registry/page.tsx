@@ -206,28 +206,7 @@ export default function Registry() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button
-            onClick={() => window.location.href = '/'}
-            className="flex items-center gap-3 bg-transparent border-0 cursor-pointer p-0"
-          >
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">UH</span>
-            </div>
-            <span className="font-semibold text-gray-900">UHRATE</span>
-          </button>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => window.location.href = '/registry/lookup'}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-            >
-              Verify Document
-            </button>
-            <span className="text-sm text-gray-500 font-medium">Document Registry</span>
-          </div>
-        </div>
-      </header>
+      <Nav />
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         {checkedAuth && !user && (

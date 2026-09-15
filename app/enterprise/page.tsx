@@ -134,24 +134,7 @@ export default function BulkVerify() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button onClick={() => window.location.href = '/'} className="flex items-center gap-3 bg-transparent border-0 cursor-pointer p-0">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">UH</span>
-            </div>
-            <span className="font-semibold text-gray-900">UHRATE</span>
-          </button>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">Bulk Verification</span>
-            {user && (
-              <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
-                {user.full_name || user.email}
-              </span>
-            )}
-          </div>
-        </div>
-      </header>
+      <Nav />
 
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
