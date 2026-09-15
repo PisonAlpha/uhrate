@@ -1,4 +1,6 @@
 'use client';
+import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 import { useEffect, useState } from 'react';
 import { SUPPORTED_CHAINS } from '@/lib/registry';

@@ -1,4 +1,6 @@
 'use client';
+import Nav from '../components/Nav';
+import Footer from '../components/Footer';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
