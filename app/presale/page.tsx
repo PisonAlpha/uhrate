@@ -234,7 +234,7 @@ export default function Presale() {
                       value={uhrAmount}
                       readOnly
                       placeholder="0"
-                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-4 text-yellow-400 text-xl font-black focus:outline-none pr-16 placeholder-gray-600"
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-xl font-black focus:outline-none pr-16 placeholder-gray-400"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">UHR</span>
                   </div>
