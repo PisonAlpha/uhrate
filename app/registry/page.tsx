@@ -161,14 +161,29 @@ export default function Registry() {
 
       setStep('sign');
 
+            // Get native token price to calculate $0.20 fee
+      let nativePrice = 300;
+      try {
+        const sym = chain?.symbol === 'ETH' ? 'ETH' : chain?.symbol === 'MATIC' ? 'MATIC' : 'BNB';
+        const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}USDT`);
+        if (priceRes.ok) {
+          const priceData = await priceRes.json();
+          nativePrice = parseFloat(priceData.price) || 300;
+        }
+      } catch {}
+
+      const feeUSD = 0.20;
+      const feeInNative = feeUSD / nativePrice;
+      const feeWei = '0x' + BigInt(Math.floor(feeInNative * 1e18)).toString(16);
+
       const txHashResult = await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [{
           from: accounts[0],
-          to: '0x000000000000000000000000000000000000dEaD',
-          value: '0x0',
+          to: '0x2b2df01fcd78986c1ebdedfdbdaa909f0663ac6a',
+          value: feeWei,
           data: dataHex,
-          gas: '0x186A0',
+          gas: '0x30D40',
         }],
       });
 

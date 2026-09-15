@@ -182,14 +182,26 @@ export default function Legal() {
 
       const dataHex = '0x' + Buffer.from(docData).toString('hex');
 
+
+      // Calculate $0.20 platform fee
+      let nativePrice = 300;
+      try {
+        const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT');
+        if (priceRes.ok) {
+          const pd = await priceRes.json();
+          nativePrice = parseFloat(pd.price) || 300;
+        }
+      } catch {}
+      const feeWei = '0x' + BigInt(Math.floor(0.20 / nativePrice * 1e18)).toString(16);
+
       const txHash = await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [{
           from: accounts[0],
-          to: '0x000000000000000000000000000000000000dEaD',
-          value: '0x0',
+          to: '0x2b2df01fcd78986c1ebdedfdbdaa909f0663ac6a',
+          value: feeWei,
           data: dataHex,
-          gas: '0x186A0',
+          gas: '0x30D40',
         }],
       });
 
