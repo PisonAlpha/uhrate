@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
 
-const PRESALE_CONTRACT = '0xfb46A42e5920903d8bD3026dA9099bc6269DCd69';
+const PRESALE_CONTRACT = '0xaDE648982c4ABceB02A48BE71B71C45580f6Ca08';
 const UHR_CONTRACT = '0xFD8723F83F5A441EdB231F2ef1f89113B481E447';
 const USDT_BEP20 = '0x55d398326f99059fF775485246999027B3197955';
 const PRESALE_PRICE = 0.01;
@@ -133,7 +133,7 @@ export default function Presale() {
         signer
       );
 
-      const usdtAmountWei = ethers.parseUnits(amount.toString(), 6);
+      const usdtAmountWei = ethers.parseUnits(amount.toString(), 18);
       const approveTx = await usdtContract.approve(PRESALE_CONTRACT, usdtAmountWei);
       await approveTx.wait();
 
@@ -174,7 +174,7 @@ export default function Presale() {
         signer
       );
 
-      const usdtAmountWei = ethers.parseUnits(amount.toString(), 6);
+      const usdtAmountWei = ethers.parseUnits(amount.toString(), 18);
       const tx = await presaleContract.buyTokens(usdtAmountWei, {
         gasLimit: 300000,
       });
