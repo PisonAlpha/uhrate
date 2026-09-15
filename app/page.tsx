@@ -11,6 +11,9 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'verify' | 'lookup'>('verify');
   const [user, setUser] = useState<any>(null);
   const [totalVerifications, setTotalVerifications] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [registryOpen, setRegistryOpen] = useState(false);
+  const [tokenOpen, setTokenOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('uhrate_user');
@@ -18,7 +21,7 @@ export default function Home() {
     fetchStats();
   }, []);
 
-      const fetchStats = async () => {
+  const fetchStats = async () => {
     try {
       const response = await fetch('/api/stats');
       const data = await response.json();
@@ -33,302 +36,310 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
-      {/* Header */}
+
+      {/* ── NAVIGATION ── */}
       <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs font-bold">UH</span>
-              </div>
-              <span className="font-bold text-gray-900 text-lg">UHRATE</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+
+          {/* Logo */}
+          <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 bg-transparent border-0 cursor-pointer p-0 flex-shrink-0">
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+              <span className="text-white text-xs font-bold">UH</span>
             </div>
-            <nav className="hidden md:flex items-center gap-6">
-              <button onClick={() => window.location.href = '/verify'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Verify</button>
-              <div className="relative group">
-                <button className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer flex items-center gap-1">
-                  Registry
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <span className="font-bold text-gray-900 text-lg">UHRATE</span>
+          </button>
+
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center gap-1">
+            <button onClick={() => window.location.href = '/'} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer">Verify</button>
+
+            {/* Registry Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => { setRegistryOpen(!registryOpen); setTokenOpen(false); }}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer flex items-center gap-1"
+              >
+                Registry <span className="text-xs">{registryOpen ? '▲' : '▼'}</span>
+              </button>
+              {registryOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2 w-52 z-50">
                   {[
-                    { label: '📄 Document Registry', href: '/registry' },
-                    { label: '🎓 Education', href: '/education' },
-                    { label: '⚖️ Legal', href: '/legal' },
-                    { label: '📰 Media', href: '/media' },
-                    { label: '🪪 Identity', href: '/identity' },
+                    { icon: '📄', label: 'Document Registry', href: '/registry' },
+                    { icon: '🎓', label: 'Education', href: '/education' },
+                    { icon: '⚖️', label: 'Legal', href: '/legal' },
+                    { icon: '📰', label: 'Media', href: '/media' },
+                    { icon: '🪪', label: 'Identity Badge', href: '/identity' },
                   ].map(item => (
-                    <button key={item.href} onClick={() => window.location.href = item.href}
-                      className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 bg-transparent border-0 cursor-pointer first:rounded-t-xl last:rounded-b-xl">
-                      {item.label}
+                    <button key={item.href} onClick={() => { window.location.href = item.href; setRegistryOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer text-left">
+                      <span>{item.icon}</span>{item.label}
                     </button>
                   ))}
                 </div>
-              </div>
-              <button onClick={() => window.location.href = '/tokenomics'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Token</button>
-              <button onClick={() => window.location.href = '/enterprise'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Enterprise</button>
-              <button onClick={() => window.location.href = '/api-marketplace'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">API</button>
-              <button onClick={() => window.location.href = '/presale'} className="text-sm text-red-600 font-bold hover:text-red-700 bg-transparent border-0 cursor-pointer">🔥 Presale</button>
-              <button onClick={() => window.location.href = '/swap'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Buy UHR</button>
-              <button onClick={() => window.location.href = '/dashboard'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Dashboard</button>
-            </nav>
-            <button
-              onClick={() => {
-                const menu = document.getElementById('mobile-menu');
-                if (menu) menu.classList.toggle('hidden');
-              }}
-              className="md:hidden p-2 text-gray-600 bg-transparent border-0 cursor-pointer"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              )}
+            </div>
+
+            {/* Token Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => { setTokenOpen(!tokenOpen); setRegistryOpen(false); }}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer flex items-center gap-1"
+              >
+                Token <span className="text-xs">{tokenOpen ? '▲' : '▼'}</span>
+              </button>
+              {tokenOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2 w-52 z-50">
+                  {[
+                    { icon: '🔥', label: 'Presale — $0.01/UHR', href: '/presale' },
+                    { icon: '🔄', label: 'Buy UHR — $0.02/UHR', href: '/swap' },
+                    { icon: '📊', label: 'Tokenomics', href: '/tokenomics' },
+                    { icon: '📄', label: 'Whitepaper', href: '/whitepaper' },
+                  ].map(item => (
+                    <button key={item.href} onClick={() => { window.location.href = item.href; setTokenOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer text-left">
+                      <span>{item.icon}</span>{item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button onClick={() => window.location.href = '/enterprise'} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer">Bulk Verify</button>
+            <button onClick={() => window.location.href = '/api-marketplace'} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer">API</button>
+          </nav>
+
+          {/* Desktop Right */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
+            <button onClick={() => window.location.href = '/presale'} className="px-4 py-2 text-sm text-white font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
+              🔥 Presale
             </button>
-          </div>
-          <div className="flex items-center gap-3">
-           {user ? (
-              <>
-                <button
-                  onClick={() => window.location.href = '/profile'}
-                  className="text-sm text-gray-600 hidden sm:block hover:text-gray-900 bg-transparent border-0 cursor-pointer"
-                >
-                  {user.full_name}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <button onClick={() => window.location.href = '/dashboard'} className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 bg-transparent border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                  Dashboard
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
+                <button onClick={handleLogout} className="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 bg-transparent border-0 cursor-pointer">
                   Logout
                 </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => window.location.href = '/login'} className="px-4 py-2 text-sm text-gray-700 bg-transparent border-0 cursor-pointer hover:text-gray-900">Login</button>
+                <button onClick={() => window.location.href = '/register'} className="px-4 py-2 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors">Sign up free</button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-gray-600 bg-transparent border-0 cursor-pointer">
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-1">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Platform</p>
+            {[
+              { label: 'Verify File', href: '/' },
+              { label: 'Document Registry', href: '/registry' },
+              { label: 'Education Registry', href: '/education' },
+              { label: 'Legal Registry', href: '/legal' },
+              { label: 'Media Registry', href: '/media' },
+              { label: 'Identity Badge', href: '/identity' },
+              { label: 'Bulk Verification', href: '/enterprise' },
+              { label: 'Developer API', href: '/api-marketplace' },
+            ].map(item => (
+              <button key={item.href} onClick={() => { window.location.href = item.href; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">
+                {item.label}
+              </button>
+            ))}
+            <div className="border-t border-gray-100 my-2" />
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Token</p>
+            {[
+              { label: '🔥 Presale — $0.01/UHR', href: '/presale' },
+              { label: '🔄 Buy UHR — $0.02/UHR', href: '/swap' },
+              { label: '📊 Tokenomics', href: '/tokenomics' },
+              { label: '📄 Whitepaper', href: '/whitepaper' },
+            ].map(item => (
+              <button key={item.href} onClick={() => { window.location.href = item.href; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">
+                {item.label}
+              </button>
+            ))}
+            <div className="border-t border-gray-100 my-2" />
+            {user ? (
+              <>
+                <button onClick={() => { window.location.href = '/dashboard'; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">Dashboard</button>
+                <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl bg-transparent border-0 cursor-pointer">Logout</button>
               </>
             ) : (
               <>
-                <button
-                  onClick={() => window.location.href = '/login'}
-                  className="px-4 py-2 text-gray-700 text-sm font-medium hover:text-gray-900 bg-transparent border-0 cursor-pointer"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => window.location.href = '/register'}
-                  className="px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
-                >
-                  Sign up free
-                </button>
+                <button onClick={() => { window.location.href = '/login'; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">Login</button>
+                <button onClick={() => { window.location.href = '/register'; setMobileMenuOpen(false); }} className="w-full py-3 bg-black text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors text-center">Sign up free</button>
               </>
             )}
           </div>
-        </div>
+        )}
       </header>
 
-      <div id="mobile-menu" className="hidden md:hidden bg-white border-b border-gray-100 px-6 py-4 space-y-3">
-        {[
-          { label: 'Verify', href: '/verify' },
-          { label: 'Registry', href: '/registry' },
-          { label: 'Education', href: '/education' },
-          { label: 'Legal', href: '/legal' },
-          { label: 'Media', href: '/media' },
-          { label: 'Identity', href: '/identity' },
-          { label: 'Enterprise', href: '/enterprise' },
-          { label: 'API', href: '/api-marketplace' },
-          { label: '🔥 Presale', href: '/presale' },
-          { label: 'Buy UHR', href: '/swap' },
-          { label: 'Dashboard', href: '/dashboard' },
-        ].map(item => (
-          <button
-            key={item.label}
-            onClick={() => window.location.href = item.href}
-            className="block w-full text-left text-sm text-gray-700 hover:text-gray-900 bg-transparent border-0 cursor-pointer py-2 border-b border-gray-50"
-          >
-            {item.label}
-          </button>
-        ))}
+      {/* ── PRESALE BANNER ── */}
+      <div className="bg-black text-white py-2.5 px-4 text-center text-sm">
+        <span className="text-yellow-400 font-bold">🔥 UHR Presale Live</span>
+        <span className="text-gray-300 mx-2">·</span>
+        <span className="text-gray-300">Buy UHR at $0.01 — 50% cheaper than swap price</span>
+        <span className="text-gray-300 mx-2">·</span>
+        <button onClick={() => window.location.href = '/presale'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">
+          Join Presale →
+        </button>
       </div>
 
-      {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-600 mb-6">
+      {/* ── HERO ── */}
+      <section className="bg-white py-16 sm:py-24 px-4 text-center border-b border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full text-green-700 text-xs font-semibold mb-6 uppercase tracking-wide">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            Live · {totalVerifications} files verified
+            Live · {totalVerifications > 0 ? totalVerifications.toLocaleString() : '...'} files verified
           </div>
-          <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Is this file
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              real or fake?
-            </span>
+          <h1 className="text-4xl sm:text-6xl font-black text-gray-900 mb-6 tracking-tight leading-tight">
+            Is this file<br />
+            <span className="text-black underline decoration-yellow-400 decoration-4">real or fake?</span>
           </h1>
-          <p className="text-xl text-gray-500 mb-8">
-            UHRATE uses AI and blockchain to verify whether any digital file —
-            image, video, audio, or document — is original, AI-generated, or manipulated.
+          <p className="text-lg sm:text-xl text-gray-500 mb-8 max-w-2xl mx-auto leading-relaxed">
+            UHRATE uses AI and blockchain to verify whether any digital file — image, video, audio, or document — is original, AI-generated, deepfaked, or manipulated.
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex gap-3 justify-center flex-wrap mb-12">
             <button
               onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-4 bg-black text-white rounded-xl text-base font-medium hover:bg-gray-800 transition-colors"
+              className="px-8 py-4 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 transition-colors"
             >
-              Verify a file free
+              Verify a File Free →
             </button>
-            <button
-              onClick={() => window.location.href = '/pricing'}
-              className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl text-base font-medium hover:bg-gray-50 transition-colors"
-            >
-              View pricing
+            <button onClick={() => window.location.href = '/presale'} className="px-8 py-4 bg-red-500 text-white font-bold rounded-2xl text-sm hover:bg-red-600 transition-colors">
+              🔥 Join Presale
+            </button>
+            <button onClick={() => window.location.href = '/whitepaper'} className="px-8 py-4 border border-gray-200 text-gray-700 font-semibold rounded-2xl text-sm hover:bg-gray-50 transition-colors">
+              Read Whitepaper
             </button>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto">
-          {[
-                        { label: 'Files Verified', value: totalVerifications > 0 ? totalVerifications.toLocaleString() : '...' },
-            { label: 'AI Models', value: '6' },
-            { label: 'Blockchains', value: '4' },
-            { label: 'Accuracy', value: '94%' },
-          ].map(stat => (
-            <div key={stat.label} className="text-center">
-              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
-            </div>
-          ))}
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            {[
+              { value: totalVerifications > 0 ? totalVerifications.toLocaleString() : '...', label: 'Files Verified' },
+              { value: '6', label: 'AI Models' },
+              { value: '4', label: 'Blockchains' },
+              { value: '94%', label: 'Accuracy' },
+            ].map(stat => (
+              <div key={stat.label} className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-2xl font-black text-gray-900">{stat.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-gray-50 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-16 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">How UHRATE works</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
-              Every file gets a permanent cryptographic identity and authenticity record.
-            </p>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">How UHRATE works</h2>
+            <p className="text-gray-500">Every file gets a permanent cryptographic identity and authenticity record</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              {
-                icon: '🧬',
-                title: 'Digital DNA',
-                desc: 'SHA-256, SHA-512, perceptual and semantic fingerprints create a permanent content identity.',
-              },
-              {
-                icon: '🤖',
-                title: 'AI Analysis',
-                desc: 'Claude AI visually analyzes images and documents for deepfakes, manipulation, and AI generation.',
-              },
-              {
-                icon: '⛓️',
-                title: 'Blockchain Proof',
-                desc: 'Every verification is permanently registered on BNB Chain — tamper-proof forever.',
-              },
-              {
-                icon: '📜',
-                title: 'Proof Certificates',
-                desc: 'Download PDF, JSON, or NFT certificates with unique IDs anyone can verify.',
-              },
-              {
-                icon: '🌐',
-                title: 'IPFS Storage',
-                desc: 'Certificate data is stored on IPFS via Pinata — decentralized and permanent.',
-              },
-              {
-                icon: '🔌',
-                title: 'Developer API',
-                desc: 'Integrate UHRATE into your own apps with our simple REST API.',
-              },
-            ].map(feature => (
-              <div key={feature.title} className="bg-white border border-gray-200 rounded-2xl p-6">
-                <div className="text-3xl mb-4">{feature.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-500 text-sm">{feature.desc}</p>
+              { icon: '🧬', title: 'Digital DNA', desc: 'SHA-256, SHA-512, perceptual and semantic fingerprints create a permanent content identity.' },
+              { icon: '🤖', title: 'AI Analysis', desc: 'Claude AI visually analyzes images and documents for deepfakes, manipulation, and AI generation.' },
+              { icon: '⛓️', title: 'Blockchain Proof', desc: 'Deploy to ETH, BNB, Base, or Polygon for permanent on-chain identity — you pay only gas + $0.20.' },
+              { icon: '📜', title: 'Proof Certificates', desc: 'Download JSON certificates with unique IDs anyone can verify at uhrate.online/verify.' },
+              { icon: '🌐', title: 'IPFS Storage', desc: 'Certificate data stored on IPFS via Pinata — decentralized and permanent.' },
+              { icon: '🔌', title: 'Developer API', desc: 'Integrate UHRATE into your own apps with our simple REST API and developer keys.' },
+            ].map(item => (
+              <div key={item.title} className="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-sm transition-all">
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Use cases */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
+      {/* ── USE CASES ── */}
+      <section className="py-16 px-4 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Who uses UHRATE</h2>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Who uses UHRATE</h2>
+            <p className="text-gray-500">Trusted by professionals who need verified digital content</p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { icon: '📰', label: 'Journalists', desc: 'Verify images and sources' },
-              { icon: '🏛️', label: 'Governments', desc: 'Authenticate documents' },
-              { icon: '🎓', label: 'Universities', desc: 'Issue verified credentials' },
-              { icon: '⚖️', label: 'Law firms', desc: 'Verify contracts' },
-              { icon: '🏦', label: 'Banks', desc: 'Detect forged documents' },
-              { icon: '🎨', label: 'Creators', desc: 'Protect their work' },
-              { icon: '💻', label: 'Developers', desc: 'Build with our API' },
-              { icon: '🏢', label: 'Enterprise', desc: 'Bulk verification' },
+              { icon: '📰', title: 'Journalists', desc: 'Verify images and sources before publishing' },
+              { icon: '🏛️', title: 'Governments', desc: 'Authenticate official documents' },
+              { icon: '🎓', title: 'Universities', desc: 'Issue verified credentials on-chain' },
+              { icon: '⚖️', title: 'Law Firms', desc: 'Verify contracts and legal documents' },
+              { icon: '🏦', title: 'Banks', desc: 'Detect forged financial documents' },
+              { icon: '🎨', title: 'Creators', desc: 'Protect original work with blockchain proof' },
+              { icon: '💻', title: 'Developers', desc: 'Build with the UHRATE API' },
+              { icon: '🏢', title: 'Enterprise', desc: 'Bulk verify thousands of files' },
             ].map(item => (
-              <div key={item.label} className="p-4 border border-gray-100 rounded-xl text-center hover:border-gray-300 transition-colors">
-                <div className="text-2xl mb-2">{item.icon}</div>
-                <p className="font-medium text-gray-900 text-sm">{item.label}</p>
-                <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
+              <div key={item.title} className="bg-white border border-gray-200 rounded-2xl p-5 text-center hover:border-gray-400 hover:shadow-sm transition-all cursor-pointer">
+                <div className="text-3xl mb-2">{item.icon}</div>
+                <p className="font-bold text-gray-900 text-sm mb-1">{item.title}</p>
+                <p className="text-xs text-gray-500">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Verify section */}
-      <section id="verify-section" className="bg-gray-50 py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Verify a file now</h2>
-              <p className="text-gray-500">Free for everyone. No account required.</p>
-          </div>
-
-          <div className="flex gap-2 mb-8 justify-center">
-            <button
-              onClick={() => { setActiveTab('verify'); setResult(null); }}
-              className={"px-6 py-2.5 rounded-xl text-sm font-medium transition-colors " + (
-                activeTab === 'verify' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              )}
-            >
-              Verify File
-            </button>
-            <button
-              onClick={() => { setActiveTab('lookup'); setResult(null); }}
-              className={"px-6 py-2.5 rounded-xl text-sm font-medium transition-colors " + (
-                activeTab === 'lookup' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              )}
-            >
-              Lookup Certificate
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* ── INVESTOR SECTION ── */}
+      <section className="py-16 px-4 bg-black text-white border-b border-gray-800">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              {activeTab === 'verify' ? (
-                <>
-                  {!result ? (
-                    <FileUploader onResult={setResult} onLoading={setLoading} />
-                  ) : (
-                    <ScoreCard result={result} />
-                  )}
-                </>
-              ) : (
-                <CertificateCard />
-              )}
-            </div>
-            <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900">Step by step</h3>
-              {[
-                { step: '01', title: 'Upload your file', desc: 'Drag and drop any image, video, audio, or document up to 50MB' },
-                { step: '02', title: 'Digital DNA extraction', desc: 'SHA-256, SHA-512, perceptual and semantic fingerprints generated' },
-                { step: '03', title: 'AI analysis', desc: 'Claude AI visually analyzes for deepfakes and manipulation' },
-                { step: '04', title: 'Blockchain registration', desc: 'Results permanently recorded on BNB Chain' },
-                { step: '05', title: 'Get your certificate', desc: 'Download proof certificate with unique ID' },
-              ].map(item => (
-                <div key={item.step} className="flex gap-4 p-4 bg-white border border-gray-200 rounded-xl">
-                  <span className="text-xs font-mono text-gray-400 mt-0.5 shrink-0">{item.step}</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-full text-yellow-400 text-xs font-bold mb-6 uppercase tracking-wider">
+                🔥 Presale Live — $0.01/UHR
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black mb-4">Invest in the future of document authenticity</h2>
+              <p className="text-gray-400 mb-6 leading-relaxed">
+                UHR is the native token of UHRATE — the decentralized authenticity network. Early investors get UHR at presale price before public listing.
+              </p>
+              <div className="space-y-3 mb-8">
+                {[
+                  { label: 'Presale Price', value: '$0.01 per UHR' },
+                  { label: 'Swap Price', value: '$0.02 per UHR' },
+                  { label: 'Total Supply', value: '1,000,000,000 UHR' },
+                  { label: 'Network', value: 'BNB Smart Chain (BEP20)' },
+                  { label: 'Contract', value: '0xFD87...E447' },
+                ].map(item => (
+                  <div key={item.label} className="flex justify-between py-2 border-b border-white/10">
+                    <span className="text-gray-400 text-sm">{item.label}</span>
+                    <span className="text-white font-semibold text-sm">{item.value}</span>
                   </div>
+                ))}
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <button onClick={() => window.location.href = '/presale'} className="px-6 py-3 bg-yellow-400 text-black font-black rounded-xl text-sm hover:bg-yellow-300 transition-colors">
+                  Join Presale →
+                </button>
+                <button onClick={() => window.location.href = '/tokenomics'} className="px-6 py-3 border border-white/20 text-white font-semibold rounded-xl text-sm hover:bg-white/10 transition-colors">
+                  View Tokenomics
+                </button>
+                <button onClick={() => window.location.href = '/whitepaper'} className="px-6 py-3 border border-white/20 text-white font-semibold rounded-xl text-sm hover:bg-white/10 transition-colors">
+                  Whitepaper
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: '💸', title: '50% Cheaper', desc: 'Pay $0.10 in UHR for deployments vs $0.20 in ETH/BNB' },
+                { icon: '🔥', title: 'Deflationary', desc: '10% of UHR fees burned permanently every transaction' },
+                { icon: '📈', title: 'Buyback', desc: '20% of platform revenue used quarterly to buy and burn UHR' },
+                { icon: '🗳️', title: 'Governance', desc: 'Vote on platform decisions as a UHR token holder' },
+              ].map(item => (
+                <div key={item.title} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <div className="text-2xl mb-2">{item.icon}</div>
+                  <p className="font-bold text-white text-sm mb-1">{item.title}</p>
+                  <p className="text-xs text-gray-400">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -336,119 +347,210 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to fight misinformation?
-          </h2>
-          <p className="text-gray-500 mb-8">
-            Join thousands of journalists, businesses, and creators using UHRATE to verify digital content.
-          </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+      {/* ── REGISTRIES ── */}
+      <section className="py-16 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Document Registries</h2>
+            <p className="text-gray-500">Register any document type permanently on the blockchain</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: '📄', title: 'Document Registry', desc: 'Register any document with permanent on-chain identity', href: '/registry' },
+              { icon: '🎓', title: 'Education Registry', desc: 'Degrees, diplomas and academic credentials', href: '/education' },
+              { icon: '⚖️', title: 'Legal Registry', desc: 'Contracts, NDAs and legal documents', href: '/legal' },
+              { icon: '📰', title: 'Media Registry', desc: 'Photos, videos and media content', href: '/media' },
+            ].map(item => (
+              <button key={item.href} onClick={() => window.location.href = item.href} className="p-6 border border-gray-200 rounded-2xl text-left hover:border-black hover:shadow-md transition-all bg-transparent cursor-pointer">
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <p className="font-bold text-gray-900 mb-1">{item.title}</p>
+                <p className="text-xs text-gray-500 mb-3">{item.desc}</p>
+                <span className="text-xs font-semibold text-black">Register now →</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── VERIFY SECTION ── */}
+      <section id="verify-section" className="py-16 px-4 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Verify a file now</h2>
+            <p className="text-gray-500">Free for everyone. No account required.</p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 justify-center">
+            {[
+              { key: 'verify', label: '🔍 Verify File' },
+              { key: 'lookup', label: '🏆 Lookup Certificate' },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key as any); setResult(null); }}
+                className={"px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors " + (
+                  activeTab === tab.key ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            {activeTab === 'verify' ? (
+              <>
+                {!result ? (
+                  <FileUploader onResult={setResult} onLoading={setLoading} />
+                ) : (
+                  <div>
+                    <button onClick={() => setResult(null)} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer">
+                      ← Verify another file
+                    </button>
+                    <ScoreCard result={result} />
+                  </div>
+                )}
+              </>
+            ) : (
+              <CertificateCard />
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── STEP BY STEP ── */}
+      <section className="py-16 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Simple 5-step process</h2>
+            <p className="text-gray-500">From upload to blockchain-verified certificate in under 30 seconds</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            {[
+              { num: '01', title: 'Upload file', desc: 'Any file type up to 50MB' },
+              { num: '02', title: 'Digital DNA', desc: 'Unique fingerprint generated' },
+              { num: '03', title: 'AI analysis', desc: 'Deepfake & manipulation check' },
+              { num: '04', title: 'Deploy on-chain', desc: 'Pay gas + $0.20 platform fee' },
+              { num: '05', title: 'Get certificate', desc: 'Download proof with unique ID' },
+            ].map((step, i) => (
+              <div key={step.num} className="flex sm:flex-col items-start sm:items-center sm:text-center gap-4">
+                <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">
+                  {step.num}
+                </div>
+                <div>
+                  <p className="font-bold text-gray-900 text-sm">{step.title}</p>
+                  <p className="text-xs text-gray-500">{step.desc}</p>
+                </div>
+                {i < 4 && <div className="hidden sm:block absolute" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-16 px-4 bg-black text-white">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl font-black mb-4">Ready to fight misinformation?</h2>
+          <p className="text-gray-400 mb-8">Join thousands of journalists, businesses, and creators using UHRATE to verify digital content.</p>
+          <div className="flex gap-3 justify-center flex-wrap">
             <button
-              onClick={() => window.location.href = '/register'}
-              className="px-8 py-4 bg-black text-white rounded-xl text-base font-medium hover:bg-gray-800 transition-colors"
+              onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-8 py-4 bg-white text-black font-bold rounded-2xl text-sm hover:bg-gray-100 transition-colors"
             >
-              Get started free
+              Get started free →
             </button>
-            <button
-              onClick={() => window.location.href = '/pricing'}
-              className="px-8 py-4 border border-gray-300 text-gray-700 rounded-xl text-base font-medium hover:bg-gray-50 transition-colors"
-            >
-              View pricing
+            <button onClick={() => window.location.href = '/presale'} className="px-8 py-4 bg-yellow-400 text-black font-bold rounded-2xl text-sm hover:bg-yellow-300 transition-colors">
+              🔥 Join Presale
+            </button>
+            <button onClick={() => window.location.href = '/register'} className="px-8 py-4 border border-white/20 text-white font-semibold rounded-2xl text-sm hover:bg-white/10 transition-colors">
+              Create account
             </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-12">
-        <div className="max-w-6xl mx-auto px-6">
+      {/* ── FOOTER ── */}
+      <footer className="bg-white border-t border-gray-100 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-black rounded flex items-center justify-center">
+                <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
                   <span className="text-white text-xs font-bold">UH</span>
                 </div>
                 <span className="font-bold text-gray-900">UHRATE</span>
               </div>
-              <p className="text-xs text-gray-500">Decentralized Authenticity Network</p>
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-sm mb-3">Product</p>
-              {['Verify', 'Enterprise', 'API', 'Pricing'].map(item => (
-                <button
-                  key={item}
-                  onClick={() => window.location.href = '/' + item.toLowerCase()}
-                  className="block text-sm text-gray-500 hover:text-gray-900 mb-2 bg-transparent border-0 cursor-pointer p-0"
-                >
-                  {item}
+              <p className="text-xs text-gray-500 leading-relaxed">Decentralized Authenticity Network — AI + Blockchain document verification.</p>
+              <div className="flex gap-3 mt-4">
+                <button onClick={() => window.open('https://x.com/uhrate_official', '_blank')} className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors bg-transparent border-0 cursor-pointer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </button>
-              ))}
-            </div>
-            <div>
-              <p className="font-medium text-gray-900 text-sm mb-3">Account</p>
-              {[
-                { label: 'Login', href: '/login' },
-                { label: 'Sign up', href: '/register' },
-                { label: 'Dashboard', href: '/dashboard' },
-              ].map(item => (
-                <button
-                  key={item.label}
-                  onClick={() => window.location.href = item.href}
-                  className="block text-sm text-gray-500 hover:text-gray-900 mb-2 bg-transparent border-0 cursor-pointer p-0"
-                >
-                  {item.label}
+                <button onClick={() => window.open('https://t.me/uhrateofficial', '_blank')} className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors bg-transparent border-0 cursor-pointer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.088 14.86l-2.95-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.718.726z"/></svg>
                 </button>
-              ))}
+              </div>
             </div>
             <div>
-              <p className="font-medium text-gray-900 text-sm mb-3">Contact</p>
-              <p className="text-sm text-gray-500 mb-2">hello@uhrate.xyz</p>
-              <p className="text-sm text-gray-500">uhrate.xyz</p>
+              <p className="font-semibold text-gray-900 text-sm mb-3">Platform</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'Verify File', href: '/' },
+                  { label: 'Document Registry', href: '/registry' },
+                  { label: 'Education Registry', href: '/education' },
+                  { label: 'Legal Registry', href: '/legal' },
+                  { label: 'Media Registry', href: '/media' },
+                  { label: 'Identity Badge', href: '/identity' },
+                  { label: 'Bulk Verification', href: '/enterprise' },
+                  { label: 'Developer API', href: '/api-marketplace' },
+                ].map(item => (
+                  <button key={item.href} onClick={() => window.location.href = item.href} className="block text-xs text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer text-left">
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900 text-sm mb-3">Token</p>
+              <div className="space-y-2">
+                {[
+                  { label: '🔥 Presale — $0.01/UHR', href: '/presale' },
+                  { label: '🔄 Buy UHR — $0.02/UHR', href: '/swap' },
+                  { label: 'Tokenomics', href: '/tokenomics' },
+                  { label: 'Whitepaper', href: '/whitepaper' },
+                ].map(item => (
+                  <button key={item.href} onClick={() => window.location.href = item.href} className="block text-xs text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer text-left">
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900 text-sm mb-3">Company</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'Dashboard', href: '/dashboard' },
+                  { label: 'Contact', href: '/contact' },
+                  { label: 'Terms of Service', href: '/terms' },
+                  { label: 'Privacy Policy', href: '/privacy' },
+                ].map(item => (
+                  <button key={item.href} onClick={() => window.location.href = item.href} className="block text-xs text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer text-left">
+                    {item.label}
+                  </button>
+                ))}
+                <p className="text-xs text-gray-400 pt-2">hello@uhrate.xyz</p>
+                <p className="text-xs text-gray-400">uhrate.online</p>
+              </div>
             </div>
           </div>
-          <div className="border-t border-gray-100 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => window.open('https://x.com/uhrate_official', '_blank')}
-                className="text-gray-400 hover:text-gray-900 transition-colors bg-transparent border-0 cursor-pointer p-0"
-                aria-label="X (Twitter)"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.261 5.635 5.903-5.635zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => window.open('https://t.me/uhrateofficial', '_blank')}
-                className="text-gray-400 hover:text-gray-900 transition-colors bg-transparent border-0 cursor-pointer p-0"
-                aria-label="Telegram"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                </svg>
-              </button>
-              <button
-                onClick={() => window.open('https://www.linkedin.com/company/uhrate', '_blank')}
-                className="text-gray-400 hover:text-gray-900 transition-colors bg-transparent border-0 cursor-pointer p-0"
-                aria-label="LinkedIn"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </button>
-            </div>
-            <div className="flex items-center gap-4">
-              <button onClick={() => window.location.href = '/whitepaper'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Whitepaper</button>
-              <button onClick={() => window.location.href = '/tokenomics'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Tokenomics</button>
-              <button onClick={() => window.location.href = '/terms'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Terms</button>
-              <button onClick={() => window.location.href = '/privacy'} className="text-xs text-gray-400 hover:text-gray-900 bg-transparent border-0 cursor-pointer p-0">Privacy</button>
-            </div>
+            <p className="text-xs text-gray-400">Decentralized Authenticity Network · BNB Smart Chain</p>
           </div>
         </div>
       </footer>
+
     </main>
   );
 }
