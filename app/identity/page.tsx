@@ -349,6 +349,7 @@ export default function Identity() {
           </div>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

@@ -533,6 +533,7 @@ export default function Registry() {
       </>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

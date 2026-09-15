@@ -357,18 +357,7 @@ export default function Tokenomics() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 py-8 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 bg-transparent border-0 cursor-pointer p-0">
-            <div className="w-6 h-6 bg-black rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold">UH</span>
-            </div>
-            <span className="font-bold text-gray-900">UHRATE</span>
-          </button>
-          <p className="text-xs text-gray-400 text-center">This is not financial advice. Cryptocurrency investments carry risk. Always do your own research.</p>
-          <p className="text-xs text-gray-400">© 2026 UHRATE</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

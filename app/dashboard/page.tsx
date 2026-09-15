@@ -546,6 +546,7 @@ export default function Dashboard() {
           </>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

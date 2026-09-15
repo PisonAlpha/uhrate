@@ -497,6 +497,7 @@ export default function Legal() {
         </>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

@@ -335,6 +335,7 @@ export default function Presale() {
           ⚠️ Only send USDT on BNB Smart Chain (BEP20) to participate. Do not send from centralized exchanges. Always verify the contract address before transacting.
         </div>
       </div>
+          <Footer />
     </main>
   );
 }

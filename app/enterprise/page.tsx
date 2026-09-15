@@ -294,6 +294,7 @@ export default function BulkVerify() {
           </div>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

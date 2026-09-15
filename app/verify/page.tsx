@@ -506,6 +506,7 @@ export default function PublicVerify() {
           </div>
         )}
       </div>
+          <Footer />
     </main>
   );
 }

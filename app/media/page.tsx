@@ -500,6 +500,7 @@ export default function Media() {
         </>
         )}
       </div>
+          <Footer />
     </main>
   );
 }
