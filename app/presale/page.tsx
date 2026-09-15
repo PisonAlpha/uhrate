@@ -123,22 +123,20 @@ export default function Presale() {
       const amountInWei = BigInt(Math.floor(amount * 1e6)); // USDT has 6 decimals
       const amountHex = '0x' + amountInWei.toString(16).padStart(64, '0');
 
-      // approve(address spender, uint256 amount)
-      const approveFn = '0x095ea7b3';
-      const spender = PRESALE_CONTRACT.slice(2).padStart(64, '0');
-      const data = approveFn + spender + amountHex;
+            const { ethers } = await import('ethers');
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: walletAddress,
-          to: USDT_BEP20,
-          data,
-          gas: '0x186A0',
-        }],
-      });
+      const usdtContract = new ethers.Contract(
+        USDT_BEP20,
+        ['function approve(address spender, uint256 amount) returns (bool)'],
+        signer
+      );
 
-      // Wait for approval confirmation
+      const usdtAmountWei = ethers.parseUnits(amount.toString(), 6);
+      const approveTx = await usdtContract.approve(PRESALE_CONTRACT, usdtAmountWei);
+      await approveTx.wait();
+
       setApproving(false);
       setApproved(true);
       setStep('buy');
@@ -166,21 +164,24 @@ export default function Presale() {
       const amountInWei = BigInt(Math.floor(amount * 1e6));
       const amountHex = '0x' + amountInWei.toString(16).padStart(64, '0');
 
-      // buyTokens(uint256 usdtAmount)
-      const buyFn = '0xd96a094a';
-      const data = buyFn + amountHex.slice(2).padStart(64, '0');
+            const { ethers } = await import('ethers');
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      const tx = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: walletAddress,
-          to: PRESALE_CONTRACT,
-          data,
-          gas: '0x493E0',
-        }],
+      const presaleContract = new ethers.Contract(
+        PRESALE_CONTRACT,
+        ['function buyTokens(uint256 usdtAmount) external'],
+        signer
+      );
+
+      const usdtAmountWei = ethers.parseUnits(amount.toString(), 6);
+      const tx = await presaleContract.buyTokens(usdtAmountWei, {
+        gasLimit: 300000,
       });
+      await tx.wait();
+      const txReceipt = tx.hash;
 
-      setTxHash(tx);
+            setTxHash(txReceipt);
 
       // Record in Supabase
       await fetch('/api/presale/record', {
@@ -190,7 +191,7 @@ export default function Presale() {
           walletAddress,
           usdtAmount: amount,
           uhrAmount: Math.floor(amount / PRESALE_PRICE),
-          txHash: tx,
+          txHash: txReceipt,
         }),
       });
 
