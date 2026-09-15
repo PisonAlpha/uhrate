@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'noreply@uhrate.xyz',
+      from: process.env.RESEND_FROM_EMAIL || 'noreply@uhrate.online',
       to: process.env.CONTACT_EMAIL || 'uhrateofficial@gmail.com',
       replyTo: email,
       subject: 'UHRATE Enterprise Inquiry from ' + name,

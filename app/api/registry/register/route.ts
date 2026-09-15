@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       const { Resend } = await import('resend');
       const resend = new Resend(process.env.RESEND_API_KEY);
       resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@uhrate.xyz',
+        from: process.env.RESEND_FROM_EMAIL || 'noreply@uhrate.online',
         to: ownerEmail,
         subject: 'Your document has been registered on UHRATE',
         html: `
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
             <tr><td><strong>Blockchain:</strong></td><td>${chain?.name}</td></tr>
             <tr><td><strong>SHA-256 Hash:</strong></td><td>${dna.sha256}</td></tr>
           </table>
-          <p>Keep your Registry ID safe — anyone can use it to verify your document at <a href="https://uhrate.xyz/registry/lookup">uhrate.xyz/registry/lookup</a></p>
+          <p>Keep your Registry ID safe — anyone can use it to verify your document at <a href="https://uhrate.online/registry/lookup">uhrate.online/registry/lookup</a></p>
           <p>— UHRATE Team</p>
         `,
       }).catch(console.error);

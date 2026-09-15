@@ -62,7 +62,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="font-semibold text-gray-900 text-base mb-2">9. Your Rights</h2>
-            <p>You may request access to, correction of, or deletion of your account data (excluding immutable on-chain or IPFS records, which cannot be altered) by contacting us through our <span className="text-blue-600">contact form (uhrate.xyz/contact)</span>.</p>
+            <p>You may request access to, correction of, or deletion of your account data (excluding immutable on-chain or IPFS records, which cannot be altered) by contacting us through our <span className="text-blue-600">contact form (uhrate.online/contact)</span>.</p>
           </section>
 
           <section>
@@ -82,7 +82,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="font-semibold text-gray-900 text-base mb-2">13. Contact</h2>
-            <p>For privacy-related questions, please use our <span className="text-blue-600">contact form (uhrate.xyz/contact)</span>.</p>
+            <p>For privacy-related questions, please use our <span className="text-blue-600">contact form (uhrate.online/contact)</span>.</p>
           </section>
         </div>
       </div>

@@ -21,7 +21,7 @@ export default function Terms() {
         <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 space-y-6 text-sm text-gray-700 leading-relaxed">
           <section>
             <h2 className="font-semibold text-gray-900 text-base mb-2">1. Acceptance of Terms</h2>
-            <p>By accessing or using UHRATE ("the Service"), available at uhrate.xyz, you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+            <p>By accessing or using UHRATE ("the Service"), available at uhrate.online, you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
           </section>
 
           <section>
@@ -77,7 +77,7 @@ export default function Terms() {
 
           <section>
             <h2 className="font-semibold text-gray-900 text-base mb-2">12. Contact</h2>
-            <p>Questions about these Terms can be sent via our <span className="text-blue-600">contact form (uhrate.xyz/contact)</span>.</p>
+            <p>Questions about these Terms can be sent via our <span className="text-blue-600">contact form (uhrate.online/contact)</span>.</p>
           </section>
         </div>
       </div>

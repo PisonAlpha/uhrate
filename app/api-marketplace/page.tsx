@@ -171,7 +171,7 @@ export default function APIMarketplace() {
             <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Base URL</h3>
               <div className="bg-gray-900 rounded-xl p-4 font-mono text-green-400 text-sm overflow-x-auto">
-                https://uhrate.xyz
+                https://uhrate.online
               </div>
             </div>
 
@@ -226,7 +226,7 @@ export default function APIMarketplace() {
                 <pre>{`const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 
-const response = await fetch('https://uhrate.xyz/api/verify', {
+const response = await fetch('https://uhrate.online/api/verify', {
   method: 'POST',
   headers: { 'x-api-key': 'uhr_your_key' },
   body: formData,

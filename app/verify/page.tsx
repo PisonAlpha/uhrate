@@ -181,7 +181,7 @@ export default function PublicVerify() {
   };
 
   const shareVerification = (v: any) => {
-    const text = `I verified "${v.file_name}" on UHRATE.\n\nRating: ${v.rating}\nTrust Score: ${v.trust_score}/100\nCertificate: ${v.certificate_id}\n\nVerify at: https://uhrate.xyz/verify`;
+    const text = `I verified "${v.file_name}" on UHRATE.\n\nRating: ${v.rating}\nTrust Score: ${v.trust_score}/100\nCertificate: ${v.certificate_id}\n\nVerify at: https://uhrate.online/verify`;
     if (navigator.share) {
       navigator.share({ title: 'UHRATE Verification', text });
     } else {

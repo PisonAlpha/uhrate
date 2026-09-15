@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   authors: [{ name: "UHRATE" }],
   creator: "UHRATE",
   publisher: "UHRATE",
-  metadataBase: new URL("https://uhrate.xyz"),
+  metadataBase: new URL("https://uhrate.online"),
   openGraph: {
     title: "UHRATE — Is this file real or fake?",
     description: "AI-powered authenticity verification with blockchain proof. Detect deepfakes, AI-generated content, and document forgery.",
-    url: "https://uhrate.xyz",
+    url: "https://uhrate.online",
     siteName: "UHRATE",
     type: "website",
     images: [

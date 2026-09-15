@@ -213,10 +213,10 @@ export default function Home() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            {[
+              {[
               { value: totalVerifications > 0 ? totalVerifications.toLocaleString() + '+' : '...', label: 'Files Identified' },
-              { value: '$0.20', label: 'Per Identity' },
               { value: '4', label: 'Blockchains' },
+              { value: '6', label: 'AI Models' },
               { value: '∞', label: 'Years of Proof' },
             ].map(stat => (
               <div key={stat.label} className="bg-gray-50 rounded-2xl p-4 text-center">
