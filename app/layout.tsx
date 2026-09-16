@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,16 +18,16 @@ export const metadata: Metadata = {
   verification: {
     google: 'a0klwKIDkie4dA9WGC_mGnxMIfnBoH0A8LS8jxQsevA',
   },
-  title: "UHRATE — Decentralized Authenticity Network",
-  description: "Verify whether any digital file is original, AI-generated, deepfaked, or manipulated. Powered by AI and blockchain technology.",
-  keywords: "deepfake detection, AI content detection, document verification, blockchain authenticity, digital forensics, NFT certificates",
+  title: "UHRATE — Permanent Blockchain Identity for Every Document",
+  description: "Give any document, image, video or file a permanent blockchain identity. AI-powered authenticity verification with immutable on-chain proof.",
+  keywords: "blockchain document identity, deepfake detection, AI content detection, document verification, blockchain authenticity, digital forensics, NFT certificates, document registry",
   authors: [{ name: "UHRATE" }],
   creator: "UHRATE",
   publisher: "UHRATE",
   metadataBase: new URL("https://uhrate.online"),
   openGraph: {
-    title: "UHRATE — Is this file real or fake?",
-    description: "AI-powered authenticity verification with blockchain proof. Detect deepfakes, AI-generated content, and document forgery.",
+    title: "UHRATE — Permanent Blockchain Identity for Every Document",
+    description: "Give any document a permanent, immutable blockchain identity. AI-powered verification with on-chain proof — verifiable by anyone, forever.",
     url: "https://uhrate.online",
     siteName: "UHRATE",
     type: "website",
@@ -40,8 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "UHRATE — Is this file real or fake?",
-    description: "AI-powered authenticity verification with blockchain proof.",
+    title: "UHRATE — Permanent Blockchain Identity for Every Document",
+    description: "Give any document a permanent, immutable blockchain identity. AI-powered verification with on-chain proof.",
     images: ["/og-image.png"],
   },
   robots: {
@@ -68,7 +70,47 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-WK8RSXJFVD"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-WK8RSXJFVD');
+          `}
+        </Script>
+
+        {/* Structured Data — Organization */}
+        <Script id="structured-data" type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "UHRATE",
+            "url": "https://uhrate.online",
+            "logo": "https://uhrate.online/og-image.png",
+            "description": "Decentralized authenticity network — permanent blockchain identity for every document.",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": "hello@uhrate.online",
+              "contactType": "customer support"
+            },
+            "sameAs": [
+              "https://x.com/uhrate_official",
+              "https://t.me/uhrateofficial",
+              "https://www.instagram.com/uhrate"
+            ]
+          })}
+        </Script>
+      </head>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
