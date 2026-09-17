@@ -42,7 +42,7 @@ export default function InvestorPage() {
   };
 
   const metrics = [
-    { label: 'Documents Verified', value: stats.totalVerifications.toLocaleString() + '+', icon: '📄', desc: 'Total files verified on platform' },
+    { label: 'Files Sealed', value: stats.totalVerifications.toLocaleString() + '+', icon: '🔏', desc: 'Total files sealed on platform' },
     { label: 'UHR Tokens Sold', value: (stats.tokensSold / 1000000).toFixed(2) + 'M', icon: '🪙', desc: 'Presale tokens distributed' },
     { label: 'USDT Raised', value: '$' + stats.totalRaised.toLocaleString(), icon: '💰', desc: 'Total presale funds raised' },
     { label: 'Presale Progress', value: stats.presaleProgress + '%', icon: '📈', desc: 'Of 80M token presale allocation' },
@@ -174,7 +174,8 @@ export default function InvestorPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: '🔐', title: 'Digital Identity', desc: 'Give any file a permanent blockchain identity — $0.20 per document' },
-              { icon: '🔍', title: 'Authenticity Check', desc: 'Free AI-powered deepfake and manipulation detection' },
+              { icon: '🧬', title: 'Deep Scan', desc: 'Free AI-powered deepfake and manipulation detection across 6 models' },
+              { icon: '🔍', title: 'File Lookup', desc: 'Instantly verify any sealed file by upload, certificate ID, or SHA-256 hash' },
               { icon: '📄', title: 'Document Registry', desc: 'Register contracts, credentials, media permanently on-chain' },
               { icon: '⛓️', title: '4 Blockchains', desc: 'Ethereum, BNB Chain, Base, and Polygon supported' },
               { icon: '🤖', title: '6 AI Models', desc: 'Multiple AI models for comprehensive authenticity analysis' },

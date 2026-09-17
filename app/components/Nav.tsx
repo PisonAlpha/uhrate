@@ -46,9 +46,12 @@ export default function Nav({ active }: NavProps) {
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          <button onClick={() => window.location.href = '/'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'verify' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
-            Verify
-          </button>
+            <button onClick={() => window.location.href = '/scan'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'scan' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
+              🧬 Deep Scan
+            </button>
+            <button onClick={() => window.location.href = '/lookup'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'lookup' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
+              🔍 Lookup
+            </button>
 
           {/* Registry Dropdown */}
           <div className="relative">
@@ -134,12 +137,13 @@ export default function Nav({ active }: NavProps) {
         <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-1 max-h-screen overflow-y-auto">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Platform</p>
           {[
-            { label: '🔍 Verify File', href: '/' },
+            { label: '🔏 Seal Your File', href: '/seal' },
+            { label: '🧬 Deep Scan', href: '/scan' },
+            { label: '🔍 File Lookup', href: '/lookup' },
             { label: '📄 Document Registry', href: '/registry' },
             { label: '🎓 Education Registry', href: '/education' },
             { label: '⚖️ Legal Registry', href: '/legal' },
             { label: '📰 Media Registry', href: '/media' },
-            { label: '🪪 Identity Badge', href: '/identity' },
             { label: '📁 Bulk Verification', href: '/enterprise' },
             { label: '🔌 Developer API', href: '/api-marketplace' },
           ].map(item => (

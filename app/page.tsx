@@ -57,12 +57,12 @@ export default function Home() {
               {registryOpen && (
                 <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2 w-56 z-50">
                   <p className="text-xs text-gray-400 px-3 py-1 font-semibold uppercase tracking-wider">Identity Registry</p>
-                  {[
-                    { icon: '📄', label: 'Document Identity', href: '/registry' },
-                    { icon: '🎓', label: 'Education Credential', href: '/education' },
-                    { icon: '⚖️', label: 'Legal Document', href: '/legal' },
-                    { icon: '📰', label: 'Media & Content', href: '/media' },
-                    { icon: '🪪', label: 'Identity Badge', href: '/identity' },
+                                    {[
+                    { icon: '🔏', label: 'Seal Your File', href: '/seal' },
+                    { icon: '📄', label: 'Document Registry', href: '/registry' },
+                    { icon: '🎓', label: 'Education Registry', href: '/education' },
+                    { icon: '⚖️', label: 'Legal Registry', href: '/legal' },
+                    { icon: '📰', label: 'Media Registry', href: '/media' },
                   ].map(item => (
                     <button key={item.href} onClick={() => { window.location.href = item.href; setRegistryOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer text-left">
                       <span>{item.icon}</span>{item.label}
@@ -198,16 +198,22 @@ export default function Home() {
           </p>
           <div className="flex gap-3 justify-center flex-wrap mb-16">
             <button
-              onClick={() => document.getElementById('identity-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => window.location.href = '/seal'}
               className="px-8 py-4 bg-black text-white font-bold rounded-2xl text-base hover:bg-gray-800 transition-colors shadow-lg"
             >
-              Give a File Permanent Identity →
+              🔏 Seal Your File →
             </button>
             <button
-              onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => window.location.href = '/scan'}
               className="px-8 py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl text-base hover:border-gray-400 transition-colors"
             >
-              🔍 Check if a File is Authentic
+              🧬 Deep Scan — Free
+            </button>
+            <button
+              onClick={() => window.location.href = '/lookup'}
+              className="px-8 py-4 border-2 border-gray-100 text-gray-600 font-semibold rounded-2xl text-base hover:border-gray-300 transition-colors"
+            >
+              🔍 File Lookup
             </button>
           </div>
 
@@ -399,48 +405,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── VERIFY SECTION ── */}
-      <section id="verify-section" className="py-16 px-4 bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-xs font-bold mb-4">🔍 Authenticity Check — Free</div>
-            <h2 className="text-3xl font-black text-gray-900 mb-3">Is this file authentic?</h2>
-            <p className="text-gray-500">Upload any file to check for deepfakes, AI generation, and manipulation. Free. No account needed.</p>
+            {/* ── THREE PRODUCTS ── */}
+      <section className="py-16 px-4 bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Three powerful tools. One platform.</h2>
+            <p className="text-gray-500">Everything you need to protect, analyse, and verify digital files</p>
           </div>
-
-          <div className="flex gap-2 mb-6 justify-center">
-            {[
-              { key: 'verify', label: '🔍 Check File' },
-              { key: 'lookup', label: '🏆 Lookup Certificate' },
-            ].map(tab => (
-              <button key={tab.key} onClick={() => { setActiveTab(tab.key as any); setResult(null); }} className={"px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors " + (activeTab === tab.key ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}>
-                {tab.label}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <button onClick={() => window.location.href = '/seal'} className="bg-black text-white rounded-3xl p-8 text-left cursor-pointer border-0 hover:bg-gray-900 transition-colors">
+              <div className="text-4xl mb-4">🔏</div>
+              <h3 className="text-xl font-black mb-2">Seal</h3>
+              <p className="text-gray-300 text-sm mb-4">Give any file a permanent, immutable identity on the blockchain. Proof of existence, ownership, and authenticity — forever.</p>
+              <p className="text-yellow-400 font-bold text-sm">$0.20 · or $0.10 in UHR →</p>
+            </button>
+            <button onClick={() => window.location.href = '/scan'} className="bg-white border-2 border-gray-200 rounded-3xl p-8 text-left cursor-pointer hover:border-gray-400 hover:shadow-md transition-all">
+              <div className="text-4xl mb-4">🧬</div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Deep Scan</h3>
+              <p className="text-gray-500 text-sm mb-4">AI-powered analysis for deepfakes, manipulation, AI generation. Get a detailed trust report with scores across 6 AI models.</p>
+              <p className="text-green-600 font-bold text-sm">Free — No account needed →</p>
+            </button>
+            <button onClick={() => window.location.href = '/lookup'} className="bg-white border-2 border-gray-200 rounded-3xl p-8 text-left cursor-pointer hover:border-gray-400 hover:shadow-md transition-all">
+              <div className="text-4xl mb-4">🔍</div>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Lookup</h3>
+              <p className="text-gray-500 text-sm mb-4">Check if any file has been sealed on UHRATE. Upload the file, enter a certificate ID, or paste a SHA-256 hash.</p>
+              <p className="text-blue-600 font-bold text-sm">Free — Instant results →</p>
+            </button>
           </div>
-
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            {activeTab === 'verify' ? (
-              <>
-                {!result ? (
-                  <FileUploader onResult={setResult} onLoading={setLoading} />
-                ) : (
-                  <div>
-                    <button onClick={() => setResult(null)} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer">
-                      ← Check another file
-                    </button>
-                    <ScoreCard result={result} />
-                  </div>
-                )}
-              </>
-            ) : (
-              <CertificateCard />
-            )}
-          </div>
-
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Want permanent blockchain proof? <button onClick={() => document.getElementById('identity-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-black font-semibold underline bg-transparent border-0 cursor-pointer">Give this file a permanent identity →</button>
-          </p>
         </div>
       </section>
 
