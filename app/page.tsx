@@ -591,6 +591,24 @@ export default function Home() {
         </div>
       </footer>
 
+      {/* Floating Partner Badge */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <a
+          href="https://iq.wiki/wiki/uhrate"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all no-underline group"
+        >
+          <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-black">IQ</span>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-gray-900">Listed on IQ.wiki</p>
+            <p className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors">View our profile →</p>
+          </div>
+        </a>
+      </div>
+
     </main>
   );
 }
