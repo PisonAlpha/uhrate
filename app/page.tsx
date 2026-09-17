@@ -56,9 +56,9 @@ export default function Home() {
               </button>
               {registryOpen && (
                 <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2 w-56 z-50">
-                  <p className="text-xs text-gray-400 px-3 py-1 font-semibold uppercase tracking-wider">Identity Registry</p>
+                  <p className="text-xs text-gray-400 px-3 py-1 font-semibold uppercase tracking-wider">Platform</p>
                                     {[
-                    { icon: '🔏', label: 'Seal Your File', href: '/seal' },
+                    { icon: '🔏', label: 'Seal', href: '/seal' },
                     { icon: '📄', label: 'Document Registry', href: '/registry' },
                     { icon: '🎓', label: 'Education Registry', href: '/education' },
                     { icon: '⚖️', label: 'Legal Registry', href: '/legal' },
@@ -122,13 +122,15 @@ export default function Home() {
 
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-1 max-h-screen overflow-y-auto">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Give Identity</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Platform</p>
             {[
-              { label: '📄 Document Identity', href: '/registry' },
-              { label: '🎓 Education Credential', href: '/education' },
-              { label: '⚖️ Legal Document', href: '/legal' },
-              { label: '📰 Media & Content', href: '/media' },
-              { label: '🪪 Identity Badge', href: '/identity' },
+              { label: '🔏 Seal', href: '/seal' },
+              { label: '✅ Verify', href: '/scan' },
+              { label: '🔍 Lookup', href: '/lookup' },
+              { label: '📄 Document Registry', href: '/registry' },
+              { label: '🎓 Education Registry', href: '/education' },
+              { label: '⚖️ Legal Registry', href: '/legal' },
+              { label: '📰 Media Registry', href: '/media' },
             ].map(item => (
               <button key={item.href} onClick={() => { window.location.href = item.href; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">{item.label}</button>
             ))}
@@ -201,13 +203,13 @@ export default function Home() {
               onClick={() => window.location.href = '/seal'}
               className="px-8 py-4 bg-black text-white font-bold rounded-2xl text-base hover:bg-gray-800 transition-colors shadow-lg"
             >
-              🔏 Seal Your File →
+              🔏 Seal →
             </button>
             <button
               onClick={() => window.location.href = '/scan'}
               className="px-8 py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl text-base hover:border-gray-400 transition-colors"
             >
-              🧬 Deep Scan — Free
+              ✅ Verify — Free
             </button>
             <button
               onClick={() => window.location.href = '/lookup'}
@@ -421,7 +423,7 @@ export default function Home() {
             </button>
             <button onClick={() => window.location.href = '/scan'} className="bg-white border-2 border-gray-200 rounded-3xl p-8 text-left cursor-pointer hover:border-gray-400 hover:shadow-md transition-all">
               <div className="text-4xl mb-4">🧬</div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">Deep Scan</h3>
+              <h3 className="text-xl font-black text-gray-900 mb-2">Verify</h3>
               <p className="text-gray-500 text-sm mb-4">AI-powered analysis for deepfakes, manipulation, AI generation. Get a detailed trust report with scores across 6 AI models.</p>
               <p className="text-green-600 font-bold text-sm">Free — No account needed →</p>
             </button>
@@ -536,14 +538,16 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <p className="font-semibold text-gray-900 text-sm mb-3">Identity</p>
+              <p className="font-semibold text-gray-900 text-sm mb-3">Platform</p>
               <div className="space-y-2">
                 {[
-                  { label: 'Document Identity', href: '/registry' },
-                  { label: 'Education Credential', href: '/education' },
-                  { label: 'Legal Document', href: '/legal' },
-                  { label: 'Media & Content', href: '/media' },
-                  { label: 'Identity Badge', href: '/identity' },
+                  { label: '🔏 Seal', href: '/seal' },
+                  { label: '✅ Verify', href: '/scan' },
+                  { label: '🔍 Lookup', href: '/lookup' },
+                  { label: 'Document Registry', href: '/registry' },
+                  { label: 'Education Registry', href: '/education' },
+                  { label: 'Legal Registry', href: '/legal' },
+                  { label: 'Media Registry', href: '/media' },
                   { label: 'Bulk Verification', href: '/enterprise' },
                   { label: 'Developer API', href: '/api-marketplace' },
                 ].map(item => (
@@ -569,7 +573,7 @@ export default function Home() {
               <div className="space-y-2">
                 {[
                   { label: 'Dashboard', href: '/dashboard' },
-                  { label: 'Verify File', href: '/verify' },
+
                   { label: 'Contact', href: '/contact' },
                   { label: 'Terms of Service', href: '/terms' },
                   { label: 'Privacy Policy', href: '/privacy' },

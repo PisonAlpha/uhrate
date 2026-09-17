@@ -46,8 +46,8 @@ export default function Nav({ active }: NavProps) {
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-1">
-            <button onClick={() => window.location.href = '/scan'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'scan' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
-              🧬 Deep Scan
+                        <button onClick={() => window.location.href = '/scan'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'scan' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
+              ✅ Verify
             </button>
             <button onClick={() => window.location.href = '/lookup'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'lookup' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
               🔍 Lookup
@@ -137,8 +137,8 @@ export default function Nav({ active }: NavProps) {
         <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-1 max-h-screen overflow-y-auto">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1">Platform</p>
           {[
-            { label: '🔏 Seal Your File', href: '/seal' },
-            { label: '🧬 Deep Scan', href: '/scan' },
+            { label: '🔏 Seal', href: '/seal' },
+            { label: '✅ Verify', href: '/scan' },
             { label: '🔍 File Lookup', href: '/lookup' },
             { label: '📄 Document Registry', href: '/registry' },
             { label: '🎓 Education Registry', href: '/education' },
@@ -177,6 +177,23 @@ export default function Nav({ active }: NavProps) {
           )}
         </div>
       )}
+            {/* Floating Partner Badge */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <a
+          href="https://iq.wiki/wiki/uhrate"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all no-underline group"
+        >
+          <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-black">IQ</span>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-gray-900">Listed on IQ.wiki</p>
+            <p className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors">View our profile →</p>
+          </div>
+        </a>
+      </div>
     </header>
   );
 }

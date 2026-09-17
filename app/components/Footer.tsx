@@ -35,14 +35,15 @@ export default function Footer() {
             <p className="font-semibold text-gray-900 text-sm mb-3">Platform</p>
             <div className="space-y-2">
               {[
-                { label: 'Verify File', href: '/' },
-                { label: 'Document Registry', href: '/registry' },
-                { label: 'Education Registry', href: '/education' },
-                { label: 'Legal Registry', href: '/legal' },
-                { label: 'Media Registry', href: '/media' },
-                { label: 'Identity Badge', href: '/identity' },
-                { label: 'Bulk Verification', href: '/enterprise' },
-                { label: 'Developer API', href: '/api-marketplace' },
+              { label: '🔏 Seal', href: '/seal' },
+              { label: '✅ Verify', href: '/scan' },
+              { label: '🔍 Lookup', href: '/lookup' },
+              { label: 'Document Registry', href: '/registry' },
+              { label: 'Education Registry', href: '/education' },
+              { label: 'Legal Registry', href: '/legal' },
+              { label: 'Media Registry', href: '/media' },
+              { label: 'Bulk Verification', href: '/enterprise' },
+              { label: 'Developer API', href: '/api-marketplace' },
               ].map(item => (
                 <button key={item.href} onClick={() => window.location.href = item.href} className="block text-xs text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer text-left">
                   {item.label}
@@ -83,6 +84,25 @@ export default function Footer() {
             </div>
           </div>
         </div>
+                {/* Partners */}
+        <div className="border-t border-gray-100 pt-6 mb-6">
+          <p className="text-xs text-gray-400 mb-3 text-center">Partners & Ecosystem</p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <a
+              href="https://iq.wiki/wiki/uhrate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all no-underline"
+            >
+              <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-xs font-black">IQ</span>
+              </div>
+              <span className="text-xs font-semibold text-gray-700">IQ.wiki</span>
+              <span className="text-xs text-gray-400">— Listed</span>
+            </a>
+          </div>
+        </div>
+
         <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
           <p className="text-xs text-gray-400">Decentralized Authenticity Network · BNB Smart Chain</p>

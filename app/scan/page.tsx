@@ -93,7 +93,7 @@ export default function DeepScan() {
       analysis: result.analysis?.summary,
       detected_issues: result.analysis?.detected_issues,
       scanned_at: result.data?.created_at,
-      platform: 'UHRATE Deep Scan',
+      platform: 'UHRATE Verify',
     };
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -113,7 +113,7 @@ export default function DeepScan() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-xs font-bold mb-4 uppercase tracking-wider">
             🧬 AI-Powered — Free — No Account Needed
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-3">Deep Scan</h1>
+          <h1 className="text-4xl font-black text-gray-900 mb-3">Verify</h1>
           <p className="text-gray-500 max-w-xl mx-auto">
             Upload any file — our AI models analyse it for deepfakes, manipulation, AI generation, and authenticity. Get a detailed trust report instantly.
           </p>
@@ -155,7 +155,7 @@ export default function DeepScan() {
                 <div className="flex flex-col items-center gap-3">
                   <div className="text-4xl">🧬</div>
                   <div>
-                    <p className="font-bold text-gray-700 text-lg">Drop any file to deep scan</p>
+                    <p className="font-bold text-gray-700 text-lg">Drop any file to verify</p>
                     <p className="text-sm text-gray-400 mt-1">Images, videos, audio, documents — max 50MB</p>
                   </div>
                   <div className="flex gap-2 flex-wrap justify-center">
@@ -222,14 +222,10 @@ export default function DeepScan() {
               </div>
             )}
 
-            {/* Digital DNA */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-3">🧬 Digital DNA Fingerprint</h3>
-              <div className="p-3 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 mb-1">SHA-256 Hash</p>
-                <p className="font-mono text-xs text-gray-700 break-all">{result.data.sha256_hash}</p>
-              </div>
-              <p className="text-xs text-gray-400 mt-2">Scan ID: <span className="font-mono text-blue-600">{result.data.certificate_id}</span></p>
+            {/* Scan ID — minimal, no DNA shown */}
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-between">
+              <span className="text-xs text-gray-500">Scan Reference</span>
+              <span className="font-mono text-xs text-gray-400">{result.data.certificate_id}</span>
             </div>
 
             {/* Actions */}
@@ -242,11 +238,11 @@ export default function DeepScan() {
                   Scan Another File
                 </button>
               </div>
-              <div className="p-4 bg-black text-white rounded-xl text-center">
-                <p className="text-sm font-semibold mb-2">Want permanent blockchain proof of this file?</p>
-                <p className="text-xs text-gray-400 mb-3">Seal it on the blockchain — $0.20 or $0.10 in UHR</p>
+                            <div className="p-4 bg-black text-white rounded-xl text-center">
+                <p className="text-sm font-semibold mb-1">Want a permanent Digital DNA + Blockchain Identity?</p>
+                <p className="text-xs text-gray-400 mb-3">Seal your file on the blockchain — get SHA-256 fingerprint, certificate, and on-chain proof forever.</p>
                 <button onClick={() => window.location.href = '/seal'} className="px-6 py-2 bg-white text-black font-bold rounded-xl text-sm hover:bg-gray-100 transition-colors">
-                  🔏 Seal This File →
+                  🔏 Seal This File for Permanent Identity →
                 </button>
               </div>
             </div>

@@ -191,7 +191,7 @@ export default function SealFile() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold mb-4 uppercase tracking-wider">
             🔏 Permanent Digital Identity
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-3">Seal Your File</h1>
+          <h1 className="text-4xl font-black text-gray-900 mb-3">Seal</h1>
           <p className="text-gray-500 max-w-xl mx-auto">
             Give any file a permanent, immutable digital identity on the blockchain. Timestamped proof of existence, ownership, and authenticity — verifiable by anyone, forever.
           </p>

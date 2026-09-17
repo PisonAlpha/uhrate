@@ -174,7 +174,7 @@ export default function InvestorPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: '🔐', title: 'Digital Identity', desc: 'Give any file a permanent blockchain identity — $0.20 per document' },
-              { icon: '🧬', title: 'Deep Scan', desc: 'Free AI-powered deepfake and manipulation detection across 6 models' },
+              { icon: '🧬', title: 'Verify', desc: 'Free AI-powered deepfake and manipulation detection across 6 models' },
               { icon: '🔍', title: 'File Lookup', desc: 'Instantly verify any sealed file by upload, certificate ID, or SHA-256 hash' },
               { icon: '📄', title: 'Document Registry', desc: 'Register contracts, credentials, media permanently on-chain' },
               { icon: '⛓️', title: '4 Blockchains', desc: 'Ethereum, BNB Chain, Base, and Polygon supported' },
