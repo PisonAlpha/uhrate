@@ -592,7 +592,7 @@ export default function Home() {
       </footer>
 
             {/* Floating Partners */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+      <div className="fixed bottom-8 right-4 z-50 flex flex-col gap-2 animate-bounce-slow">
         {[
           { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ' },
           { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: '🦎' },
