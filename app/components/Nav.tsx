@@ -177,22 +177,26 @@ export default function Nav({ active }: NavProps) {
           )}
         </div>
       )}
-            {/* Floating Partner Badge */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <a
-          href="https://iq.wiki/wiki/uhrate"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all no-underline group"
-        >
-          <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-black">IQ</span>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-gray-900">Listed on IQ.wiki</p>
-            <p className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors">View our profile →</p>
-          </div>
-        </a>
+             {/* Floating Partners */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+        {[
+          { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ' },
+          { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: '🦎' },
+          { name: 'CoinMarketCap', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC' },
+        ].map(partner => (
+            <a
+            key={partner.name}
+            href={partner.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all no-underline"
+          >
+            <div className={`w-6 h-6 ${partner.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+              <span className="text-white text-xs font-black">{partner.text}</span>
+            </div>
+            <p className="text-xs font-bold text-gray-900">{partner.name}</p>
+          </a>
+        ))}
       </div>
     </header>
   );
