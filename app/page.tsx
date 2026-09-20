@@ -584,6 +584,37 @@ export default function Home() {
               </div>
             </div>
           </div>
+                    {/* Partners Ticker */}
+          <div className="border-t border-gray-100 pt-6 mb-6">
+            <p className="text-xs text-gray-400 mb-4 text-center font-semibold uppercase tracking-wider">Partners & Ecosystem</p>
+            <div className="overflow-hidden relative">
+              <div className="flex animate-marquee gap-8 whitespace-nowrap">
+                {[
+                  { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ', desc: 'Listed' },
+                  { name: 'CryptoPulse', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP', desc: 'Web3 SocialFi' },
+                  { name: 'ATT Global', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT', desc: 'Web3 Advertising' },
+                  { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: 'G', desc: 'Listed' },
+                  { name: 'CoinMarketCap', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC', desc: 'Listed' },
+                  { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ', desc: 'Listed' },
+                  { name: 'CryptoPulse', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP', desc: 'Web3 SocialFi' },
+                  { name: 'ATT Global', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT', desc: 'Web3 Advertising' },
+                  { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: 'G', desc: 'Listed' },
+                  { name: 'CoinMarketCap', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC', desc: 'Listed' },
+                ].map((partner, i) => (
+                  <a key={i} href={partner.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all no-underline flex-shrink-0">
+                    <div className={`w-7 h-7 ${partner.bg} rounded-lg flex items-center justify-center`}>
+                      <span className="text-white text-xs font-black">{partner.text}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">{partner.name}</p>
+                      <p className="text-xs text-gray-400">{partner.desc}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
             <p className="text-xs text-gray-400">The decentralized notary for the digital world · BNB Smart Chain</p>
