@@ -34,28 +34,7 @@ input::placeholder, textarea::placeholder {
   color: #9ca3af !important;
   -webkit-text-fill-color: #9ca3af !important;
 }
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-marquee {
-  animation: marquee 20s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-.animate-bounce-slow {
-  animation: float 3s ease-in-out infinite;
-}
-
+/* Marquee - scrolls right to left */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -68,3 +47,19 @@ input::placeholder, textarea::placeholder {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Partner badges - slide in from right */
+@keyframes slide-in-right {
+  0% { transform: translateX(120px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.partner-badge {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.partner-badge:nth-child(1) { animation-delay: 0.1s; opacity: 0; }
+.partner-badge:nth-child(2) { animation-delay: 0.3s; opacity: 0; }
+.partner-badge:nth-child(3) { animation-delay: 0.5s; opacity: 0; }
+.partner-badge:nth-child(4) { animation-delay: 0.7s; opacity: 0; }
+.partner-badge:nth-child(5) { animation-delay: 0.9s; opacity: 0; }
