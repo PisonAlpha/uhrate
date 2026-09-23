@@ -120,6 +120,17 @@ export async function POST(request: NextRequest) {
       console.error('Deployment notification error:', notifError);
     }
 
+        // Update verifications table with blockchain tx
+    if (documentId) {
+      await supabaseAdmin
+        .from('verifications')
+        .update({
+          blockchain_tx: txHash,
+          blockchain_chain: chainId,
+        })
+        .eq('certificate_id', documentId);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Deployment fee verified. Your document is now being deployed to the blockchain.`,

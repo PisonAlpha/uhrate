@@ -64,6 +64,12 @@ export default function SealFile() {
 
   const sealOnBlockchain = async () => {
     if (!window.ethereum) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        const currentUrl = window.location.href;
+        window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace('https://', '')}`;
+        return;
+      }
       setError('Please install MetaMask to seal files on the blockchain.');
       return;
     }
