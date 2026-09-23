@@ -56,11 +56,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No file provided' }, { status: 400 });
       }
 
-      const bytes = await file.arrayBuffer();
+            const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const hash = generateSHA256(buffer);
 
-      const found = await searchByHash(hash);
+      // First try hash lookup
+      let found = await searchByHash(hash);
+
+      // If not found and it's an image, try reading UHRATE EXIF seal
+      if (!found && file.type.startsWith('image/')) {
+        try {
+          const { readSealFromImage } = await import('@/lib/sealer');
+          const certId = await readSealFromImage(buffer);
+          if (certId) {
+            found = await searchByCertId(certId);
+          }
+        } catch {}
+      }
 
       if (!found) {
         return NextResponse.json({

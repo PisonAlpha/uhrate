@@ -1,21 +1,21 @@
-'use client';
+content = '''\'use client\';
 
-import { useState, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { SUPPORTED_CHAINS, PLATFORM_FEE_USD, PLATFORM_FEE_UHR_USD, UHR_CONTRACT } from '@/lib/registry';
-import Nav from '../components/Nav';
-import Footer from '../components/Footer';
+import { useState, useEffect } from \'react\';
+import { useDropzone } from \'react-dropzone\';
+import { SUPPORTED_CHAINS, PLATFORM_FEE_USD, PLATFORM_FEE_UHR_USD, UHR_CONTRACT } from \'@/lib/registry\';
+import Nav from \'../components/Nav\';
+import Footer from \'../components/Footer\';
 
-const PAYMENT_WALLET = process.env.NEXT_PUBLIC_PAYMENT_WALLET || '0x2b2df01fcd78986c1ebdedfdbdaa909f0663ac6a';
+const PAYMENT_WALLET = process.env.NEXT_PUBLIC_PAYMENT_WALLET || \'0x2b2df01fcd78986c1ebdedfdbdaa909f0663ac6a\';
 
 export default function SealFile() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState('');
-  const [step, setStep] = useState<'upload' | 'scanned' | 'sealing' | 'sealed'>('upload');
-  const [selectedChain, setSelectedChain] = useState('bnb');
+  const [progress, setProgress] = useState(\'\');
+  const [step, setStep] = useState<\'upload\' | \'scanned\' | \'sealing\' | \'sealed\'>(\'upload\');
+  const [selectedChain, setSelectedChain] = useState(\'bnb\');
   const [payWithUHR, setPayWithUHR] = useState(false);
   const [deployResult, setDeployResult] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
@@ -23,7 +23,7 @@ export default function SealFile() {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('uhrate_user');
+    const stored = localStorage.getItem(\'uhrate_user\');
     if (stored) setUser(JSON.parse(stored));
   }, []);
 
@@ -35,29 +35,29 @@ export default function SealFile() {
     setFile(f);
     setLoading(true);
     setError(null);
-    setProgress('Extracting Digital DNA...');
+    setProgress(\'Extracting Digital DNA...\');
 
     try {
       await new Promise(r => setTimeout(r, 600));
-      setProgress('Running AI analysis...');
+      setProgress(\'Running AI analysis...\');
       await new Promise(r => setTimeout(r, 600));
-      setProgress('Generating certificate...');
+      setProgress(\'Generating certificate...\');
 
       const formData = new FormData();
-      formData.append('file', f);
-      if (user?.email) formData.append('userEmail', user.email);
+      formData.append(\'file\', f);
+      if (user?.email) formData.append(\'userEmail\', user.email);
 
-      const response = await fetch('/api/verify', { method: 'POST', body: formData });
+      const response = await fetch(\'/api/verify\', { method: \'POST\', body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setResult(data);
       setFile(f);
-      setStep('scanned');
+      setStep(\'scanned\');
     } catch (err: any) {
-      setError(err.message || 'Failed to process file.');
+      setError(err.message || \'Failed to process file.\');
     } finally {
       setLoading(false);
-      setProgress('');
+      setProgress(\'\');
     }
   };
 
@@ -71,30 +71,30 @@ export default function SealFile() {
     setError(null);
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('watermark', withWatermark.toString());
-      if (user?.email) formData.append('userEmail', user.email);
+      formData.append(\'file\', file);
+      formData.append(\'watermark\', withWatermark.toString());
+      if (user?.email) formData.append(\'userEmail\', user.email);
 
-      const response = await fetch('/api/seal', {
-        method: 'POST',
+      const response = await fetch(\'/api/seal\', {
+        method: \'POST\',
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Sealing failed');
+      if (!response.ok) throw new Error(\'Sealing failed\');
 
       const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
+      const disposition = response.headers.get(\'Content-Disposition\') || \'\';
       const fileNameMatch = disposition.match(/filename="(.+)"/);
-      const fileName = fileNameMatch ? fileNameMatch[1] : `sealed_${result.data.certificate_id}.${file.name.split('.').pop()}`;
+      const fileName = fileNameMatch ? fileNameMatch[1] : `sealed_${result.data.certificate_id}.${file.name.split(\'.\').pop()}`;
 
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement(\'a\');
       a.href = url;
       a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
-      setError(err.message || 'Download failed. Please try again.');
+      setError(err.message || \'Download failed. Please try again.\');
     } finally {
       setDownloading(false);
     }
@@ -105,24 +105,24 @@ export default function SealFile() {
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
         const currentUrl = window.location.href;
-        window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace('https://', '')}`;
+        window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace(\'https://\', \'\')}`;
         return;
       }
-      setError('Please install MetaMask to seal files on the blockchain.');
+      setError(\'Please install MetaMask to seal files on the blockchain.\');
       return;
     }
     setLoading(true);
     setError(null);
-    setStep('sealing');
+    setStep(\'sealing\');
 
     try {
       await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
+        method: \'wallet_switchEthereumChain\',
         params: [{ chainId: chain.chainIdHex }],
       }).catch(async (e: any) => {
         if (e.code === 4902) {
           await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
+            method: \'wallet_addEthereumChain\',
             params: [{
               chainId: chain.chainIdHex,
               chainName: chain.name,
@@ -134,27 +134,27 @@ export default function SealFile() {
         }
       });
 
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await window.ethereum.request({ method: \'eth_requestAccounts\' });
       const userAddress = accounts[0];
 
       let txHash: string;
 
       if (payWithUHR) {
-        const { ethers } = await import('ethers');
+        const { ethers } = await import(\'ethers\');
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const uhrContract = new ethers.Contract(
           UHR_CONTRACT,
-          ['function transfer(address to, uint256 amount) returns (bool)'],
+          [\'function transfer(address to, uint256 amount) returns (bool)\'],
           signer
         );
-        const uhrAmount = ethers.parseUnits('10', 18);
+        const uhrAmount = ethers.parseUnits(\'10\', 18);
         const tx = await uhrContract.transfer(PAYMENT_WALLET, uhrAmount);
         await tx.wait();
         txHash = tx.hash;
       } else {
         const documentData = JSON.stringify({
-          platform: 'UHRATE',
+          platform: \'UHRATE\',
           certificate_id: result.data.certificate_id,
           sha256_hash: result.data.sha256_hash,
           file_name: result.data.file_name,
@@ -162,11 +162,11 @@ export default function SealFile() {
           trust_score: result.data.trust_score,
           sealed_at: new Date().toISOString(),
         });
-        const hexData = '0x' + Buffer.from(documentData).toString('hex');
+        const hexData = \'0x\' + Buffer.from(documentData).toString(\'hex\');
 
         let nativePrice = 300;
         try {
-          const sym = chain.symbol === 'ETH' ? 'ETH' : chain.symbol === 'MATIC' ? 'MATIC' : 'BNB';
+          const sym = chain.symbol === \'ETH\' ? \'ETH\' : chain.symbol === \'MATIC\' ? \'MATIC\' : \'BNB\';
           const priceRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}USDT`);
           if (priceRes.ok) {
             const pd = await priceRes.json();
@@ -174,42 +174,42 @@ export default function SealFile() {
           }
         } catch {}
 
-        const feeWei = '0x' + BigInt(Math.floor(PLATFORM_FEE_USD / nativePrice * 1e18)).toString(16);
+        const feeWei = \'0x\' + BigInt(Math.floor(PLATFORM_FEE_USD / nativePrice * 1e18)).toString(16);
         txHash = await window.ethereum.request({
-          method: 'eth_sendTransaction',
+          method: \'eth_sendTransaction\',
           params: [{
             from: userAddress,
             to: PAYMENT_WALLET,
             value: feeWei,
             data: hexData,
-            gas: '0x30D40',
+            gas: \'0x30D40\',
           }],
         });
       }
 
       // Save blockchain tx to database
       try {
-        await fetch('/api/billing/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch(\'/api/billing/verify-payment\', {
+          method: \'POST\',
+          headers: { \'Content-Type\': \'application/json\' },
           body: JSON.stringify({
             txHash,
             chainId: selectedChain,
-            userEmail: user?.email || '',
+            userEmail: user?.email || \'\',
             documentId: result.data.certificate_id,
           }),
         });
       } catch {}
 
       setDeployResult({ txHash, chain: selectedChain });
-      setStep('sealed');
+      setStep(\'sealed\');
     } catch (err: any) {
       if (err.code === 4001) {
-        setError('Transaction cancelled.');
+        setError(\'Transaction cancelled.\');
       } else {
-        setError(err.message || 'Sealing failed. Please try again.');
+        setError(err.message || \'Sealing failed. Please try again.\');
       }
-      setStep('scanned');
+      setStep(\'scanned\');
     } finally {
       setLoading(false);
     }
@@ -224,14 +224,14 @@ export default function SealFile() {
       sha256_hash: result.data.sha256_hash,
       trust_score: result.data.trust_score,
       rating: result.data.rating,
-      sealed_on: deployResult ? chain.name : 'Not sealed on blockchain',
+      sealed_on: deployResult ? chain.name : \'Not sealed on blockchain\',
       tx_hash: deployResult?.txHash || null,
       sealed_at: new Date().toISOString(),
-      platform: 'UHRATE - The decentralized notary for the digital world',
+      platform: \'UHRATE - The decentralized notary for the digital world\',
     };
-    const blob = new Blob([JSON.stringify(cert, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(cert, null, 2)], { type: \'application/json\' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement(\'a\');
     a.href = url;
     a.download = `uhrate_seal_${cert.certificate_id}.json`;
     a.click();
@@ -255,24 +255,24 @@ export default function SealFile() {
         {/* Steps indicator */}
         <div className="flex items-center justify-center gap-2 mb-10">
           {[
-            { key: 'upload', label: '1. Upload' },
-            { key: 'scanned', label: '2. Analysed' },
-            { key: 'sealing', label: '3. Sealing' },
-            { key: 'sealed', label: '4. Sealed' },
+            { key: \'upload\', label: \'1. Upload\' },
+            { key: \'scanned\', label: \'2. Analysed\' },
+            { key: \'sealing\', label: \'3. Sealing\' },
+            { key: \'sealed\', label: \'4. Sealed\' },
           ].map((s, i) => {
-            const steps = ['upload', 'scanned', 'sealing', 'sealed'];
+            const steps = [\'upload\', \'scanned\', \'sealing\', \'sealed\'];
             const current = steps.indexOf(step);
             const thisStep = steps.indexOf(s.key);
             return (
               <div key={s.key} className="flex items-center gap-2">
                 <div className={"w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold " + (
-                  current > thisStep ? 'bg-green-500 text-white' :
-                  current === thisStep ? 'bg-black text-white' :
-                  'bg-gray-200 text-gray-500'
+                  current > thisStep ? \'bg-green-500 text-white\' :
+                  current === thisStep ? \'bg-black text-white\' :
+                  \'bg-gray-200 text-gray-500\'
                 )}>
-                  {current > thisStep ? 'checkmark' : i + 1}
+                  {current > thisStep ? \'checkmark\' : i + 1}
                 </div>
-                <span className={"text-xs " + (current === thisStep ? 'text-gray-900 font-semibold' : 'text-gray-400')}>{s.label}</span>
+                <span className={"text-xs " + (current === thisStep ? \'text-gray-900 font-semibold\' : \'text-gray-400\')}>{s.label}</span>
                 {i < 3 && <div className="w-6 h-px bg-gray-200" />}
               </div>
             );
@@ -280,12 +280,12 @@ export default function SealFile() {
         </div>
 
         {/* Upload Step */}
-        {step === 'upload' && (
+        {step === \'upload\' && (
           <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
             <div
               {...getRootProps()}
               className={"border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all " + (
-                isDragActive ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-black hover:bg-gray-50'
+                isDragActive ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-black hover:bg-gray-50\'
               )}
             >
               <input {...getInputProps()} />
@@ -308,9 +308,9 @@ export default function SealFile() {
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { icon: 'dna', title: 'Digital DNA', desc: 'Unique SHA-256 fingerprint' },
-                { icon: 'ai', title: 'AI Analysis', desc: 'Deepfake and manipulation detection' },
-                { icon: 'chain', title: 'Sealed File', desc: 'Download with identity embedded' },
+                { icon: \'dna\', title: \'Digital DNA\', desc: \'Unique SHA-256 fingerprint\' },
+                { icon: \'ai\', title: \'AI Analysis\', desc: \'Deepfake and manipulation detection\' },
+                { icon: \'chain\', title: \'Sealed File\', desc: \'Download with identity embedded\' },
               ].map(item => (
                 <div key={item.title} className="text-center p-4 bg-gray-50 rounded-xl">
                   <p className="font-bold text-gray-900 text-sm">{item.title}</p>
@@ -322,7 +322,7 @@ export default function SealFile() {
         )}
 
         {/* Scanned Step */}
-        {step === 'scanned' && result && (
+        {step === \'scanned\' && result && (
           <div className="space-y-4">
             {/* File summary */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -352,7 +352,7 @@ export default function SealFile() {
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <button
                   onClick={() => setWithWatermark(true)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
+                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-gray-400\')}
                 >
                   <p className="text-sm font-bold text-gray-900">With Badge</p>
                   <p className="text-xs text-gray-500">Small UHRATE stamp in corner</p>
@@ -360,7 +360,7 @@ export default function SealFile() {
                 </button>
                 <button
                   onClick={() => setWithWatermark(false)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
+                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-gray-400\')}
                 >
                   <p className="text-sm font-bold text-gray-900">Metadata Only</p>
                   <p className="text-xs text-gray-500">Identity hidden in file data</p>
@@ -373,7 +373,7 @@ export default function SealFile() {
                 disabled={downloading}
                 className="w-full py-3.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
-                {downloading ? 'Preparing sealed file...' : 'Download Sealed File'}
+                {downloading ? \'Preparing sealed file...\' : \'Download Sealed File\'}
               </button>
               <p className="text-xs text-gray-400 text-center mt-2">Free download — UHRATE identity embedded in the file</p>
             </div>
@@ -391,7 +391,7 @@ export default function SealFile() {
                       key={c.id}
                       onClick={() => { setSelectedChain(c.id); setPayWithUHR(false); }}
                       className={"p-3 rounded-xl border-2 text-left transition-all " + (
-                        selectedChain === c.id && !payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400'
+                        selectedChain === c.id && !payWithUHR ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-gray-400\'
                       )}
                     >
                       <p className="text-sm font-semibold text-gray-900">{c.icon} {c.name}</p>
@@ -404,14 +404,14 @@ export default function SealFile() {
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <button
                     onClick={() => setPayWithUHR(false)}
-                    className={"p-3 rounded-xl border-2 text-left transition-all " + (!payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
+                    className={"p-3 rounded-xl border-2 text-left transition-all " + (!payWithUHR ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-gray-400\')}
                   >
                     <p className="text-sm font-bold text-gray-900">${PLATFORM_FEE_USD}</p>
                     <p className="text-xs text-gray-500">Pay with {chain?.symbol}</p>
                   </button>
                   <button
                     onClick={() => setPayWithUHR(true)}
-                    className={"p-3 rounded-xl border-2 text-left transition-all relative " + (payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
+                    className={"p-3 rounded-xl border-2 text-left transition-all relative " + (payWithUHR ? \'border-black bg-gray-50\' : \'border-gray-200 hover:border-gray-400\')}
                   >
                     <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white text-xs rounded-full font-bold">50% OFF</div>
                     <p className="text-sm font-bold text-gray-900">${PLATFORM_FEE_UHR_USD}</p>
@@ -445,7 +445,7 @@ export default function SealFile() {
                   disabled={loading}
                   className="w-full py-3.5 border-2 border-black text-black rounded-xl text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-50"
                 >
-                  {loading ? 'Deploying to blockchain...' : `Deploy to ${chain?.name} — Pay $${payWithUHR ? PLATFORM_FEE_UHR_USD + ' UHR' : PLATFORM_FEE_USD + ' ' + chain?.symbol}`}
+                  {loading ? \'Deploying to blockchain...\' : `Deploy to ${chain?.name} — Pay $${payWithUHR ? PLATFORM_FEE_UHR_USD + \' UHR\' : PLATFORM_FEE_USD + \' \' + chain?.symbol}`}
                 </button>
                 <p className="text-xs text-gray-400 text-center mt-2">Optional — the downloaded sealed file already carries UHRATE identity</p>
               </div>
@@ -454,7 +454,7 @@ export default function SealFile() {
         )}
 
         {/* Sealing Step */}
-        {step === 'sealing' && (
+        {step === \'sealing\' && (
           <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
             <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-6" />
             <h2 className="text-xl font-black text-gray-900 mb-2">Deploying to {chain?.name}...</h2>
@@ -463,18 +463,20 @@ export default function SealFile() {
         )}
 
         {/* Sealed Step */}
-        {step === 'sealed' && deployResult && (
+        {step === \'sealed\' && deployResult && (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">seal</div>
               <h2 className="text-2xl font-black text-gray-900 mb-2">File Sealed on Blockchain!</h2>
               <p className="text-gray-600 mb-4">Permanent on-chain record created on {SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.name}.</p>
-              <button
-                onClick={() => window.open(`${SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.explorer}/tx/${deployResult.txHash}`, '_blank')}
-                className="inline-block px-6 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors border-0 cursor-pointer"
+              
+                href={`${SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.explorer}/tx/${deployResult.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors"
               >
                 View on Blockchain Explorer
-              </button>
+              </a>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
@@ -482,14 +484,14 @@ export default function SealFile() {
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <button
                   onClick={() => setWithWatermark(true)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? 'border-black bg-gray-50' : 'border-gray-200')}
+                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? \'border-black bg-gray-50\' : \'border-gray-200\')}
                 >
                   <p className="text-sm font-bold text-gray-900">With Badge</p>
                   <p className="text-xs text-gray-500">Small UHRATE stamp in corner</p>
                 </button>
                 <button
                   onClick={() => setWithWatermark(false)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? 'border-black bg-gray-50' : 'border-gray-200')}
+                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? \'border-black bg-gray-50\' : \'border-gray-200\')}
                 >
                   <p className="text-sm font-bold text-gray-900">Metadata Only</p>
                   <p className="text-xs text-gray-500">No visual change</p>
@@ -501,7 +503,7 @@ export default function SealFile() {
                   disabled={downloading}
                   className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
                 >
-                  {downloading ? 'Preparing...' : 'Download Sealed File'}
+                  {downloading ? \'Preparing...\' : \'Download Sealed File\'}
                 </button>
                 <button onClick={downloadCertificate} className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
                   Download Certificate JSON
@@ -511,13 +513,13 @@ export default function SealFile() {
 
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
               <p className="text-sm text-blue-700 mb-2">Verify this sealed file anytime</p>
-              <button onClick={() => window.location.href = '/lookup'} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
+              <button onClick={() => window.location.href = \'/lookup\'} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
                 Go to Lookup
               </button>
             </div>
 
             <button
-              onClick={() => { setStep('upload'); setFile(null); setResult(null); setDeployResult(null); setError(null); }}
+              onClick={() => { setStep(\'upload\'); setFile(null); setResult(null); setDeployResult(null); setError(null); }}
               className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
             >
               Seal Another File
@@ -529,3 +531,7 @@ export default function SealFile() {
     </main>
   );
 }
+'''
+
+open('app/seal/page.tsx', 'w', encoding='utf-8').write(content)
+print('Done!')
