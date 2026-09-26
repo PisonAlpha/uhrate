@@ -475,6 +475,17 @@ export default function SealFile() {
               >
                 View on Blockchain Explorer
               </button>
+              <div className="mt-4 p-3 bg-gray-50 rounded-xl text-left">
+                <p className="text-xs text-gray-500 mb-1">Blockchain Transaction Hash</p>
+                <p className="font-mono text-xs text-blue-600 break-all">{deployResult.txHash}</p>
+              </div>
+            </div>
+
+            {/* Certificate ID — show prominently */}
+            <div className="bg-black text-white rounded-2xl p-6 shadow-sm">
+              <p className="text-xs text-gray-400 mb-1">Your Certificate ID — save this for lookup</p>
+              <p className="font-mono text-lg font-black text-yellow-400 break-all mb-3">{result?.data?.certificate_id}</p>
+              <p className="text-xs text-gray-400">Use this ID to verify this file from any device at uhrate.online/lookup</p>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
