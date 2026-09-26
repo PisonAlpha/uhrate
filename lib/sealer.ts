@@ -67,11 +67,14 @@ async function sealImage(
       verify_at: 'https://uhrate.online/lookup',
     });
 
+    // Embed certificate ID in multiple EXIF fields for maximum compatibility
     let processedImage = image.withExif({
       IFD0: {
-        ImageDescription: `UHRATE Sealed — Certificate: ${options.certificateId}`,
+        ImageDescription: `UHRATE-SEAL:${options.certificateId}`,
+        Make: 'UHRATE',
+        Model: options.certificateId,
         Copyright: `UHRATE Decentralized Authenticity Network — ${options.certificateId}`,
-        Software: 'UHRATE Seal v1.0',
+        Software: `UHRATE Seal v1.0 | ${options.certificateId}`,
         Artist: sealComment,
       },
     });
@@ -237,13 +240,39 @@ export async function readSealFromImage(buffer: Buffer): Promise<string | null> 
     const exif = metadata.exif;
     if (!exif) return null;
 
-    // Try to read Artist field which contains our JSON
-    const exifStr = exif.toString('utf8');
-    const match = exifStr.match(/\{"platform":"UHRATE".*?\}/);
-    if (match) {
-      const data = JSON.parse(match[0]);
-      return data.certificate_id || null;
+    // Search for certificate ID pattern in multiple encodings
+    const searchForCert = (str: string): string | null => {
+      // Direct UHRATE certificate ID pattern
+      const direct = str.match(/UHRATE-[A-Z0-9]{8}-[A-Z0-9]{8}/);
+      if (direct) return direct[0];
+      // UHRATE-SEAL: prefix
+      const sealed = str.match(/UHRATE-SEAL:(UHRATE-[A-Z0-9]{8}-[A-Z0-9]{8})/);
+      if (sealed) return sealed[1];
+      // JSON certificate_id field
+      const json = str.match(/"certificate_id":"(UHRATE-[A-Z0-9-]+)"/);
+      if (json) return json[1];
+      return null;
+    };
+
+    // Try latin1 (most reliable for raw EXIF bytes)
+    const latin1Result = searchForCert(exif.toString('latin1'));
+    if (latin1Result) return latin1Result;
+
+    // Try utf8
+    const utf8Result = searchForCert(exif.toString('utf8'));
+    if (utf8Result) return utf8Result;
+
+    // Try hex — find ASCII bytes of "UHRATE-"
+    const hexStr = exif.toString('hex');
+    const uhrateHex = Buffer.from('UHRATE-', 'ascii').toString('hex');
+    const hexIdx = hexStr.indexOf(uhrateHex);
+    if (hexIdx >= 0) {
+      const startByte = Math.floor(hexIdx / 2);
+      const chunk = exif.slice(startByte, startByte + 30).toString('ascii');
+      const certFromHex = chunk.match(/UHRATE-[A-Z0-9]{8}-[A-Z0-9]{8}/);
+      if (certFromHex) return certFromHex[0];
     }
+
     return null;
   } catch {
     return null;
