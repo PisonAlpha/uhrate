@@ -21,17 +21,55 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch verifications
-    let query = supabaseAdmin
-      .from('verifications')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
+    // Fetch verifications — search by email OR wallet address format
+    let verifications: any[] = [];
+    
+    if (email) {
+      // Try exact email match first
+      const { data: byEmail } = await supabaseAdmin
+        .from('verifications')
+        .select('*')
+        .eq('user_email', email)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      
+      verifications = byEmail || [];
+      
+      // If no results and email looks like wallet format, also try wallet prefix
+      if (verifications.length === 0 && email.includes('@wallet.uhrate')) {
+        const walletPrefix = email.split('@')[0];
+        const { data: byWallet } = await supabaseAdmin
+          .from('verifications')
+          .select('*')
+          .ilike('user_email', walletPrefix + '%')
+          .order('created_at', { ascending: false })
+          .limit(100);
+        verifications = byWallet || [];
+      }
 
-    if (email) query = query.eq('user_email', email);
-    if (userId) query = query.eq('user_id', userId);
-
-    const { data: verifications, error } = await query;
+      // Also try wallet_address column if it exists
+      if (verifications.length === 0) {
+        const { data: byWalletCol } = await supabaseAdmin
+          .from('verifications')
+          .select('*')
+          .eq('wallet_address', email.split('@')[0])
+          .order('created_at', { ascending: false })
+          .limit(100);
+        if (byWalletCol && byWalletCol.length > 0) {
+          verifications = byWalletCol;
+        }
+      }
+    } else if (userId) {
+      const { data: byId } = await supabaseAdmin
+        .from('verifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      verifications = byId || [];
+    }
+    
+    const error = null;
     if (error) throw error;
 
     const v = verifications || [];

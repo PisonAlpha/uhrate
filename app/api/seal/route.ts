@@ -65,6 +65,17 @@ export async function POST(request: NextRequest) {
       watermark,
     });
 
+    // Generate hash of the SEALED file and store it for cross-device lookup
+    const sealedHash = require('crypto').createHash('sha256').update(sealed.sealedBuffer).digest('hex');
+    
+    // Store sealed file hash in verifications table
+    try {
+      await supabaseAdmin
+        .from('verifications')
+        .update({ sealed_file_hash: sealedHash })
+        .eq('certificate_id', certificateId);
+    } catch {}
+
     const nameParts = file.name.split('.');
     nameParts.pop();
     const baseName = nameParts.join('.');

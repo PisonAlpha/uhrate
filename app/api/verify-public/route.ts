@@ -9,13 +9,21 @@ export async function POST(request: NextRequest) {
     let source = 'verifications';
 
     async function searchByHash(hash: string) {
-      // Search verifications table first
+      // Search verifications by original hash
       const { data: v } = await supabaseAdmin
         .from('verifications')
         .select('*')
         .eq('sha256_hash', hash)
         .single();
       if (v) return { data: v, source: 'verifications' };
+
+      // Search verifications by SEALED file hash (cross-device lookup)
+      const { data: vs } = await supabaseAdmin
+        .from('verifications')
+        .select('*')
+        .eq('sealed_file_hash', hash)
+        .single();
+      if (vs) return { data: vs, source: 'verifications' };
 
       // Search document_registry table
       const { data: r } = await supabaseAdmin
