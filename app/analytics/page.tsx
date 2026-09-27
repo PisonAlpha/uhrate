@@ -104,7 +104,7 @@ export default function Analytics() {
           <p className="text-gray-500 text-sm mb-4">Live Google Analytics data for uhrate.online — powered by Looker Studio</p>
           <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm" style={{ height: '600px' }}>
             <iframe
-              src="https://datastudio.google.com/embed/reporting/6fab452f-0a7e-4b0f-85bb-ba0eec278fad/page/p_xyz"
+              src="https://datastudio.google.com/embed/reporting/6fab452f-0a7e-4b0f-85bb-ba0eec278fad/page/lOt9F"
               style={{ width: '100%', height: '100%', border: 0 }}
               allowFullScreen
               title="UHRATE Google Analytics Dashboard"
