@@ -8,15 +8,15 @@ export default function Tokenomics() {
   const [copied, setCopied] = useState(false);
 
   const allocation = [
-    { category: 'Community & Ecosystem', percent: 23.92, tokens: '239,191,919', vesting: 'Linear over 48 months from TGE', color: 'bg-blue-500' },
-    { category: 'Platform Rewards & Staking', percent: 20, tokens: '200,000,000', vesting: 'Starts post-TGE, monthly unlock over 36 months', color: 'bg-purple-500' },
-    { category: 'Angel Round', percent: 8.08, tokens: '80,808,081', vesting: '6-month cliff, linear over 18 months', color: 'bg-orange-500' },
-    { category: 'Treasury & Reserve', percent: 10, tokens: '100,000,000', vesting: '24-month lock, DAO controlled release', color: 'bg-amber-500' },
-    { category: 'Presale', percent: 8, tokens: '80,000,000', vesting: '6-month cliff, linear over 18 months', color: 'bg-red-500' },
-    { category: 'Team & Founders', percent: 12, tokens: '120,000,000', vesting: '12-month cliff, linear over 36 months', color: 'bg-gray-700' },
-    { category: 'Public Sale', percent: 7, tokens: '70,000,000', vesting: '20% at TGE, 80% linear over 12 months', color: 'bg-green-500' },
-    { category: 'Liquidity', percent: 6, tokens: '60,000,000', vesting: '50% at TGE, 50% over 6 months', color: 'bg-cyan-500' },
-    { category: 'Advisors & Partners', percent: 5, tokens: '50,000,000', vesting: '6-month cliff, linear over 24 months', color: 'bg-pink-500' },
+    { category: 'Community & Ecosystem', percent: 23.92, tokens: '239,191,919', vesting: '17.6% at TGE, linear over 48 months', tge: '42,097,778', cliff: '0 months', color: 'bg-blue-500' },
+    { category: 'Platform Rewards & Staking', percent: 20, tokens: '200,000,000', vesting: '0% at TGE, monthly unlock over 36 months post-TGE', tge: '0', cliff: '0 months', color: 'bg-purple-500' },
+    { category: 'Angel Round', percent: 8.08, tokens: '80,808,081', vesting: '0% at TGE, 6-month cliff, linear over 18 months', tge: '0', cliff: '6 months', color: 'bg-orange-500' },
+    { category: 'Treasury & Reserve', percent: 10, tokens: '100,000,000', vesting: '0% at TGE, 24-month lock, DAO controlled release', tge: '0', cliff: '24 months', color: 'bg-amber-500' },
+    { category: 'Presale', percent: 8, tokens: '80,000,000', vesting: '0% at TGE, 6-month cliff, linear over 18 months', tge: '0', cliff: '6 months', color: 'bg-red-500' },
+    { category: 'Team & Founders', percent: 12, tokens: '120,000,000', vesting: '0% at TGE, 12-month cliff, linear over 36 months', tge: '0', cliff: '12 months', color: 'bg-gray-700' },
+    { category: 'Public Sale', percent: 7, tokens: '70,000,000', vesting: '20% at TGE, linear over 12 months', tge: '14,000,000', cliff: '0 months', color: 'bg-green-500' },
+    { category: 'Liquidity', percent: 6, tokens: '60,000,000', vesting: '50% at TGE, 50% over 6 months', tge: '30,000,000', cliff: '0 months', color: 'bg-cyan-500' },
+    { category: 'Advisors & Partners', percent: 5, tokens: '50,000,000', vesting: '0% at TGE, 6-month cliff, linear over 24 months', tge: '0', cliff: '6 months', color: 'bg-pink-500' },
   ];
 
   const utilities = [
@@ -35,12 +35,14 @@ export default function Tokenomics() {
   ];
 
   const phases = [
-    { phase: '01', title: 'Token Launch', desc: 'UHR token deployed on BNB Smart Chain. Tokenomics and whitepaper published.', active: true },
-    { phase: '02', title: 'Presale', desc: 'Early supporters acquire UHR at presale pricing of $0.01 per token. Limited to 80,000,000 UHR.', active: true },
-    { phase: '03', title: 'Public Sale', desc: 'Community sale via launchpad. UHRATE platform users get priority whitelist access.', active: false },
-    { phase: '04', title: 'DEX Listing', desc: 'Initial listing on PancakeSwap. Liquidity provided from treasury. CEX applications begin.', active: false },
-    { phase: '05', title: 'Staking Launch', desc: 'Deploy staking platform. Enable UHR deployment fee discounts. Begin fee burn mechanism.', active: false },
-    { phase: '06', title: 'DAO Launch', desc: 'Transfer treasury to DAO smart contract. Enable full community governance voting.', active: false },
+    { phase: '01', title: 'Token Launch', desc: 'UHR token deployed on BNB Smart Chain. Smart contracts verified on BSCScan. Tokenomics published.', active: true, date: 'Q3 2026' },
+    { phase: '02', title: 'Angel Round', desc: 'Angel Round closed at $0.0099/UHR. $800,000 raised. Lead investor: Harfinance.', active: true, date: 'Sep 2026' },
+    { phase: '03', title: 'Presale — LIVE', desc: 'Public presale at $0.01/UHR. 80,000,000 UHR available. Smart contract on BNB Chain. 1,030+ files sealed on platform.', active: true, date: 'Sep 2026' },
+    { phase: '04', title: 'CEX Listing', desc: 'Listing on Bitget and Gate.com at $0.02/UHR. PancakeSwap DEX liquidity provision. CoinGecko and CoinMarketCap submissions.', active: false, date: 'Q4 2026' },
+    { phase: '05', title: 'Mobile App Launch', desc: 'Android app on Google Play Store. iOS app development begins. In-app file sealing and verification.', active: false, date: 'Q4 2026' },
+    { phase: '06', title: 'Staking Launch', desc: 'Deploy staking platform. Flexible 10% APY, 30-day 15% APY, 90-day 20% APY. Begin fee burn mechanism.', active: false, date: 'Q1 2027' },
+    { phase: '07', title: 'Enterprise API', desc: 'Launch tiered enterprise API plans. Bulk document verification. White-label integration for businesses.', active: false, date: 'Q1 2027' },
+    { phase: '08', title: 'DAO Launch', desc: 'Transfer treasury to DAO smart contract. Enable full community governance. Quarterly buyback and burn begins.', active: false, date: 'Q2 2027' },
   ];
 
   const copyAddress = () => {
@@ -145,6 +147,63 @@ export default function Tokenomics() {
         </div>
       </section>
 
+      {/* TGE Summary */}
+      <section className="py-16 px-4 bg-gray-50 border-b border-gray-200">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">TGE Circulating Supply</h2>
+            <p className="text-gray-500">Initial circulating supply at Token Generation Event</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[
+              { label: 'Public Sale (20% of 7%)', tokens: '14,000,000', pct: '1.4%', color: 'bg-green-500' },
+              { label: 'Liquidity (50% of 6%)', tokens: '30,000,000', pct: '3.0%', color: 'bg-cyan-500' },
+              { label: 'Community (17.6% of 23.92%)', tokens: '42,097,778', pct: '4.21%', color: 'bg-blue-500' },
+              { label: 'All Others (cliff/locked)', tokens: '0', pct: '0%', color: 'bg-gray-300' },
+            ].map(item => (
+              <div key={item.label} className="bg-white border border-gray-200 rounded-2xl p-5 text-center">
+                <div className={"w-3 h-3 rounded-full mx-auto mb-3 " + item.color} />
+                <p className="text-xl font-black text-gray-900">{item.tokens}</p>
+                <p className="text-sm font-bold text-gray-500">{item.pct} of supply</p>
+                <p className="text-xs text-gray-400 mt-1">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-black text-white rounded-2xl p-6 text-center">
+            <p className="text-gray-400 text-sm mb-2">Total TGE Circulating Supply</p>
+            <p className="text-4xl font-black text-yellow-400">86,097,778 UHR</p>
+            <p className="text-2xl font-bold text-white mt-1">8.61% of Total Supply</p>
+            <p className="text-gray-400 text-sm mt-3">Angel Round, Presale, Team, Advisors, Treasury, and Platform Rewards are all locked at TGE</p>
+          </div>
+
+          {/* Investment Rounds */}
+          <div className="mt-10">
+            <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Investment Rounds</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { round: 'Angel Round', price: '$0.0099', fdv: '$9.9M', raised: '$800,000', investor: 'Harfinance', status: 'CLOSED', color: 'bg-orange-500' },
+                { round: 'Presale', price: '$0.01', fdv: '$10M', raised: '$124,500+', investor: 'Public', status: 'LIVE', color: 'bg-red-500' },
+                { round: 'Public Sale / Listing', price: '$0.02', fdv: '$20M', raised: 'TBD', investor: 'CEX', status: 'Q4 2026', color: 'bg-green-500' },
+              ].map(r => (
+                <div key={r.round} className="bg-white border border-gray-200 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-bold text-gray-900">{r.round}</p>
+                    <span className={"px-2 py-0.5 text-white text-xs font-bold rounded-full " + r.color}>{r.status}</span>
+                  </div>
+                  <p className="text-3xl font-black text-gray-900 mb-3">{r.price}<span className="text-sm font-normal text-gray-500">/UHR</span></p>
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-500">FDV</span><span className="font-semibold">{r.fdv}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Raised</span><span className="font-semibold">{r.raised}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Investor</span><span className="font-semibold">{r.investor}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-gray-400 mt-4">Angel Round ROI: 2.02x at listing | Presale ROI: 2.00x at listing</p>
+          </div>
+        </div>
+      </section>
+
       {/* Token Allocation */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
@@ -155,7 +214,7 @@ export default function Tokenomics() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             <div className="space-y-3">
               {allocation.map(item => (
-                <div key={item.category} className={"bg-white border rounded-xl p-4 " + (item.category === 'Presale' ? 'border-red-300 bg-red-50' : 'border-gray-200')}>
+                <div key={item.category} className={"bg-white border rounded-xl p-4 " + (item.category === 'Presale' ? 'border-red-300 bg-red-50' : item.category === 'Angel Round' ? 'border-orange-300 bg-orange-50' : 'border-gray-200')}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className={"w-3 h-3 rounded-full " + item.color} />
@@ -324,10 +383,11 @@ export default function Tokenomics() {
                 <span className={"text-2xl font-bold font-mono flex-shrink-0 " + (item.active ? 'text-gray-400' : 'text-gray-300')}>
                   {item.phase}
                 </span>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className={"font-semibold " + (item.active ? 'text-white' : 'text-gray-900')}>{item.title}</h3>
                     {item.active && <span className="px-2 py-0.5 bg-green-500 text-white text-xs rounded-full font-medium">Active</span>}
+                    <span className={"text-xs px-2 py-0.5 rounded-full " + (item.active ? 'bg-white/10 text-gray-300' : 'bg-gray-100 text-gray-500')}>{item.date}</span>
                   </div>
                   <p className={"text-sm " + (item.active ? 'text-gray-400' : 'text-gray-500')}>{item.desc}</p>
                 </div>
