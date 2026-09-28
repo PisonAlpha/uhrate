@@ -1,4 +1,4 @@
-'use client';
+nav = """'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -187,3 +187,7 @@ export default function Nav({ active }: NavProps) {
     </header>
   );
 }
+"""
+
+open('app/components/Nav.tsx', 'w', encoding='utf-8').write(nav)
+print('Done!')
