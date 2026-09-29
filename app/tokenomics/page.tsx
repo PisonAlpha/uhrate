@@ -113,6 +113,30 @@ export default function Tokenomics() {
         </div>
       </section>
 
+      {/* Spreadsheet Download */}
+      <section className="bg-gray-50 py-6 px-4 border-b border-gray-200">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-gray-900">📊 Full Tokenomics Spreadsheet</p>
+            <p className="text-sm text-gray-500">Complete vesting schedule, investment rounds, unlock milestones — Excel format</p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => window.open('/uhrate-tokenomics.xlsx', '_blank')}
+              className="px-5 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors border-0 cursor-pointer"
+            >
+              View Spreadsheet
+            </button>
+            <button
+              onClick={() => { const a = document.createElement('a'); a.href = '/uhrate-tokenomics.xlsx'; a.download = 'UHRATE_Tokenomics.xlsx'; a.click(); }}
+              className="px-5 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors border cursor-pointer bg-white"
+            >
+              Download
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Contract Address */}
       <section className="bg-gray-50 py-8 px-4 border-b border-gray-200">
         <div className="max-w-4xl mx-auto text-center">
