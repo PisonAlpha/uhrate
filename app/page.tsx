@@ -92,7 +92,7 @@ export default function Home() {
                     { icon: '🗺️', label: 'Roadmap', href: '/roadmap' },
                     { icon: '📄', label: 'Whitepaper', href: '/whitepaper' },
                     { icon: '📈', label: 'Investors', href: '/investors' },
-                    { icon: '📉', label: 'Analytics', href: '/analytics' },
+
                   ].map(item => (
                     <button key={item.href} onClick={() => { window.location.href = item.href; setTokenOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer text-left">
                       <span>{item.icon}</span>{item.label}
@@ -155,7 +155,7 @@ export default function Home() {
               { label: '🗺️ Roadmap', href: '/roadmap' },
               { label: '📄 Whitepaper', href: '/whitepaper' },
               { label: '📈 Investors', href: '/investors' },
-              { label: '📉 Analytics', href: '/analytics' },
+
             ].map(item => (
               <button key={item.href} onClick={() => { window.location.href = item.href; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">{item.label}</button>
             ))}
