@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
+    const email = identity.status === 'authenticated' ? identity.email : searchParams.get('email');
 
     if (!email) {
       return NextResponse.json(
@@ -41,9 +47,14 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const keyId = searchParams.get('id');
-    const email = searchParams.get('email');
+    const email = identity.status === 'authenticated' ? identity.email : searchParams.get('email');
 
     if (!keyId || !email) {
       return NextResponse.json(

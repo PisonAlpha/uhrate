@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, currentPassword, newPassword } = await request.json();
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { currentPassword, newPassword } = body;
+    const email = identity.status === 'authenticated' ? identity.email : body.email;
 
     if (!email || !currentPassword || !newPassword) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 });

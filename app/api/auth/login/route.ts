@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '@/lib/supabase';
+import { signAuthToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If UHRATE_AUTH_SECRET is missing, signAuthToken throws and this request
+    // falls into the catch block below — never a silent success without a token.
+    const token = await signAuthToken({ id: user.id, email: user.email });
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -45,6 +50,7 @@ export async function POST(request: NextRequest) {
         credits: user.credits,
         verified_badge: user.verified_badge,
       },
+      token,
     });
 
     response.cookies.set('uhrate_user', JSON.stringify({

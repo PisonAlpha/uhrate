@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
-    const userId = searchParams.get('userId');
+    const email = identity.status === 'authenticated' ? identity.email : searchParams.get('email');
+    const userId = identity.status === 'authenticated' ? identity.userId : searchParams.get('userId');
 
         if (!email && !userId) {
       return NextResponse.json({ 

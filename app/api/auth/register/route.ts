@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendVerificationEmail } from '@/lib/email';
 import { sendWelcomeEmail } from '@/lib/notifications';
+import { signAuthToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,6 +41,12 @@ export async function POST(request: NextRequest) {
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+    // Fail fast if UHRATE_AUTH_SECRET is missing, before creating the user
+    // row below. The real user id doesn't exist yet, so this result is
+    // discarded — the real token (with the real id) is signed again once
+    // the row has been inserted.
+    await signAuthToken({ id: '', email: '' });
+
     const { data: user, error } = await supabaseAdmin
       .from('users')
       .insert({
@@ -65,6 +72,10 @@ export async function POST(request: NextRequest) {
 
     sendWelcomeEmail(email, full_name).catch(console.error);
 
+    // If UHRATE_AUTH_SECRET is missing, signAuthToken throws and this request
+    // falls into the catch block below — never a silent success without a token.
+    const authToken = await signAuthToken({ id: user.id, email: user.email });
+
     return NextResponse.json({
       success: true,
       requiresVerification: true,
@@ -77,6 +88,7 @@ export async function POST(request: NextRequest) {
         credits: user.credits,
         email_verified: false,
       },
+      token: authToken,
     });
   } catch (error) {
     console.error('Register error:', error);

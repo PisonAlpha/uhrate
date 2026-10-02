@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { ethers } from 'ethers';
+import { signAuthToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,11 @@ export async function POST(request: NextRequest) {
     if (recovered !== address) return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     await supabaseAdmin.from('wallet_nonces').delete().eq('wallet_address', address);
     let { data: user } = await supabaseAdmin.from('users').select('*').eq('wallet_address', address).single();
+    // Fail fast if UHRATE_AUTH_SECRET is missing, before creating a new
+    // wallet user row below. The real user id doesn't exist yet for a new
+    // wallet, so this result is discarded — the real token (with the real
+    // id) is signed again once the user is resolved/created.
+    await signAuthToken({ id: '', email: '' });
     if (!user) {
       const { data: newUser, error: insertError } = await supabaseAdmin.from('users').insert({
         wallet_address: address,
@@ -27,7 +33,10 @@ export async function POST(request: NextRequest) {
       if (insertError) throw insertError;
       user = newUser;
     }
-    return NextResponse.json({ success: true, user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role, wallet_address: user.wallet_address } });
+    // If UHRATE_AUTH_SECRET is missing, signAuthToken throws and this request
+    // falls into the catch block below — never a silent success without a token.
+    const token = await signAuthToken({ id: user.id, email: user.email });
+    return NextResponse.json({ success: true, user: { id: user.id, email: user.email, full_name: user.full_name, role: user.role, wallet_address: user.wallet_address }, token });
   } catch (error) {
     console.error('Wallet login error:', error);
     return NextResponse.json({ error: 'Wallet login failed' }, { status: 500 });
