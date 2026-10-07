@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import { Redirect, useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { fetchProfile } from '@/services/auth';
 import { ApiError } from '@/services/api';
@@ -9,14 +8,12 @@ import type { AuthUser } from '@/types/auth';
 // Temporary validation screen for Phase 1 — proves the mobile app can reach
 // the backend with a verified bearer token. NOT the full dashboard.
 export default function Home() {
-  const { isLoading: authLoading, isAuthenticated, user, logout } = useAuth();
-  const router = useRouter();
+  const { user, logout } = useAuth();
   const [profile, setProfile] = useState<AuthUser | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
     let cancelled = false;
 
     (async () => {
@@ -27,14 +24,9 @@ export default function Home() {
         const result = await fetchProfile();
         if (!cancelled) setProfile(result.user);
       } catch (err) {
-        if (cancelled) return;
-        if (err instanceof ApiError && err.status === 401) {
-          // Invalid/expired token: log out locally and return to login,
-          // per Phase 1 scope (no refresh, no server-side revocation).
-          await logout();
-          router.replace('/login');
-          return;
-        }
+        // A 401 has already ended the session in services/api.ts, and the
+        // route guards are taking the user back to the auth flow.
+        if (cancelled || (err instanceof ApiError && err.status === 401)) return;
         setError(err instanceof ApiError ? err.message : 'Failed to load your profile.');
       } finally {
         if (!cancelled) setLoadingProfile(false);
@@ -44,24 +36,11 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated]);
+  }, []);
 
-  if (authLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#000000" />
-      </View>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
-  }
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace('/login');
-  };
+  // Clearing the session is enough: the route guards return the user to the
+  // auth flow.
+  const handleLogout = () => logout();
 
   const displayName = profile?.full_name ?? user?.full_name;
   const displayEmail = profile?.email ?? user?.email;
@@ -104,7 +83,6 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb', padding: 24, paddingTop: 72 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32 },
   logoMark: {
     width: 32,

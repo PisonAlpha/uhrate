@@ -33,7 +33,8 @@ export default function Register() {
       // Calls POST /api/auth/register with the existing, unchanged
       // {email, password, full_name} contract — nothing added or removed.
       await register(email, password, fullName);
-      router.replace('/home');
+      // No navigation here: the route guards move the now signed-in user
+      // into the app area.
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.status === 0 ? 'Network error. Check your connection and try again.' : err.message);

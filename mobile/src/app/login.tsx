@@ -22,7 +22,8 @@ export default function Login() {
     try {
       // Calls POST /api/auth/login with the existing, unchanged {email, password} contract.
       await login(email, password);
-      router.replace('/home');
+      // No navigation here: the route guards move the now signed-in user
+      // into the app area.
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.status === 0 ? 'Network error. Check your connection and try again.' : err.message);

@@ -1,23 +1,10 @@
-import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
-import { Redirect, useRouter } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 // Welcome / landing screen — UHRATE-branded entry point, Login / Register only.
+// Only reachable while signed out (see the guards in _layout.tsx).
 export default function Welcome() {
-  const { isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-
-  if (isLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color="#000" />
-      </View>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Redirect href="/home" />;
-  }
 
   return (
     <View style={styles.container}>
@@ -51,7 +38,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
   brandBlock: { alignItems: 'center', marginBottom: 56 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   logoMark: {

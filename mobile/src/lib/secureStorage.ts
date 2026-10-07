@@ -1,9 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 
 // Single source of truth for reading/writing the auth token. Nothing else
-// in the app should call expo-secure-store directly for this key — go
-// through AuthContext (src/context/AuthContext.tsx), which is the only
-// caller of these functions.
+// in the app should call expo-secure-store directly for this key. Callers:
+// AuthContext (src/context/AuthContext.tsx) for login/logout, and the API
+// client (src/services/api.ts) to attach the token and clear it on a 401.
 const TOKEN_KEY = 'uhrate_token';
 
 export async function getStoredToken(): Promise<string | null> {

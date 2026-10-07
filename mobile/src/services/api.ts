@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/constants/config';
-import { getStoredToken } from '@/lib/secureStorage';
+import { getStoredToken, clearStoredToken } from '@/lib/secureStorage';
 
 /**
  * Small typed API client for the existing UHRATE Next.js backend.
@@ -26,6 +26,23 @@ export class ApiError extends Error {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
+let unauthorizedHandler: (() => void) | null = null;
+
+/**
+ * Registered by AuthContext. Called after a 401 on an authenticated request
+ * has cleared the stored token, so the app can end the session in one place.
+ */
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
+
+async function handleUnauthorized(sentToken: string) {
+  // A late 401 for a token from an earlier session must not end a newer one.
+  if ((await getStoredToken()) !== sentToken) return;
+  await clearStoredToken();
+  unauthorizedHandler?.();
+}
+
 interface RequestOptions {
   method?: Method;
   body?: unknown;
@@ -41,11 +58,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     headers['Content-Type'] = 'application/json';
   }
 
+  let sentToken: string | null = null;
   if (auth) {
-    const token = await getStoredToken();
-    if (token) {
+    sentToken = await getStoredToken();
+    if (sentToken) {
       // Never log the token — only ever placed in this header.
-      headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${sentToken}`;
     }
   }
 
@@ -65,6 +83,12 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     data = await response.json();
   } catch {
     // Non-JSON or empty body; leave data as null.
+  }
+
+  // The backend rejected our token (expired, revoked secret, malformed):
+  // end the session centrally. Screens only see the ApiError below.
+  if (response.status === 401 && sentToken) {
+    await handleUnauthorized(sentToken);
   }
 
   if (!response.ok) {
