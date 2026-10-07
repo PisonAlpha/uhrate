@@ -104,7 +104,7 @@ export default function Home() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-            <button onClick={() => window.location.href = '/presale'} className="px-4 py-2 text-sm text-white font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors">🔥 Presale</button>
+            <button onClick={() => window.location.href = '/swap'} className="px-4 py-2 text-sm text-white font-bold bg-black hover:bg-gray-800 rounded-xl transition-colors">🔄 Buy UHR</button>
             {user ? (
               <div className="flex items-center gap-2">
                 <button onClick={() => window.location.href = '/dashboard'} className="px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors bg-transparent cursor-pointer">Dashboard</button>
@@ -175,13 +175,12 @@ export default function Home() {
         )}
       </header>
 
-      {/* ── PRESALE BANNER ── */}
       <div className="bg-black text-white py-2.5 px-4 text-center text-sm">
-        <span className="text-yellow-400 font-bold">🔥 UHR Presale Live</span>
+        <span className="text-white font-bold">🔄 Buy UHR Tokens</span>
         <span className="text-gray-400 mx-2">·</span>
-        <span className="text-gray-300">Buy UHR at $0.01 — 50% cheaper than swap price</span>
+        <span className="text-gray-300">Fixed price $0.02 per UHR — instant on-chain delivery</span>
         <span className="text-gray-400 mx-2">·</span>
-        <button onClick={() => window.location.href = '/presale'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">Join Presale →</button>
+        <button onClick={() => window.location.href = '/swap'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">Buy UHR →</button>
       </div>
 
       {/* ── HERO ── */}
