@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getChainById } from '@/lib/registry';
 import { ethers } from 'ethers';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 const PLATFORM_FEE_USD = 0.20;
 const PLATFORM_FEE_UHR_USD = 0.10;
@@ -59,7 +60,14 @@ async function verifyDeploymentFee(
 
 export async function POST(request: NextRequest) {
   try {
-    const { txHash, chainId, userEmail, documentId } = await request.json();
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
+    const { txHash, chainId, userEmail: suppliedEmail, documentId } = await request.json();
+    // A valid token always wins over a client-supplied email.
+    const userEmail = identity.status === 'authenticated' ? identity.email : suppliedEmail;
 
     if (!txHash || !chainId || !userEmail) {
       return NextResponse.json(

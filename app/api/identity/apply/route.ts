@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import crypto from 'crypto';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
     const body = await request.json();
     const {
-      userEmail,
+      userEmail: suppliedEmail,
       fullName,
       badgeType,
       organization,
@@ -14,6 +20,8 @@ export async function POST(request: NextRequest) {
       verificationMethod,
       verificationData,
     } = body;
+    // A valid token always wins over a client-supplied email.
+    const userEmail = identity.status === 'authenticated' ? identity.email : suppliedEmail;
 
     if (!userEmail || !fullName || !badgeType || !verificationMethod) {
       return NextResponse.json(

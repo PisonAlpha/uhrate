@@ -6,9 +6,15 @@ import { saveVerification, getVerificationByHash } from '@/lib/supabase';
 import { uploadCertificateToIPFS } from '@/lib/ipfs';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendVerificationCompleteEmail } from '@/lib/notifications';
+import { resolveAuthIdentity } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const identity = await resolveAuthIdentity(request);
+    if (identity.status === 'invalid') {
+      return NextResponse.json({ error: 'Invalid or expired authentication token' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -26,7 +32,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userEmail = formData.get('userEmail') as string;
+    // A valid token always wins over a client-supplied email.
+    const userEmail = identity.status === 'authenticated'
+      ? identity.email
+      : (formData.get('userEmail') as string);
 
     if (userEmail) {
       const { data: user } = await supabaseAdmin
