@@ -26,3 +26,11 @@ export interface ProfileResponse {
 export function fetchProfile() {
   return api.get<ProfileResponse>('/api/profile', { auth: true });
 }
+
+/**
+ * Emails a new verification link. The endpoint identifies the account by the
+ * email in the body; it does not read the token.
+ */
+export function sendVerificationEmail(email: string) {
+  return api.post<{ success: true; message: string }>('/api/auth/send-verification', { email });
+}

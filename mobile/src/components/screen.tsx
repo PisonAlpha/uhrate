@@ -14,12 +14,14 @@ interface ScreenProps {
    * keyboard's way, and tapping outside an input closes the keyboard.
    */
   form?: boolean;
+  /** Content scrolls when taller than the screen. Implied by `form`. */
+  scroll?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
 // Themed full-screen container. Padding includes the safe-area insets, so
 // content clears the notch, status bar and gesture bar.
-export function Screen({ children, muted = false, form = false, style }: ScreenProps) {
+export function Screen({ children, muted = false, form = false, scroll = false, style }: ScreenProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const backgroundColor = muted ? colors.backgroundMuted : colors.background;
@@ -30,21 +32,27 @@ export function Screen({ children, muted = false, form = false, style }: ScreenP
     paddingRight: insets.right + PADDING,
   };
 
-  if (!form) {
+  if (!form && !scroll) {
     return <View style={[styles.fill, { backgroundColor }, padding, style]}>{children}</View>;
   }
+
+  const scrollView = (
+    <ScrollView
+      style={[styles.fill, { backgroundColor }]}
+      contentContainerStyle={[styles.grow, padding, style]}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
+      {children}
+    </ScrollView>
+  );
+  if (!form) return scrollView;
 
   // 'padding' only adds space where the keyboard actually covers the view,
   // so it is also correct on Android, where the window may already resize.
   return (
     <KeyboardAvoidingView behavior="padding" style={[styles.fill, { backgroundColor }]}>
-      <ScrollView
-        contentContainerStyle={[styles.grow, padding, style]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-      >
-        {children}
-      </ScrollView>
+      {scrollView}
     </KeyboardAvoidingView>
   );
 }

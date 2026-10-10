@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator, AppState, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { fetchProfile } from '@/services/auth';
 import { ApiError } from '@/services/api';
@@ -8,6 +8,7 @@ import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Pill } from '@/components/pill';
 import { Screen } from '@/components/screen';
+import { VerifyEmailCard } from '@/components/verify-email-card';
 import { useColors } from '@/theme';
 import type { AuthUser } from '@/types/auth';
 
@@ -20,30 +21,42 @@ export default function Home() {
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      setLoadingProfile(true);
+  // Returns the loaded profile, or null if the request failed.
+  const loadProfile = useCallback(async (): Promise<AuthUser | null> => {
+    try {
+      // Real authenticated request: Authorization: Bearer <token> -> /api/profile
+      const result = await fetchProfile();
+      setProfile(result.user);
       setError(null);
-      try {
-        // Real authenticated request: Authorization: Bearer <token> -> /api/profile
-        const result = await fetchProfile();
-        if (!cancelled) setProfile(result.user);
-      } catch (err) {
-        // A 401 has already ended the session in services/api.ts, and the
-        // route guards are taking the user back to the auth flow.
-        if (cancelled || (err instanceof ApiError && err.status === 401)) return;
+      return result.user;
+    } catch (err) {
+      // A 401 has already ended the session in services/api.ts, and the
+      // route guards are taking the user back to the auth flow.
+      if (!(err instanceof ApiError && err.status === 401)) {
         setError(err instanceof ApiError ? err.message : 'Failed to load your profile.');
-      } finally {
-        if (!cancelled) setLoadingProfile(false);
       }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+      return null;
+    }
   }, []);
+
+  useEffect(() => {
+    loadProfile().finally(() => setLoadingProfile(false));
+  }, [loadProfile]);
+
+  // Right after sign-up the profile hasn't loaded yet, so fall back to the
+  // user returned by register (email_verified: false). Login's response
+  // doesn't include the flag, so the card waits for the profile there.
+  const needsVerification = (profile?.email_verified ?? user?.email_verified) === false;
+
+  // The verification link opens in the browser. When the user comes back to
+  // the app, check again so the reminder disappears without a manual refresh.
+  useEffect(() => {
+    if (!needsVerification) return;
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') loadProfile();
+    });
+    return () => subscription.remove();
+  }, [needsVerification, loadProfile]);
 
   // Clearing the session is enough: the route guards return the user to the
   // auth flow.
@@ -53,10 +66,22 @@ export default function Home() {
   const displayEmail = profile?.email ?? user?.email;
 
   return (
-    <Screen muted>
+    <Screen muted scroll>
       <View style={styles.header}>
         <BrandHeader />
       </View>
+
+      {needsVerification && displayEmail && (
+        <View style={styles.card}>
+          <VerifyEmailCard
+            email={displayEmail}
+            onCheckAgain={async () => {
+              const loaded = await loadProfile();
+              return loaded ? loaded.email_verified === true : null;
+            }}
+          />
+        </View>
+      )}
 
       <Card style={styles.card}>
         {loadingProfile ? (
