@@ -53,7 +53,7 @@ export default function Home() {
   const displayEmail = profile?.email ?? user?.email;
 
   return (
-    <Screen muted style={styles.container}>
+    <Screen muted>
       <View style={styles.header}>
         <BrandHeader />
       </View>
@@ -82,7 +82,6 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { paddingTop: 72 },
   header: { marginBottom: 32 },
   card: { marginBottom: 24 },
   label: { fontSize: 12, marginTop: 12 },

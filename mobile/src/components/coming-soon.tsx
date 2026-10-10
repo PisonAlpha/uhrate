@@ -10,7 +10,7 @@ export function ComingSoon({ title, description }: { title: string; description:
   const colors = useColors();
 
   return (
-    <Screen muted style={styles.container}>
+    <Screen muted>
       <View style={styles.header}>
         <BrandHeader />
       </View>
@@ -25,7 +25,6 @@ export function ComingSoon({ title, description }: { title: string; description:
 }
 
 const styles = StyleSheet.create({
-  container: { paddingTop: 72 },
   header: { marginBottom: 32 },
   title: { fontSize: 26, fontWeight: '700', marginBottom: 16 },
   description: { fontSize: 14, lineHeight: 20 },

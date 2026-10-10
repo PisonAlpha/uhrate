@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Text, Pressable } from 'react-native';
+import { useRef, useState } from 'react';
+import { Text, Pressable, type TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { errorMessage } from '@/services/api';
+import { isValidEmail } from '@/lib/validation';
 import { Button } from '@/components/button';
 import { ErrorMessage } from '@/components/error-message';
 import { Screen } from '@/components/screen';
@@ -14,21 +15,28 @@ export default function Login() {
   const { login } = useAuth();
   const router = useRouter();
   const colors = useColors();
+  const passwordRef = useRef<TextInput>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    // Passwords are sent exactly as typed; only the email is trimmed.
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       setError('Please enter your email and password.');
+      return;
+    }
+    if (!isValidEmail(trimmedEmail)) {
+      setError('Please enter a valid email address.');
       return;
     }
     setLoading(true);
     setError(null);
     try {
       // Calls POST /api/auth/login with the existing, unchanged {email, password} contract.
-      await login(email, password);
+      await login(trimmedEmail, password);
       // No navigation here: the route guards move the now signed-in user
       // into the app area.
     } catch (err) {
@@ -39,7 +47,7 @@ export default function Login() {
   };
 
   return (
-    <Screen style={authStyles.container}>
+    <Screen form style={authStyles.container}>
       <Text style={[authStyles.title, { color: colors.text }]}>Welcome back</Text>
       <Text style={[authStyles.subtitle, { color: colors.textMuted }]}>Sign in to your UHRATE account</Text>
 
@@ -52,15 +60,25 @@ export default function Login() {
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
+        autoComplete="email"
+        textContentType="emailAddress"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => passwordRef.current?.focus()}
         placeholder="you@example.com"
         editable={!loading}
       />
 
       <TextField
+        ref={passwordRef}
         label="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoComplete="current-password"
+        textContentType="password"
+        returnKeyType="go"
+        onSubmitEditing={handleLogin}
         placeholder="Enter your password"
         editable={!loading}
       />

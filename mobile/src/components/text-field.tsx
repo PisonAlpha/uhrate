@@ -1,18 +1,22 @@
+import type { Ref } from 'react';
 import { View, Text, TextInput, StyleSheet, type TextInputProps } from 'react-native';
 import { useColors } from '@/theme';
 
 interface TextFieldProps extends TextInputProps {
   label: string;
+  /** Lets a form move focus to this field from the previous one. */
+  ref?: Ref<TextInput>;
 }
 
 // Labelled text input. Any TextInput prop passes through.
-export function TextField({ label, style, ...inputProps }: TextFieldProps) {
+export function TextField({ label, style, ref, ...inputProps }: TextFieldProps) {
   const colors = useColors();
 
   return (
     <View>
       <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
       <TextInput
+        ref={ref}
         placeholderTextColor={colors.textSubtle}
         {...inputProps}
         style={[styles.input, { borderColor: colors.borderStrong, color: colors.text }, style]}
