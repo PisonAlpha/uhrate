@@ -5,10 +5,8 @@ import { getStoredToken, clearStoredToken } from '@/lib/secureStorage';
  * Small typed API client for the existing UHRATE Next.js backend.
  * Centralizes: base URL, JSON headers, Bearer-token attachment (read from
  * SecureStore, never duplicated per-screen), and error normalization.
- *
- * multipart/form-data support (needed later for verify/upload screens) is a
- * deliberately deferred extension point — not implemented in Phase 1, which
- * only needs JSON auth endpoints.
+ * Sends JSON bodies, or multipart/form-data when the body is a FormData
+ * (file uploads; see api.upload and appendFile).
  */
 
 export class ApiError extends Error {
@@ -31,6 +29,24 @@ export function errorMessage(err: unknown, fallback = 'Something went wrong. Ple
 }
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+/** A local file to upload, e.g. from the image or document picker. */
+export interface UploadFile {
+  /** Local URI, e.g. file:///... or content://... */
+  uri: string;
+  name: string;
+  /** MIME type, e.g. image/jpeg or application/pdf. */
+  type: string;
+}
+
+/**
+ * Adds a local file to a FormData under `field`. React Native uploads a
+ * { uri, name, type } object as a file part; TypeScript's DOM types only
+ * allow string or Blob, hence the cast.
+ */
+export function appendFile(form: FormData, field: string, file: UploadFile) {
+  form.append(field, file as unknown as Blob);
+}
 
 let unauthorizedHandler: (() => void) | null = null;
 
@@ -59,8 +75,11 @@ interface RequestOptions {
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = false } = options;
 
+  // FormData is sent as multipart/form-data. Its Content-Type is left to
+  // fetch, which adds the boundary the server needs to split the parts.
+  const isForm = body instanceof FormData;
   const headers: Record<string, string> = {};
-  if (body !== undefined) {
+  if (body !== undefined && !isForm) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -78,7 +97,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
     throw new ApiError(0, 'Network request failed. Check your connection and try again.');
@@ -99,7 +118,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const errorBody = data as { error?: string } | null;
-    const message = errorBody?.error || `Request failed with status ${response.status}`;
+    const message =
+      errorBody?.error ||
+      (response.status === 413
+        ? 'The file is too large to upload.'
+        : `Request failed with status ${response.status}`);
     throw new ApiError(response.status, message, data);
   }
 
@@ -115,4 +138,7 @@ export const api = {
     request<T>(path, { method: 'PUT', body, auth: opts?.auth }),
   delete: <T>(path: string, opts?: { auth?: boolean }) =>
     request<T>(path, { method: 'DELETE', auth: opts?.auth }),
+  /** POST multipart/form-data. Build the form with appendFile and form.append. */
+  upload: <T>(path: string, form: FormData, opts?: { auth?: boolean }) =>
+    request<T>(path, { method: 'POST', body: form, auth: opts?.auth }),
 };
