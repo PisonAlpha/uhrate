@@ -1,17 +1,24 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { StatusBar, useColorScheme } from 'react-native';
+import { Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { useNavigationTheme } from '@/theme';
 
 // Keep the splash screen up until the stored token has been read, so neither
 // the signed-in nor the signed-out area flashes on launch.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const isDark = useColorScheme() === 'dark';
+
   return (
-    <AuthProvider>
-      <RootNavigator />
-    </AuthProvider>
+    <ThemeProvider value={useNavigationTheme()}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

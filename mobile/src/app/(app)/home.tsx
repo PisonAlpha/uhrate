@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { fetchProfile } from '@/services/auth';
 import { ApiError } from '@/services/api';
+import { BrandHeader } from '@/components/brand-header';
+import { Button } from '@/components/button';
+import { Card } from '@/components/card';
+import { Pill } from '@/components/pill';
+import { Screen } from '@/components/screen';
+import { useColors } from '@/theme';
 import type { AuthUser } from '@/types/auth';
 
 // Temporary validation screen for Phase 1 — proves the mobile app can reach
 // the backend with a verified bearer token. NOT the full dashboard.
 export default function Home() {
   const { user, logout } = useAuth();
+  const colors = useColors();
   const [profile, setProfile] = useState<AuthUser | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,74 +53,39 @@ export default function Home() {
   const displayEmail = profile?.email ?? user?.email;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.logoRow}>
-        <View style={styles.logoMark}>
-          <Text style={styles.logoMarkText}>UH</Text>
-        </View>
-        <Text style={styles.brand}>UHRATE</Text>
+    <Screen muted style={styles.container}>
+      <View style={styles.header}>
+        <BrandHeader />
       </View>
 
-      <View style={styles.card}>
+      <Card style={styles.card}>
         {loadingProfile ? (
-          <ActivityIndicator color="#000000" />
+          <ActivityIndicator color={colors.primary} />
         ) : error ? (
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
         ) : (
           <>
-            <Text style={styles.label}>Name</Text>
-            <Text style={styles.value}>{displayName || '—'}</Text>
+            <Text style={[styles.label, { color: colors.textSubtle }]}>Name</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{displayName || '—'}</Text>
 
-            <Text style={styles.label}>Email</Text>
-            <Text style={styles.value}>{displayEmail || '—'}</Text>
+            <Text style={[styles.label, { color: colors.textSubtle }]}>Email</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{displayEmail || '—'}</Text>
 
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>✓ Authenticated</Text>
-            </View>
+            <Pill label="✓ Authenticated" tone="success" />
           </>
         )}
-      </View>
+      </Card>
 
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </Pressable>
-    </View>
+      <Button title="Logout" variant="danger" onPress={handleLogout} />
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb', padding: 24, paddingTop: 72 },
-  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32 },
-  logoMark: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoMarkText: { color: '#ffffff', fontWeight: '700', fontSize: 12 },
-  brand: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    padding: 24,
-    marginBottom: 24,
-  },
-  label: { fontSize: 12, color: '#9ca3af', marginTop: 12 },
-  value: { fontSize: 16, fontWeight: '600', color: '#111827', marginTop: 2 },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#dcfce7',
-    borderRadius: 999,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    marginTop: 16,
-  },
-  statusText: { color: '#15803d', fontSize: 12, fontWeight: '600' },
-  errorText: { color: '#dc2626', fontSize: 13 },
-  logoutButton: { borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  logoutText: { color: '#dc2626', fontWeight: '600', fontSize: 15 },
+  container: { paddingTop: 72 },
+  header: { marginBottom: 32 },
+  card: { marginBottom: 24 },
+  label: { fontSize: 12, marginTop: 12 },
+  value: { fontSize: 16, fontWeight: '600', marginTop: 2 },
+  errorText: { fontSize: 13 },
 });

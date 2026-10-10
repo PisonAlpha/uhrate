@@ -24,6 +24,12 @@ export class ApiError extends Error {
   }
 }
 
+/** User-facing message for an error thrown by a request. */
+export function errorMessage(err: unknown, fallback = 'Something went wrong. Please try again.'): string {
+  if (!(err instanceof ApiError)) return fallback;
+  return err.status === 0 ? 'Network error. Check your connection and try again.' : err.message;
+}
+
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 let unauthorizedHandler: (() => void) | null = null;

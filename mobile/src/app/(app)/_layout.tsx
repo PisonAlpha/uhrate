@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
+import { useColors } from '@/theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -15,13 +16,15 @@ function tabIcon(outline: IconName, filled: IconName) {
 // Authenticated area. Reachable only while signed in — see the
 // Stack.Protected guards in the root layout (src/app/_layout.tsx).
 export default function AppLayout() {
+  const colors = useColors();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#000000',
-        tabBarInactiveTintColor: '#9ca3af',
-        tabBarStyle: { backgroundColor: '#ffffff', borderTopColor: '#e5e7eb' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSubtle,
+        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
