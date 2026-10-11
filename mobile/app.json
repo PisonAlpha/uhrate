@@ -38,8 +38,16 @@
         "expo-image-picker",
         {
           "photosPermission": "UHRATE needs access to your photos so you can choose images and videos to verify.",
-          "cameraPermission": false,
+          "cameraPermission": "UHRATE uses the camera to photograph documents and scan certificate QR codes.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "UHRATE uses the camera to photograph documents and scan certificate QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
         }
       ]
     ],

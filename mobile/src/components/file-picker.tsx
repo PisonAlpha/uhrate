@@ -1,8 +1,16 @@
 import { useState } from 'react';
-import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, Linking, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { fileSizeError, formatFileSize, pickDocument, pickFromLibrary, type PickedFile } from '@/lib/file-picker';
+import {
+  CameraPermissionError,
+  fileSizeError,
+  formatFileSize,
+  pickDocument,
+  pickFromLibrary,
+  takePhoto,
+  type PickedFile,
+} from '@/lib/file-picker';
 import { ErrorMessage } from '@/components/error-message';
 import { useColors } from '@/theme';
 
@@ -15,13 +23,15 @@ interface FilePickerProps {
 }
 
 // Mobile replacement for the web's drag-and-drop uploader: choose one file
-// from the gallery or the file browser, then see what was picked.
+// from the gallery, the camera or the file browser, then see what was picked.
 export function FilePicker({ file, onChange, maxSizeMB = 50, disabled = false }: FilePickerProps) {
   const colors = useColors();
   const [error, setError] = useState<string | null>(null);
+  const [cameraBlocked, setCameraBlocked] = useState(false);
 
   const choose = async (pick: () => Promise<PickedFile | null>) => {
     setError(null);
+    setCameraBlocked(false);
     try {
       const picked = await pick();
       if (!picked) return;
@@ -31,7 +41,12 @@ export function FilePicker({ file, onChange, maxSizeMB = 50, disabled = false }:
         return;
       }
       onChange(picked);
-    } catch {
+    } catch (err) {
+      if (err instanceof CameraPermissionError) {
+        setCameraBlocked(true);
+        setError('Camera access is turned off for this app. Allow it in Settings to take a photo.');
+        return;
+      }
       setError("Couldn't open that file. Please try another one.");
     }
   };
@@ -39,6 +54,11 @@ export function FilePicker({ file, onChange, maxSizeMB = 50, disabled = false }:
   return (
     <View>
       {error && <ErrorMessage message={error} />}
+      {cameraBlocked && (
+        <Pressable onPress={() => Linking.openSettings()} style={styles.settingsLink}>
+          <Text style={[styles.settingsText, { color: colors.text }]}>Open Settings</Text>
+        </Pressable>
+      )}
 
       {file ? (
         <View style={[styles.selected, { borderColor: colors.border, backgroundColor: colors.card }]}>
@@ -70,6 +90,7 @@ export function FilePicker({ file, onChange, maxSizeMB = 50, disabled = false }:
       ) : (
         <View style={styles.options}>
           <Option icon="images-outline" label="Photos & videos" onPress={() => choose(pickFromLibrary)} disabled={disabled} />
+          <Option icon="camera-outline" label="Camera" onPress={() => choose(takePhoto)} disabled={disabled} />
           <Option icon="folder-open-outline" label="Files" onPress={() => choose(pickDocument)} disabled={disabled} />
         </View>
       )}
@@ -129,6 +150,8 @@ const styles = StyleSheet.create({
   // Full width so Android doesn't clip the bold label (see Button).
   optionLabel: { fontSize: 13, fontWeight: '600', alignSelf: 'stretch', textAlign: 'center' },
   dimmed: { opacity: 0.7 },
+  settingsLink: { alignSelf: 'flex-start', marginTop: -8, marginBottom: 16 },
+  settingsText: { fontSize: 13, fontWeight: '600' },
   selected: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderRadius: 16, padding: 12 },
   thumb: { width: 56, height: 56, borderRadius: 10 },
   iconThumb: { justifyContent: 'center', alignItems: 'center' },

@@ -35,6 +35,30 @@ export async function pickFromLibrary(): Promise<PickedFile | null> {
   };
 }
 
+/** Thrown by takePhoto when the user has refused camera access. */
+export class CameraPermissionError extends Error {}
+
+/**
+ * Photo taken with the phone's own camera app, e.g. of a paper document.
+ * Asks for camera access first. Resolves to null if cancelled.
+ */
+export async function takePhoto(): Promise<PickedFile | null> {
+  const permission = await ImagePicker.requestCameraPermissionsAsync();
+  if (!permission.granted) throw new CameraPermissionError();
+
+  const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1, allowsEditing: false });
+  if (result.canceled || !result.assets[0]) return null;
+
+  const asset = result.assets[0];
+  return {
+    uri: asset.uri,
+    name: asset.fileName ?? nameFromUri(asset.uri),
+    type: asset.mimeType ?? 'image/jpeg',
+    size: asset.fileSize ?? null,
+    isImage: true,
+  };
+}
+
 /** Any file from the device's file browser. Resolves to null if cancelled. */
 export async function pickDocument(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
