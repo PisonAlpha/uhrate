@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { lookupCode, lookupFile } from '@/services/lookup';
 import { errorMessage } from '@/services/api';
@@ -11,9 +11,10 @@ import { Card } from '@/components/card';
 import { ErrorMessage } from '@/components/error-message';
 import { FilePicker } from '@/components/file-picker';
 import { Pill } from '@/components/pill';
+import { RecordRow, RegistryCard } from '@/components/record-card';
 import { TextField } from '@/components/text-field';
 import { monoFont, useColors } from '@/theme';
-import type { LookupOutcome, PublicVerification, RegistryRecord } from '@/types/lookup';
+import type { LookupOutcome, PublicVerification } from '@/types/lookup';
 
 interface LookupPanelProps {
   /** Code handed over by the QR scanner. Looked up as soon as it arrives. */
@@ -150,7 +151,7 @@ function LookupResult({ outcome, onReset }: { outcome: LookupOutcome; onReset: (
           r.type === 'verification' ? (
             <VerificationCard key={i} verification={r.verification} />
           ) : (
-            <RegistryCard key={i} record={r.record} />
+            <RegistryCard key={i} record={r.record} style={styles.section} />
           )
         )
       )}
@@ -170,49 +171,16 @@ function VerificationCard({ verification: v }: { verification: PublicVerificatio
         {v.file_name}
       </Text>
       <Pill label={v.rating} tone={ratingTone(v.rating)} style={styles.ratingPill} />
-      <Row label="Certificate ID" value={v.certificate_id} mono />
-      <Row
+      <RecordRow label="Certificate ID" value={v.certificate_id} mono />
+      <RecordRow
         label="Trust score"
         value={`${v.trust_score}/100`}
         color={trust === 'neutral' ? undefined : colors[trust]}
       />
-      <Row label="Verified" value={formatDate(v.verified_at)} />
-      {v.blockchain_tx && <Row label={`On-chain${v.blockchain_chain ? ` (${v.blockchain_chain})` : ''}`} value={v.blockchain_tx} mono />}
-      <Row label="SHA-256" value={v.sha256_hash} mono />
+      <RecordRow label="Verified" value={formatDate(v.verified_at)} />
+      {v.blockchain_tx && <RecordRow label={`On-chain${v.blockchain_chain ? ` (${v.blockchain_chain})` : ''}`} value={v.blockchain_tx} mono />}
+      <RecordRow label="SHA-256" value={v.sha256_hash} mono />
     </Card>
-  );
-}
-
-function RegistryCard({ record }: { record: RegistryRecord }) {
-  const colors = useColors();
-
-  return (
-    <Card style={styles.section}>
-      <Pill
-        label={record.valid === false ? 'Marked invalid' : '✓ Registered on UHRATE'}
-        tone={record.valid === false ? 'danger' : 'success'}
-        style={styles.headPill}
-      />
-      <Text style={[styles.cardTitle, { color: colors.text }]}>{record.title}</Text>
-      <Row label="Registry ID" value={record.registryId} mono />
-      {record.fields.map((f) => (
-        <Row key={f.label} label={f.label} value={f.value} />
-      ))}
-      <Row label="Registered" value={formatDate(record.registeredAt)} />
-      {record.tx && <Row label={`On-chain${record.chain ? ` (${record.chain})` : ''}`} value={record.tx} mono />}
-    </Card>
-  );
-}
-
-function Row({ label, value, mono = false, color }: { label: string; value: string; mono?: boolean; color?: string }) {
-  const colors = useColors();
-  return (
-    <View style={[styles.row, { borderTopColor: colors.border }]}>
-      <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
-      <Text style={[mono ? styles.mono : styles.value, { color: color ?? colors.text }]} selectable={mono}>
-        {value}
-      </Text>
-    </View>
   );
 }
 
@@ -228,8 +196,6 @@ const styles = StyleSheet.create({
   ratingPill: { marginTop: 8 },
   cardTitle: { fontSize: 16, fontWeight: '700' },
   body: { fontSize: 14, lineHeight: 20, marginTop: 6 },
-  row: { borderTopWidth: 1, marginTop: 12, paddingTop: 12 },
   label: { fontSize: 12, marginTop: 4 },
-  value: { fontSize: 14, fontWeight: '600', marginTop: 2 },
   mono: { fontSize: 13, fontWeight: '600', marginTop: 2, fontFamily: monoFont },
 });

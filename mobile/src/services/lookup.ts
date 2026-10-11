@@ -56,7 +56,7 @@ function lookupRegistryId(registryId: string): Promise<LookupOutcome> {
   }
 }
 
-type AnyLookupResponse =
+export type AnyLookupResponse =
   | VerifyPublicResponse
   | DocumentRegistryResponse
   | EducationVerifyResponse
@@ -79,7 +79,8 @@ async function combine(requests: Promise<AnyLookupResponse>[]): Promise<LookupOu
   };
 }
 
-function toRecords(response: AnyLookupResponse): LookupRecord[] {
+/** Turns any lookup route's response into the records the screens show. */
+export function toRecords(response: AnyLookupResponse): LookupRecord[] {
   if (!response.found) return [];
   if ('verification' in response) return [{ type: 'verification', verification: response.verification }];
   if ('registry' in response) {
