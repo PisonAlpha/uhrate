@@ -33,6 +33,7 @@ const REGISTRIES: RegistryEntry[] = [
     title: 'Legal',
     description: 'Contracts, deeds and other legal documents.',
     icon: 'briefcase-outline',
+    href: '/legal',
   },
   {
     title: 'Media',

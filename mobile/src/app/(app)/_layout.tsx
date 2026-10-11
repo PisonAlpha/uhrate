@@ -9,6 +9,7 @@ export default function AppLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="scan" options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }} />
       <Stack.Screen name="education" />
+      <Stack.Screen name="legal" />
     </Stack>
   );
 }
