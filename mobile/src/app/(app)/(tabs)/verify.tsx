@@ -1,28 +1,243 @@
-import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import type { ComponentProps } from 'react';
+import { verifyFile } from '@/services/verify';
+import { ApiError, errorMessage } from '@/services/api';
+import { formatFileSize, type PickedFile } from '@/lib/file-picker';
+import { ratingTone, trustTone } from '@/lib/format';
+import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
-import { ComingSoon } from '@/components/coming-soon';
+import { Card } from '@/components/card';
+import { ErrorMessage } from '@/components/error-message';
 import { FilePicker } from '@/components/file-picker';
-import type { PickedFile } from '@/lib/file-picker';
+import { Pill } from '@/components/pill';
+import { ScoreBar } from '@/components/score-bar';
+import { Screen } from '@/components/screen';
+import { useColors } from '@/theme';
+import type { VerifyResponse } from '@/types/verify';
 
-// Verifying arrives with roadmap D20. File picking (C13) and QR scanning
-// (C14) already work, so they are shown here to be tried out.
+// Shown in turn while the server works, so a long analysis doesn't look stuck.
+const PROGRESS_STEPS = [
+  'Uploading your file...',
+  'Extracting Digital DNA...',
+  'Running AI deepfake analysis...',
+  'Computing trust score...',
+];
+const PROGRESS_INTERVAL_MS = 2500;
+
+const CHECKS: { icon: ComponentProps<typeof Ionicons>['name']; label: string }[] = [
+  { icon: 'hardware-chip-outline', label: 'AI generation' },
+  { icon: 'eye-outline', label: 'Deepfake' },
+  { icon: 'cut-outline', label: 'Manipulation' },
+  { icon: 'analytics-outline', label: 'Trust score' },
+];
+
+// Verify (roadmap D20): pick a file, run /api/verify, show the trust report.
+// Mobile version of the web's /scan page, which /verify redirects to.
 export default function Verify() {
   const router = useRouter();
+  const colors = useColors();
   const [file, setFile] = useState<PickedFile | null>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [step, setStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<VerifyResponse | null>(null);
+
+  useEffect(() => {
+    if (!verifying) return;
+    setStep(0);
+    const timer = setInterval(
+      () => setStep((s) => Math.min(s + 1, PROGRESS_STEPS.length - 1)),
+      PROGRESS_INTERVAL_MS
+    );
+    return () => clearInterval(timer);
+  }, [verifying]);
+
+  const handleVerify = async () => {
+    if (!file) return;
+    setVerifying(true);
+    setError(null);
+    try {
+      setResult(await verifyFile(file));
+    } catch (err) {
+      // A 401 has already ended the session in services/api.ts.
+      if (!(err instanceof ApiError && err.status === 401)) setError(errorMessage(err));
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const reset = () => {
+    setResult(null);
+    setFile(null);
+    setError(null);
+  };
 
   return (
-    <ComingSoon
-      title="Verify"
-      description="Check any image, video or document for AI generation, deepfakes and manipulation, and get a Digital DNA certificate."
-    >
-      <FilePicker file={file} onChange={setFile} />
-      <Button title="Scan a QR code" variant="secondary" onPress={() => router.push('/scan')} style={styles.scan} />
-    </ComingSoon>
+    <Screen muted scroll>
+      <View style={styles.header}>
+        <BrandHeader />
+      </View>
+      <Text style={[styles.title, { color: colors.text }]}>Verify</Text>
+
+      {result ? (
+        <VerifyResult result={result} onReset={reset} />
+      ) : (
+        <>
+          <Text style={[styles.intro, { color: colors.textMuted }]}>
+            Check any image, video, audio file or document for AI generation, deepfakes and manipulation, and get a
+            trust report. Each check uses one credit on the free plan.
+          </Text>
+
+          <View style={styles.checks}>
+            {CHECKS.map((c) => (
+              <View key={c.label} style={[styles.check, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Ionicons name={c.icon} size={20} color={colors.text} />
+                <Text style={[styles.checkLabel, { color: colors.textSecondary }]}>{c.label}</Text>
+              </View>
+            ))}
+          </View>
+
+          {error && <ErrorMessage message={error} />}
+
+          {verifying ? (
+            <Card style={styles.progress}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={[styles.progressStep, { color: colors.text }]}>{PROGRESS_STEPS[step]}</Text>
+              <Text style={[styles.progressNote, { color: colors.textMuted }]}>
+                Analysing your file with 6 AI models. This can take a minute.
+              </Text>
+            </Card>
+          ) : (
+            <>
+              <FilePicker file={file} onChange={setFile} />
+              <Button title="Verify file" onPress={handleVerify} disabled={!file} style={styles.action} />
+              <Button
+                title="Scan a QR code"
+                variant="secondary"
+                onPress={() => router.push('/scan')}
+                style={styles.secondaryAction}
+              />
+            </>
+          )}
+        </>
+      )}
+    </Screen>
+  );
+}
+
+function VerifyResult({ result, onReset }: { result: VerifyResponse; onReset: () => void }) {
+  const colors = useColors();
+  const { data, analysis, cached } = result;
+  const trust = trustTone(data.trust_score);
+  const trustColor = trust === 'neutral' ? colors.text : colors[trust];
+  const issues = analysis?.detected_issues ?? [];
+
+  return (
+    <>
+      {cached && (
+        <Card style={styles.section}>
+          <Text style={[styles.note, { color: colors.textMuted }]}>
+            This exact file has been verified on UHRATE before, so this is the earlier result.
+          </Text>
+        </Card>
+      )}
+
+      <Card style={styles.section}>
+        <View style={styles.fileRow}>
+          <View style={styles.fileInfo}>
+            <Text style={[styles.fileName, { color: colors.text }]} numberOfLines={2}>
+              {data.file_name}
+            </Text>
+            <Text style={[styles.fileMeta, { color: colors.textMuted }]} numberOfLines={1}>
+              {[data.file_type, data.file_size != null ? formatFileSize(data.file_size) : null]
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
+          </View>
+        </View>
+        <Pill label={data.rating} tone={ratingTone(data.rating)} style={styles.ratingPill} />
+
+        <View style={[styles.trustRow, { borderTopColor: colors.border }]}>
+          <Text style={[styles.trustLabel, { color: colors.textSecondary }]}>Overall trust score</Text>
+          <Text style={[styles.trustValue, { color: trustColor }]}>{data.trust_score}/100</Text>
+        </View>
+
+        <ScoreBar label="Originality" value={data.originality_score} color={colors.success} />
+        <ScoreBar label="AI generation probability" value={data.ai_score} color={colors.warning} />
+        <ScoreBar label="Deepfake risk" value={data.deepfake_score} color={colors.danger} />
+        <ScoreBar label="Manipulation" value={data.manipulation_score} color={colors.info} />
+      </Card>
+
+      {analysis?.summary && (
+        <Card style={styles.section}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>AI analysis</Text>
+          <Text style={[styles.summary, { color: colors.textSecondary }]}>{analysis.summary}</Text>
+          {issues.map((issue, i) => (
+            <View key={i} style={styles.issue}>
+              <Ionicons name="warning-outline" size={16} color={colors.warning} />
+              <Text style={[styles.issueText, { color: colors.textSecondary }]}>{issue}</Text>
+            </View>
+          ))}
+        </Card>
+      )}
+
+      <Card style={styles.section}>
+        <Text style={[styles.refLabel, { color: colors.textMuted }]}>Scan reference</Text>
+        <Text style={[styles.ref, { color: colors.text }]} selectable>
+          {data.certificate_id}
+        </Text>
+      </Card>
+
+      <Button title="Verify another file" onPress={onReset} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  scan: { marginTop: 16 },
+  header: { marginBottom: 24 },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
+  intro: { fontSize: 14, lineHeight: 20, marginBottom: 16 },
+  checks: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  check: {
+    flexBasis: '45%',
+    flexGrow: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+  },
+  checkLabel: { fontSize: 13, fontWeight: '600', flex: 1 },
+  progress: { alignItems: 'center', paddingVertical: 32 },
+  progressStep: { fontSize: 15, fontWeight: '600', marginTop: 16, alignSelf: 'stretch', textAlign: 'center' },
+  progressNote: { fontSize: 13, marginTop: 6, textAlign: 'center' },
+  action: { marginTop: 16 },
+  secondaryAction: { marginTop: 12 },
+  section: { marginBottom: 16 },
+  note: { fontSize: 13, lineHeight: 19 },
+  fileRow: { flexDirection: 'row' },
+  fileInfo: { flex: 1 },
+  fileName: { fontSize: 16, fontWeight: '700' },
+  fileMeta: { fontSize: 12, marginTop: 2 },
+  ratingPill: { marginTop: 12 },
+  trustRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    marginTop: 16,
+    paddingTop: 16,
+  },
+  trustLabel: { fontSize: 14, fontWeight: '600' },
+  trustValue: { fontSize: 28, fontWeight: '800' },
+  cardTitle: { fontSize: 16, fontWeight: '700' },
+  summary: { fontSize: 14, lineHeight: 20, marginTop: 8 },
+  issue: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  issueText: { flex: 1, fontSize: 13, lineHeight: 19 },
+  refLabel: { fontSize: 12 },
+  ref: { fontSize: 14, fontWeight: '600', marginTop: 4, fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }) },
 });

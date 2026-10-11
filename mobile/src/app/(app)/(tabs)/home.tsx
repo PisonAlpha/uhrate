@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, AppState, RefreshControl, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchDashboard } from '@/services/dashboard';
@@ -56,6 +56,20 @@ export default function Home() {
   useEffect(() => {
     loadDashboard().finally(() => setLoading(false));
   }, [loadDashboard]);
+
+  // Reload quietly when returning to this tab (e.g. after verifying a file),
+  // so credits and history are current. The first focus is the mount above.
+  const focusedBefore = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (!focusedBefore.current) {
+        focusedBefore.current = true;
+        return;
+      }
+      loadDashboard();
+      reloadProfile();
+    }, [loadDashboard, reloadProfile])
+  );
 
   const refresh = async () => {
     setRefreshing(true);
