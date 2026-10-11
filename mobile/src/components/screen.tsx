@@ -1,5 +1,6 @@
 import { View, ScrollView, KeyboardAvoidingView, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import type { RefreshControlProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/theme';
 
@@ -16,12 +17,14 @@ interface ScreenProps {
   form?: boolean;
   /** Content scrolls when taller than the screen. Implied by `form`. */
   scroll?: boolean;
+  /** Pull-to-refresh, for scrolling screens. */
+  refreshControl?: ReactElement<RefreshControlProps>;
   style?: StyleProp<ViewStyle>;
 }
 
 // Themed full-screen container. Padding includes the safe-area insets, so
 // content clears the notch, status bar and gesture bar.
-export function Screen({ children, muted = false, form = false, scroll = false, style }: ScreenProps) {
+export function Screen({ children, muted = false, form = false, scroll = false, refreshControl, style }: ScreenProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const backgroundColor = muted ? colors.backgroundMuted : colors.background;
@@ -42,6 +45,7 @@ export function Screen({ children, muted = false, form = false, scroll = false, 
       contentContainerStyle={[styles.grow, padding, style]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
+      refreshControl={refreshControl}
     >
       {children}
     </ScrollView>

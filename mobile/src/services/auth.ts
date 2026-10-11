@@ -34,3 +34,12 @@ export function fetchProfile() {
 export function sendVerificationEmail(email: string) {
   return api.post<{ success: true; message: string }>('/api/auth/send-verification', { email });
 }
+
+/** Changes the signed-in user's password. Identity comes from the token. */
+export function changePassword(currentPassword: string, newPassword: string) {
+  return api.post<{ success: true; message: string }>(
+    '/api/profile/change-password',
+    { currentPassword, newPassword },
+    { auth: true }
+  );
+}

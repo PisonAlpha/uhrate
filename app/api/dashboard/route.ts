@@ -34,8 +34,11 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(100);
 
+    // Verifications are saved with user_email only (see /api/verify), so
+    // filter by email whenever there is one. Adding a user_id filter on top
+    // matched nothing, or errored where the column doesn't exist.
     if (email) query = query.eq('user_email', email);
-    if (userId) query = query.eq('user_id', userId);
+    else if (userId) query = query.eq('user_id', userId);
 
     const { data: verifications, error } = await query;
     if (error) throw error;

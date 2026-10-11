@@ -17,6 +17,10 @@ export const lightColors = {
   dangerBorder: '#fecaca',
   success: '#15803d',
   successBackground: '#dcfce7',
+  warning: '#b45309',
+  warningBackground: '#fef3c7',
+  info: '#2563eb',
+  accent: '#7c3aed',
   neutralBackground: '#f3f4f6',
 };
 
@@ -39,5 +43,9 @@ export const darkColors: ThemeColors = {
   dangerBorder: '#7f1d1d',
   success: '#4ade80',
   successBackground: '#052e16',
+  warning: '#fbbf24',
+  warningBackground: '#2a2008',
+  info: '#60a5fa',
+  accent: '#a78bfa',
   neutralBackground: '#262626',
 };

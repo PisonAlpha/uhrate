@@ -1,14 +1,37 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { useColors } from '@/theme';
+import { View, Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { useColors, type ThemeColors } from '@/theme';
+
+export type PillTone = 'neutral' | 'success' | 'warning' | 'danger';
+
+function toneColors(tone: PillTone, colors: ThemeColors) {
+  switch (tone) {
+    case 'success':
+      return { background: colors.successBackground, text: colors.success };
+    case 'warning':
+      return { background: colors.warningBackground, text: colors.warning };
+    case 'danger':
+      return { background: colors.dangerBackground, text: colors.danger };
+    default:
+      return { background: colors.neutralBackground, text: colors.textSecondary };
+  }
+}
 
 // Small rounded status label, e.g. "Authenticated" or "Coming soon".
-export function Pill({ label, tone = 'neutral' }: { label: string; tone?: 'neutral' | 'success' }) {
+export function Pill({
+  label,
+  tone = 'neutral',
+  style,
+}: {
+  label: string;
+  tone?: PillTone;
+  style?: StyleProp<ViewStyle>;
+}) {
   const colors = useColors();
-  const success = tone === 'success';
+  const { background, text } = toneColors(tone, colors);
 
   return (
-    <View style={[styles.pill, { backgroundColor: success ? colors.successBackground : colors.neutralBackground }]}>
-      <Text style={[styles.text, { color: success ? colors.success : colors.textSecondary }]}>{label}</Text>
+    <View style={[styles.pill, { backgroundColor: background }, style]}>
+      <Text style={[styles.text, { color: text }]}>{label}</Text>
     </View>
   );
 }

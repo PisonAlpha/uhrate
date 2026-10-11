@@ -12,6 +12,10 @@ export interface AuthUser {
   email_verified?: boolean;
   verified_badge?: boolean;
   wallet_address?: string;
+  /** Returned by /api/profile only. */
+  plan_expires_at?: string | null;
+  /** Returned by /api/profile only. */
+  created_at?: string;
 }
 
 export interface AuthSuccessResponse {
