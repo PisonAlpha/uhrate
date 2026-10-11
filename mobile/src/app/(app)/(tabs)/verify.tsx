@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Platform, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { verifyFile } from '@/services/verify';
 import { ApiError, errorMessage } from '@/services/api';
 import { formatFileSize, type PickedFile } from '@/lib/file-picker';
+import { parseLookupCode, type LookupCode } from '@/lib/lookup-code';
 import { ratingTone, trustTone } from '@/lib/format';
 import { BrandHeader } from '@/components/brand-header';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { ErrorMessage } from '@/components/error-message';
 import { FilePicker } from '@/components/file-picker';
+import { LookupPanel } from '@/components/lookup-panel';
 import { Pill } from '@/components/pill';
 import { ScoreBar } from '@/components/score-bar';
 import { Screen } from '@/components/screen';
-import { useColors } from '@/theme';
+import { SegmentedControl } from '@/components/segmented-control';
+import { monoFont, useColors } from '@/theme';
 import type { VerifyResponse } from '@/types/verify';
 
 // Shown in turn while the server works, so a long analysis doesn't look stuck.
@@ -34,10 +37,55 @@ const CHECKS: { icon: ComponentProps<typeof Ionicons>['name']; label: string }[]
   { icon: 'analytics-outline', label: 'Trust score' },
 ];
 
+type Mode = 'verify' | 'lookup';
+
+// The Verify tab holds two tools: Verify (D20, also covering D21) and Look up
+// (D23). The QR scanner returns here with `code` (and `t`, so the same code
+// can be scanned twice) to open Look up and run it.
+export default function VerifyTab() {
+  const colors = useColors();
+  const { code, t } = useLocalSearchParams<{ code?: string; t?: string }>();
+  const [mode, setMode] = useState<Mode>('verify');
+  const [scanned, setScanned] = useState<LookupCode | null>(null);
+
+  useEffect(() => {
+    const parsed = code ? parseLookupCode(code) : null;
+    if (!parsed) return;
+    setMode('lookup');
+    setScanned(parsed);
+  }, [code, t]);
+
+  return (
+    <Screen muted form>
+      <View style={styles.header}>
+        <BrandHeader />
+      </View>
+      <Text style={[styles.title, { color: colors.text }]}>{mode === 'verify' ? 'Verify' : 'Look up'}</Text>
+      <View style={styles.switch}>
+        <SegmentedControl
+          options={[
+            { value: 'verify', label: 'Verify file' },
+            { value: 'lookup', label: 'Look up' },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
+      </View>
+
+      {/* Both stay mounted, so switching back and forth keeps each one's progress. */}
+      <View style={mode !== 'verify' && styles.hidden}>
+        <VerifyPanel />
+      </View>
+      <View style={mode !== 'lookup' && styles.hidden}>
+        <LookupPanel scannedCode={scanned} />
+      </View>
+    </Screen>
+  );
+}
+
 // Verify (roadmap D20): pick a file, run /api/verify, show the trust report.
 // Mobile version of the web's /scan page, which /verify redirects to.
-export default function Verify() {
-  const router = useRouter();
+function VerifyPanel() {
   const colors = useColors();
   const [file, setFile] = useState<PickedFile | null>(null);
   const [verifying, setVerifying] = useState(false);
@@ -76,12 +124,7 @@ export default function Verify() {
   };
 
   return (
-    <Screen muted scroll>
-      <View style={styles.header}>
-        <BrandHeader />
-      </View>
-      <Text style={[styles.title, { color: colors.text }]}>Verify</Text>
-
+    <>
       {result ? (
         <VerifyResult result={result} onReset={reset} />
       ) : (
@@ -114,17 +157,11 @@ export default function Verify() {
             <>
               <FilePicker file={file} onChange={setFile} />
               <Button title="Verify file" onPress={handleVerify} disabled={!file} style={styles.action} />
-              <Button
-                title="Scan a QR code"
-                variant="secondary"
-                onPress={() => router.push('/scan')}
-                style={styles.secondaryAction}
-              />
             </>
           )}
         </>
       )}
-    </Screen>
+    </>
   );
 }
 
@@ -198,7 +235,9 @@ function VerifyResult({ result, onReset }: { result: VerifyResponse; onReset: ()
 
 const styles = StyleSheet.create({
   header: { marginBottom: 24 },
-  title: { fontSize: 26, fontWeight: '700', marginBottom: 8 },
+  title: { fontSize: 26, fontWeight: '700', marginBottom: 12 },
+  switch: { marginBottom: 16 },
+  hidden: { display: 'none' },
   intro: { fontSize: 14, lineHeight: 20, marginBottom: 16 },
   checks: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   check: {
@@ -216,7 +255,6 @@ const styles = StyleSheet.create({
   progressStep: { fontSize: 15, fontWeight: '600', marginTop: 16, alignSelf: 'stretch', textAlign: 'center' },
   progressNote: { fontSize: 13, marginTop: 6, textAlign: 'center' },
   action: { marginTop: 16 },
-  secondaryAction: { marginTop: 12 },
   section: { marginBottom: 16 },
   note: { fontSize: 13, lineHeight: 19 },
   fileRow: { flexDirection: 'row' },
@@ -239,5 +277,5 @@ const styles = StyleSheet.create({
   issue: { flexDirection: 'row', gap: 8, marginTop: 10 },
   issueText: { flex: 1, fontSize: 13, lineHeight: 19 },
   refLabel: { fontSize: 12 },
-  ref: { fontSize: 14, fontWeight: '600', marginTop: 4, fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }) },
+  ref: { fontSize: 14, fontWeight: '600', marginTop: 4, fontFamily: monoFont },
 });

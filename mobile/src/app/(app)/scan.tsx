@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, Linking, Platform, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Linking, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,18 +8,23 @@ import { lookupCodeLabel, parseLookupCode, type LookupCode } from '@/lib/lookup-
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { Screen } from '@/components/screen';
-import { useColors } from '@/theme';
+import { monoFont, useColors } from '@/theme';
 
 type ScanResult = { code: LookupCode } | { unrecognized: string };
 
 // Full-screen QR scanner for UHRATE certificate and registry codes (roadmap
-// C14). Looking the code up arrives with the Lookup screen (D23).
+// C14). "Look up" returns to the Verify tab's Look up panel (D23) with the code.
 export default function Scan() {
   const router = useRouter();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const [result, setResult] = useState<ScanResult | null>(null);
+
+  const lookUp = (code: LookupCode) => {
+    // `t` makes each hand-over distinct, so scanning the same code twice still runs it.
+    router.dismissTo({ pathname: '/verify', params: { code: code.value, t: String(Date.now()) } });
+  };
 
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     const code = parseLookupCode(data);
@@ -80,9 +85,6 @@ export default function Scan() {
                 <Text style={[styles.code, { color: colors.text }]} selectable>
                   {result.code.value}
                 </Text>
-                <Text style={[styles.body, styles.note, { color: colors.textMuted }]}>
-                  Looking up this record in the app is coming soon.
-                </Text>
               </>
             ) : (
               <>
@@ -93,8 +95,17 @@ export default function Scan() {
               </>
             )}
             <View style={styles.actions}>
-              <Button title="Scan again" onPress={() => setResult(null)} />
-              <Button title="Done" variant="secondary" onPress={() => router.back()} />
+              {'code' in result ? (
+                <>
+                  <Button title="Look up" onPress={() => lookUp(result.code)} />
+                  <Button title="Scan again" variant="secondary" onPress={() => setResult(null)} />
+                </>
+              ) : (
+                <>
+                  <Button title="Scan again" onPress={() => setResult(null)} />
+                  <Button title="Done" variant="secondary" onPress={() => router.back()} />
+                </>
+              )}
             </View>
           </Card>
         ) : (
@@ -138,7 +149,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginTop: 4,
-    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
+    fontFamily: monoFont,
   },
   note: { marginTop: 8 },
   centered: { justifyContent: 'center', alignItems: 'center' },

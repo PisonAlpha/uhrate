@@ -1,8 +1,11 @@
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, type Theme } from 'expo-router';
 import { darkColors, lightColors, type ThemeColors } from './colors';
 
 export type { ThemeColors };
+
+/** Monospace font for IDs and hashes. */
+export const monoFont = Platform.select({ ios: 'Menlo', default: 'monospace' });
 
 /** Colors for the device's current light/dark setting (app.json: automatic). */
 export function useColors(): ThemeColors {
