@@ -39,6 +39,7 @@ const REGISTRIES: RegistryEntry[] = [
     title: 'Media',
     description: 'Photos, videos and recordings from journalists and creators.',
     icon: 'camera-outline',
+    href: '/media',
   },
 ];
 
