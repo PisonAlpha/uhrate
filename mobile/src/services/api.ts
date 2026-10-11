@@ -65,6 +65,30 @@ async function handleUnauthorized(sentToken: string) {
   unauthorizedHandler?.();
 }
 
+/**
+ * Sends multipart/form-data with React Native's XMLHttpRequest. Expo SDK 57
+ * replaces the global fetch with expo/fetch, which rejects React Native's
+ * { uri, name, type } file parts ("Unsupported FormDataPart implementation").
+ * XHR still uploads them natively, streaming the file from disk.
+ */
+function sendForm(
+  url: string,
+  method: Method,
+  headers: Record<string, string>,
+  form: FormData
+): Promise<{ status: number; text: string }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    for (const [name, value] of Object.entries(headers)) xhr.setRequestHeader(name, value);
+    xhr.onload = () => resolve({ status: xhr.status, text: xhr.responseText });
+    xhr.onerror = () => reject(new Error('XMLHttpRequest failed'));
+    xhr.ontimeout = () => reject(new Error('XMLHttpRequest timed out'));
+    // Content-Type is left unset so XHR adds the multipart boundary.
+    xhr.send(form);
+  });
+}
+
 interface RequestOptions {
   method?: Method;
   body?: unknown;
@@ -75,8 +99,7 @@ interface RequestOptions {
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = false } = options;
 
-  // FormData is sent as multipart/form-data. Its Content-Type is left to
-  // fetch, which adds the boundary the server needs to split the parts.
+  // FormData is sent as multipart/form-data (see sendForm).
   const isForm = body instanceof FormData;
   const headers: Record<string, string> = {};
   if (body !== undefined && !isForm) {
@@ -92,38 +115,47 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
-  let response: Response;
+  const url = `${API_BASE_URL}${path}`;
+  let status: number;
+  let text: string;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      method,
-      headers,
-      body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,
-    });
-  } catch {
+    if (isForm) {
+      ({ status, text } = await sendForm(url, method, headers, body));
+    } else {
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+      status = response.status;
+      text = await response.text();
+    }
+  } catch (err) {
+    // Shown in the Expo terminal during development; users only see the
+    // generic message, which can otherwise hide the real cause.
+    if (__DEV__) console.warn(`Request to ${path} failed before a response:`, err);
     throw new ApiError(0, 'Network request failed. Check your connection and try again.');
   }
 
   let data: unknown = null;
   try {
-    data = await response.json();
+    data = text ? JSON.parse(text) : null;
   } catch {
-    // Non-JSON or empty body; leave data as null.
+    // Non-JSON body; leave data as null.
   }
 
   // The backend rejected our token (expired, revoked secret, malformed):
   // end the session centrally. Screens only see the ApiError below.
-  if (response.status === 401 && sentToken) {
+  if (status === 401 && sentToken) {
     await handleUnauthorized(sentToken);
   }
 
-  if (!response.ok) {
+  if (status < 200 || status >= 300) {
     const errorBody = data as { error?: string } | null;
     const message =
       errorBody?.error ||
-      (response.status === 413
-        ? 'The file is too large to upload.'
-        : `Request failed with status ${response.status}`);
-    throw new ApiError(response.status, message, data);
+      (status === 413 ? 'The file is too large to upload.' : `Request failed with status ${status}`);
+    throw new ApiError(status, message, data);
   }
 
   return data as T;
