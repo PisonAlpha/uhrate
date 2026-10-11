@@ -44,6 +44,8 @@ export function Button({ title, onPress, variant = 'primary', loading = false, d
 
 const styles = StyleSheet.create({
   base: { paddingVertical: 16, borderRadius: 12, alignItems: 'center' },
-  text: { fontWeight: '600', fontSize: 15 },
+  // Full width with centered text: some Android phones measure bold text
+  // too narrow when it is shrink-wrapped, which cut labels off ("Logi").
+  text: { fontWeight: '600', fontSize: 15, alignSelf: 'stretch', textAlign: 'center' },
   dimmed: { opacity: 0.7 },
 });
