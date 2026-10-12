@@ -207,7 +207,7 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
             >
               <Text style={[styles.chainName, { color: selected ? colors.onPrimary : colors.text }]}>{c.name}</Text>
               <Text style={[styles.chainSymbol, { color: selected ? colors.onPrimary : colors.textMuted }]}>
-                {c.symbol}
+                {c.testnet ? `Testnet · free test ${c.symbol}` : c.symbol}
               </Text>
             </Pressable>
           );
@@ -221,7 +221,14 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
             <RecordRow key={row.label} label={row.label} value={row.value} />
           ))}
           <RecordRow label="Blockchain" value={selectedChain.name} />
-          <RecordRow label="Fee" value={`$0.20 platform fee + network gas, paid in ${selectedChain.symbol}`} />
+          <RecordRow
+            label="Fee"
+            value={
+              selectedChain.testnet
+                ? `Paid in free test ${selectedChain.symbol} (testnet, no real money)`
+                : `$0.20 platform fee + network gas, paid in ${selectedChain.symbol}`
+            }
+          />
           <Button title="Pay & register" onPress={() => {}} disabled style={styles.action} />
           <Text style={[styles.note, { color: colors.textMuted }]}>
             Paying with a crypto wallet is coming soon. Your details stay here until then.

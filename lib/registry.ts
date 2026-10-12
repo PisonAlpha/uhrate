@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-export const SUPPORTED_CHAINS = [
+const MAINNET_CHAINS = [
   {
     id: 'ethereum',
     name: 'Ethereum',
@@ -54,6 +54,26 @@ export const SUPPORTED_CHAINS = [
     gasEstimate: '~$0.01-0.05',
   },
 ];
+
+// BNB Smart Chain testnet, for testing payments with free test BNB. Listed
+// only when NEXT_PUBLIC_ENABLE_TESTNET=true (e.g. in .env.local), so the live
+// site never offers it. The pages already handle id 'bnb-testnet'.
+const BNB_TESTNET = {
+  id: 'bnb-testnet',
+  name: 'BNB Testnet',
+  symbol: 'BNB',
+  chainId: 97,
+  chainIdHex: '0x61',
+  rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+  explorer: 'https://testnet.bscscan.com',
+  color: '#F3BA2F',
+  icon: '⬡',
+  testnet: true,
+  gasEstimate: 'free (test BNB)',
+};
+
+export const SUPPORTED_CHAINS =
+  process.env.NEXT_PUBLIC_ENABLE_TESTNET === 'true' ? [...MAINNET_CHAINS, BNB_TESTNET] : MAINNET_CHAINS;
 
 export const PLATFORM_FEE_USD = 0.20;
 export const PLATFORM_FEE_UHR_USD = 0.10;
