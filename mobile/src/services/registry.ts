@@ -52,3 +52,25 @@ export async function checkDetailsMatch(
   const response = await api.upload<{ success: true; mismatches?: DetailMismatch[] }>(`/api/${key}/verify-match`, form);
   return response.mismatches ?? [];
 }
+
+export interface RegisterResponse {
+  success: true;
+  registry_id: string;
+  /** Chain name, e.g. "BNB Chain". */
+  chain: string;
+  tx_hash: string;
+  ipfs_hash?: string;
+  ipfs_url?: string;
+}
+
+/**
+ * Saves a paid registration (/api/<key>/register). `txHash` is the fee
+ * payment; `chainId` is the chain's id from constants/chains.ts.
+ */
+export function registerRecord(
+  key: RegistryKey,
+  details: Record<string, string>,
+  payment: { sha256Hash: string; chainId: string; txHash: string }
+) {
+  return api.post<RegisterResponse>(`/api/${key}/register`, { ...details, ...payment });
+}

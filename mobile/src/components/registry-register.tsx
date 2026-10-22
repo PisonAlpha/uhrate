@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, StyleSheet, type TextInput } from 'react-native';
-import { checkDetailsMatch, extractDetails } from '@/services/registry';
-import { errorMessage } from '@/services/api';
+import { View, Text, Pressable, ActivityIndicator, Linking, StyleSheet, type TextInput } from 'react-native';
+import { checkDetailsMatch, extractDetails, registerRecord, type RegisterResponse } from '@/services/registry';
+import { ApiError, errorMessage } from '@/services/api';
 import { isValidEmail } from '@/lib/validation';
+import { sha256OfFile } from '@/lib/file-hash';
+import { formatAddress } from '@/lib/format';
 import type { PickedFile } from '@/lib/file-picker';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
@@ -14,6 +16,7 @@ import { SelectField } from '@/components/select-field';
 import { TextField } from '@/components/text-field';
 import { useColors } from '@/theme';
 import type { RegistryConfig, RegistryField } from '@/registries/types';
+import { useWallet, walletErrorMessage } from '@/wallet/use-wallet';
 
 type Form = Record<string, string>;
 
@@ -30,8 +33,8 @@ function fieldError(field: RegistryField, value: string): string | undefined {
 }
 
 // Register side of a registry (roadmap D25–D27): file upload with AI
-// auto-fill, the details form and the AI mismatch check, as on the web. The
-// last step, paying the fee on-chain, needs wallet support (C15).
+// auto-fill, the details form, the AI mismatch check, then paying the fee
+// from the user's wallet (C15) and saving the record, as on the web.
 export function RegistryRegister({ config }: { config: RegistryConfig }) {
   const colors = useColors();
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -43,6 +46,12 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
   const [ready, setReady] = useState(false);
+  const [paying, setPaying] = useState(false);
+  // A fee already paid on this chain, kept so a failed save can be retried
+  // without paying twice.
+  const [paidTx, setPaidTx] = useState<string | null>(null);
+  const [result, setResult] = useState<RegisterResponse | null>(null);
+  const wallet = useWallet();
   const inputs = useRef<Record<string, TextInput | null>>({});
 
   // Any change means the details need checking again before payment.
@@ -113,11 +122,82 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
     setReady(true);
   };
 
-  const busy = extracting || checking;
+  const handlePay = async () => {
+    setError(null);
+    setPaying(true);
+    let txHash = paidTx;
+    try {
+      // Read the file before the wallet is involved, so a file problem is
+      // reported as one and never as a cancelled payment.
+      let sha256Hash = '';
+      if (file) {
+        try {
+          sha256Hash = await sha256OfFile(file.uri);
+        } catch (err) {
+          if (__DEV__) console.warn('File hash failed:', err);
+          setError("Couldn't read the file. Please remove it and pick it again.");
+          return;
+        }
+      }
+      if (!txHash) {
+        txHash = await wallet.payFee(selectedChain, config.chainRecord(form, sha256Hash || null));
+        setPaidTx(txHash);
+      }
+      setResult(await registerRecord(config.key, form, { sha256Hash, chainId: chain, txHash }));
+    } catch (err) {
+      if (txHash) {
+        setError(
+          `Your payment went through, but the record couldn't be saved: ${errorMessage(err)} ` +
+            'Tap Retry to save it without paying again.'
+        );
+      } else if (err instanceof ApiError) {
+        setError(errorMessage(err));
+      } else {
+        setError(walletErrorMessage(err));
+      }
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const startOver = () => {
+    setFile(null);
+    setForm(emptyForm(config));
+    setFieldErrors({});
+    setExtractNote(null);
+    setReady(false);
+    setPaidTx(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const busy = extracting || checking || paying;
   const selectedChain = CHAINS.find((c) => c.id === chain)!;
   // Enter moves to the next typed field; pick-lists are skipped.
   const nextTextField = (index: number) =>
     config.fields.slice(index + 1).find((f) => f.kind !== 'select' && f.kind !== 'multiline');
+
+  if (result) {
+    return (
+      <Card>
+        <Text style={[styles.readyTitle, { color: colors.success }]}>✓ Registered</Text>
+        <RecordRow label="Registry ID" value={result.registry_id} />
+        <RecordRow label="Blockchain" value={result.chain} />
+        <RecordRow label="Transaction" value={result.tx_hash} />
+        {result.ipfs_hash && <RecordRow label="IPFS" value={result.ipfs_hash} />}
+        <Text style={[styles.note, { color: colors.textMuted }]}>
+          Anyone can look this up with the registry ID on the Verify tab.
+        </Text>
+        <Button
+          title="View transaction"
+          variant="secondary"
+          onPress={() => Linking.openURL(`${selectedChain.explorer}/tx/${result.tx_hash}`)}
+          style={styles.action}
+        />
+        <Button title={`Register another ${config.fileNoun}`} onPress={startOver} style={styles.resultAction} />
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -136,7 +216,7 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
       {extractNote && <Text style={[styles.note, { color: colors.textMuted }]}>{extractNote}</Text>}
 
       <Text style={[styles.step, styles.stepSpaced, { color: colors.text }]}>2. Details</Text>
-      {error && <ErrorMessage message={error} />}
+      {error && !ready && <ErrorMessage message={error} />}
 
       {config.fields.map((field, index) => {
         const label = field.required ? `${field.label} *` : field.label;
@@ -194,7 +274,10 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
           return (
             <Pressable
               key={c.id}
-              onPress={() => setChain(c.id)}
+              onPress={() => {
+                setChain(c.id);
+                setPaidTx(null);
+              }}
               disabled={busy}
               accessibilityRole="radio"
               accessibilityState={{ selected }}
@@ -229,9 +312,18 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
                 : `$0.20 platform fee + network gas, paid in ${selectedChain.symbol}`
             }
           />
-          <Button title="Pay & register" onPress={() => {}} disabled style={styles.action} />
+          {wallet.address && <RecordRow label="Wallet" value={formatAddress(wallet.address)} />}
+          {error && <ErrorMessage message={error} />}
+          <Button
+            title={paidTx ? 'Retry' : wallet.isConnected ? 'Pay & register' : 'Connect wallet & pay'}
+            onPress={handlePay}
+            loading={paying}
+            style={styles.action}
+          />
           <Text style={[styles.note, { color: colors.textMuted }]}>
-            Paying with a crypto wallet is coming soon. Your details stay here until then.
+            {paying
+              ? 'Confirm the payment in your wallet app, then come back here.'
+              : 'Your wallet will ask you to approve the payment.'}
           </Text>
         </Card>
       ) : (
@@ -260,6 +352,7 @@ const styles = StyleSheet.create({
   chainName: { fontSize: 14, fontWeight: '600' },
   chainSymbol: { fontSize: 12, marginTop: 2 },
   action: { marginTop: 24 },
+  resultAction: { marginTop: 12 },
   ready: { marginTop: 24 },
   readyTitle: { fontSize: 16, fontWeight: '700' },
 });

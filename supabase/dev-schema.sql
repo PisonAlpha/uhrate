@@ -232,3 +232,6 @@ CREATE TABLE identity_badges (
   created_at timestamptz DEFAULT now(),
   verified_at timestamptz
 );
+
+alter table wallet_nonces
+  add constraint wallet_nonces_wallet_address_key unique (wallet_address);

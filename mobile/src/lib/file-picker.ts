@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import type { UploadFile } from '@/services/api';
@@ -63,8 +64,10 @@ export async function takePhoto(): Promise<PickedFile | null> {
 export async function pickDocument(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
     type: '*/*',
-    // Copy into the app's cache so the upload can read it with a file:// URI.
-    copyToCacheDirectory: true,
+    // On Android, keep the picker's content:// URI: uploads and expo-file-system
+    // can read it, whereas the cache copy lands in Expo Go's own cache, which
+    // expo-file-system refuses to read there. iOS needs the copy to read it.
+    copyToCacheDirectory: Platform.OS !== 'android',
     multiple: false,
   });
   if (result.canceled || !result.assets[0]) return null;

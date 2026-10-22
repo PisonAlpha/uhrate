@@ -43,3 +43,21 @@ export function changePassword(currentPassword: string, newPassword: string) {
     { auth: true }
   );
 }
+
+/** Step 1 of wallet login: a one-time nonce for this address, valid 5 minutes. */
+export function walletNonceRequest(walletAddress: string) {
+  return api.post<{ success: true; nonce: string }>('/api/auth/wallet-nonce', { walletAddress });
+}
+
+/** The message the wallet signs. Same wording as the web login page. */
+export function walletLoginMessage(walletAddress: string, nonce: string) {
+  return `Sign in to UHRATE\n\nWallet: ${walletAddress}\nNonce: ${nonce}\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
+}
+
+/**
+ * Step 2: the server checks the signature against the nonce and returns a
+ * token. A wallet seen for the first time gets a new account.
+ */
+export function walletLoginRequest(walletAddress: string, signature: string, message: string) {
+  return api.post<AuthSuccessResponse>('/api/auth/wallet-login', { walletAddress, signature, message });
+}

@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { Text, Pressable, type TextInput } from 'react-native';
+import { Text, Pressable, StyleSheet, type TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
-import { errorMessage } from '@/services/api';
+import { ApiError, errorMessage } from '@/services/api';
+import { walletLoginMessage, walletNonceRequest } from '@/services/auth';
 import { isValidEmail } from '@/lib/validation';
 import { Button } from '@/components/button';
 import { ErrorMessage } from '@/components/error-message';
@@ -10,15 +11,18 @@ import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { authStyles } from '@/components/auth-styles';
 import { useColors } from '@/theme';
+import { useWallet, walletErrorMessage } from '@/wallet/use-wallet';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, walletLogin } = useAuth();
+  const wallet = useWallet();
   const router = useRouter();
   const colors = useColors();
   const passwordRef = useRef<TextInput>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [walletLoading, setWalletLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
@@ -46,6 +50,26 @@ export default function Login() {
     }
   };
 
+  // Same steps as the web: connect, get a nonce, sign it, exchange the
+  // signature for a token. A new wallet gets a new account.
+  const handleWalletLogin = async () => {
+    setWalletLoading(true);
+    setError(null);
+    try {
+      const walletAddress = await wallet.connect();
+      const { nonce } = await walletNonceRequest(walletAddress);
+      const message = walletLoginMessage(walletAddress, nonce);
+      const signature = await wallet.signMessage(message);
+      await walletLogin(walletAddress, signature, message);
+    } catch (err) {
+      setError(err instanceof ApiError ? errorMessage(err) : walletErrorMessage(err));
+    } finally {
+      setWalletLoading(false);
+    }
+  };
+
+  const busy = loading || walletLoading;
+
   return (
     <Screen form style={authStyles.container}>
       <Text style={[authStyles.title, { color: colors.text }]}>Welcome back</Text>
@@ -66,7 +90,7 @@ export default function Login() {
         submitBehavior="submit"
         onSubmitEditing={() => passwordRef.current?.focus()}
         placeholder="you@example.com"
-        editable={!loading}
+        editable={!busy}
       />
 
       <TextField
@@ -80,14 +104,27 @@ export default function Login() {
         returnKeyType="go"
         onSubmitEditing={handleLogin}
         placeholder="Enter your password"
-        editable={!loading}
+        editable={!busy}
       />
 
-      <Button title="Sign in" onPress={handleLogin} loading={loading} style={authStyles.submit} />
+      <Button title="Sign in" onPress={handleLogin} loading={loading} disabled={walletLoading} style={authStyles.submit} />
 
-      <Pressable onPress={() => router.push('/register')} disabled={loading}>
+      <Text style={[styles.or, { color: colors.textMuted }]}>or</Text>
+      <Button
+        title="Continue with wallet"
+        variant="secondary"
+        onPress={handleWalletLogin}
+        loading={walletLoading}
+        disabled={loading}
+      />
+
+      <Pressable onPress={() => router.push('/register')} disabled={busy}>
         <Text style={[authStyles.link, { color: colors.text }]}>Don&apos;t have an account? Create one free</Text>
       </Pressable>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  or: { fontSize: 13, textAlign: 'center', marginVertical: 12 },
+});

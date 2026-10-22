@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { getStoredToken, setStoredToken, clearStoredToken } from '@/lib/secureStorage';
-import { loginRequest, registerRequest } from '@/services/auth';
+import { loginRequest, registerRequest, walletLoginRequest } from '@/services/auth';
 import { setUnauthorizedHandler } from '@/services/api';
 import type { AuthUser } from '@/types/auth';
 
@@ -23,6 +23,8 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  /** Signs in with a message the wallet has signed (see services/auth.ts). */
+  walletLogin: (walletAddress: string, signature: string, message: string) => Promise<void>;
   register: (
     email: string,
     password: string,
@@ -65,6 +67,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(result.user);
   }, []);
 
+  const walletLogin = useCallback(async (walletAddress: string, signature: string, message: string) => {
+    const result = await walletLoginRequest(walletAddress, signature, message);
+    if (result.token) {
+      await setStoredToken(result.token);
+      setHasToken(true);
+    }
+    setUser(result.user);
+  }, []);
+
   const register = useCallback(async (email: string, password: string, fullName: string) => {
     const result = await registerRequest(email, password, fullName);
     if (result.token) {
@@ -86,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: hasToken, login, register, logout }}
+      value={{ user, isLoading, isAuthenticated: hasToken, login, walletLogin, register, logout }}
     >
       {children}
     </AuthContext.Provider>

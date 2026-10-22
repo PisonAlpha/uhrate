@@ -48,6 +48,16 @@ export const legalRegistry: RegistryConfig = {
     { label: 'Executed', value: f.executionDate },
     { label: 'Firm', value: f.firmName },
   ],
+  chainRecord: (f, sha256) => ({
+    platform: 'UHRATE Legal',
+    firm: f.firmName,
+    title: f.documentTitle,
+    type: f.documentType,
+    parties: f.parties,
+    date: f.executionDate,
+    sha256,
+    timestamp: Date.now(),
+  }),
   idPrefix: 'ULEG',
   searchFields: [
     { name: 'documentTitle', label: 'Document title', placeholder: 'Service Agreement…' },

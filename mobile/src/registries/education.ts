@@ -41,6 +41,15 @@ export const educationRegistry: RegistryConfig = {
     { label: 'Credential', value: `${f.degreeType}, ${f.fieldOfStudy} (${f.graduationYear})` },
     { label: 'Institution', value: f.institutionName },
   ],
+  chainRecord: (f) => ({
+    platform: 'UHRATE Education',
+    institution: f.institutionName,
+    student: f.studentName,
+    degree: f.degreeType,
+    field: f.fieldOfStudy,
+    year: f.graduationYear,
+    timestamp: Date.now(),
+  }),
   idPrefix: 'UEDU',
   searchFields: [
     { name: 'studentName', label: 'Student name', placeholder: 'Jane Doe' },

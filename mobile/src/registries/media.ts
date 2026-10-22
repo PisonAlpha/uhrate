@@ -39,6 +39,17 @@ export const mediaRegistry: RegistryConfig = {
     { label: 'Captured', value: f.location ? `${f.captureDate}, ${f.location}` : f.captureDate },
     { label: 'Journalist', value: f.mediaOrganization ? `${f.journalistName}, ${f.mediaOrganization}` : f.journalistName },
   ],
+  chainRecord: (f, sha256) => ({
+    platform: 'UHRATE Media',
+    journalist: f.journalistName,
+    org: f.mediaOrganization,
+    title: f.contentTitle,
+    type: f.contentType,
+    date: f.captureDate,
+    location: f.location,
+    sha256,
+    timestamp: Date.now(),
+  }),
   idPrefix: 'UMED',
   // The server uses one of these, preferring the hash, then the title.
   searchFields: [

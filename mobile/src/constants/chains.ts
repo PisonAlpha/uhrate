@@ -7,20 +7,62 @@ export interface Chain {
   symbol: string;
   /** EVM chain ID, used to switch the wallet to this network. */
   chainId: number;
+  rpc: string;
+  explorer: string;
   testnet: boolean;
 }
 
 const MAINNET_CHAINS: Chain[] = [
-  { id: 'bnb', name: 'BNB Chain', symbol: 'BNB', chainId: 56, testnet: false },
-  { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', chainId: 1, testnet: false },
-  { id: 'base', name: 'Base', symbol: 'ETH', chainId: 8453, testnet: false },
-  { id: 'polygon', name: 'Polygon', symbol: 'MATIC', chainId: 137, testnet: false },
+  {
+    id: 'bnb',
+    name: 'BNB Chain',
+    symbol: 'BNB',
+    chainId: 56,
+    rpc: 'https://bsc-dataseed.binance.org',
+    explorer: 'https://bscscan.com',
+    testnet: false,
+  },
+  {
+    id: 'ethereum',
+    name: 'Ethereum',
+    symbol: 'ETH',
+    chainId: 1,
+    rpc: 'https://cloudflare-eth.com',
+    explorer: 'https://etherscan.io',
+    testnet: false,
+  },
+  {
+    id: 'base',
+    name: 'Base',
+    symbol: 'ETH',
+    chainId: 8453,
+    rpc: 'https://mainnet.base.org',
+    explorer: 'https://basescan.org',
+    testnet: false,
+  },
+  {
+    id: 'polygon',
+    name: 'Polygon',
+    symbol: 'MATIC',
+    chainId: 137,
+    rpc: 'https://polygon-rpc.com',
+    explorer: 'https://polygonscan.com',
+    testnet: false,
+  },
 ];
 
 // For testing payments with free test BNB. Offered only when
 // EXPO_PUBLIC_ENABLE_TESTNET=true (mobile/.env.local); the server must have
 // NEXT_PUBLIC_ENABLE_TESTNET=true too, or it won't recognise the chain.
-const BNB_TESTNET: Chain = { id: 'bnb-testnet', name: 'BNB Testnet', symbol: 'BNB', chainId: 97, testnet: true };
+const BNB_TESTNET: Chain = {
+  id: 'bnb-testnet',
+  name: 'BNB Testnet',
+  symbol: 'BNB',
+  chainId: 97,
+  rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+  explorer: 'https://testnet.bscscan.com',
+  testnet: true,
+};
 
 export const CHAINS: Chain[] =
   process.env.EXPO_PUBLIC_ENABLE_TESTNET === 'true' ? [...MAINNET_CHAINS, BNB_TESTNET] : MAINNET_CHAINS;

@@ -45,3 +45,8 @@ export function creditsLabel(user: Pick<AuthUser, 'role' | 'credits'>): string {
 export function formatDate(iso: string | null | undefined): string {
   return iso ? new Date(iso).toLocaleDateString() : 'N/A';
 }
+
+/** 0x1234…abcd */
+export function formatAddress(address: string): string {
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}

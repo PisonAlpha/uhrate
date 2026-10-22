@@ -39,6 +39,11 @@ export interface RegistryConfig {
   fields: RegistryField[];
   /** Lines of the "Details checked" summary. */
   summary: (form: Record<string, string>) => { label: string; value: string }[];
+  /**
+   * What goes into the payment transaction's data field, as JSON. Same keys
+   * as the web page writes on-chain. `sha256` is null without a file.
+   */
+  chainRecord: (form: Record<string, string>, sha256: string | null) => Record<string, unknown>;
   /** e.g. "UEDU" — registry IDs start with this. */
   idPrefix: string;
   /** Ways to search besides the registry ID. */
