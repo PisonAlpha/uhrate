@@ -10,6 +10,8 @@ export interface Chain {
   rpc: string;
   explorer: string;
   testnet: boolean;
+  /** Typical gas cost in US dollars, shown on the Pricing page. */
+  gasEstimate: string;
 }
 
 const MAINNET_CHAINS: Chain[] = [
@@ -21,6 +23,7 @@ const MAINNET_CHAINS: Chain[] = [
     rpc: 'https://bsc-dataseed.binance.org',
     explorer: 'https://bscscan.com',
     testnet: false,
+    gasEstimate: '~$0.10-0.30',
   },
   {
     id: 'ethereum',
@@ -30,6 +33,7 @@ const MAINNET_CHAINS: Chain[] = [
     rpc: 'https://cloudflare-eth.com',
     explorer: 'https://etherscan.io',
     testnet: false,
+    gasEstimate: '~$1-3',
   },
   {
     id: 'base',
@@ -39,6 +43,7 @@ const MAINNET_CHAINS: Chain[] = [
     rpc: 'https://mainnet.base.org',
     explorer: 'https://basescan.org',
     testnet: false,
+    gasEstimate: '~$0.01-0.05',
   },
   {
     id: 'polygon',
@@ -48,6 +53,7 @@ const MAINNET_CHAINS: Chain[] = [
     rpc: 'https://polygon-rpc.com',
     explorer: 'https://polygonscan.com',
     testnet: false,
+    gasEstimate: '~$0.01-0.05',
   },
 ];
 
@@ -62,6 +68,7 @@ const BNB_TESTNET: Chain = {
   rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
   explorer: 'https://testnet.bscscan.com',
   testnet: true,
+  gasEstimate: 'free (test BNB)',
 };
 
 export const CHAINS: Chain[] =
