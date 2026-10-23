@@ -11,6 +11,7 @@ export default function AppLayout() {
       <Stack.Screen name="education" />
       <Stack.Screen name="legal" />
       <Stack.Screen name="media" />
+      <Stack.Screen name="seal" />
     </Stack>
   );
 }

@@ -140,6 +140,12 @@ export default function Home() {
             <Pill label={planLabel(profile.role)} style={styles.inlinePill} />
           </View>
           <Button title="Verify a file" onPress={() => router.push('/verify')} style={styles.cardButton} />
+          <Button
+            title="Seal a file on the blockchain"
+            variant="secondary"
+            onPress={() => router.push('/seal')}
+            style={styles.secondButton}
+          />
         </Card>
       )}
 
@@ -246,6 +252,7 @@ const styles = StyleSheet.create({
   credits: { fontSize: 26, fontWeight: '700', marginTop: 2 },
   inlinePill: { marginTop: 0 },
   cardButton: { marginTop: 16 },
+  secondButton: { marginTop: 12 },
   loading: { marginTop: 24 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   cardTitle: { fontSize: 16, fontWeight: '700' },

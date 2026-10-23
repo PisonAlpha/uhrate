@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, Linking, StyleSheet, type TextInput } from 'react-native';
+import { View, Text, ActivityIndicator, Linking, StyleSheet, type TextInput } from 'react-native';
 import { checkDetailsMatch, extractDetails, registerRecord, type RegisterResponse } from '@/services/registry';
 import { ApiError, errorMessage } from '@/services/api';
 import { isValidEmail } from '@/lib/validation';
@@ -9,6 +9,7 @@ import type { PickedFile } from '@/lib/file-picker';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
+import { ChainPicker } from '@/components/chain-picker';
 import { ErrorMessage } from '@/components/error-message';
 import { FilePicker } from '@/components/file-picker';
 import { RecordRow } from '@/components/record-card';
@@ -268,34 +269,14 @@ export function RegistryRegister({ config }: { config: RegistryConfig }) {
       })}
 
       <Text style={[styles.step, styles.stepSpaced, { color: colors.text }]}>3. Blockchain</Text>
-      <View style={styles.chains}>
-        {CHAINS.map((c) => {
-          const selected = c.id === chain;
-          return (
-            <Pressable
-              key={c.id}
-              onPress={() => {
-                setChain(c.id);
-                setPaidTx(null);
-              }}
-              disabled={busy}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              style={[
-                styles.chain,
-                selected
-                  ? { backgroundColor: colors.primary, borderColor: colors.primary }
-                  : { backgroundColor: colors.card, borderColor: colors.borderStrong },
-              ]}
-            >
-              <Text style={[styles.chainName, { color: selected ? colors.onPrimary : colors.text }]}>{c.name}</Text>
-              <Text style={[styles.chainSymbol, { color: selected ? colors.onPrimary : colors.textMuted }]}>
-                {c.testnet ? `Testnet · free test ${c.symbol}` : c.symbol}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <ChainPicker
+        value={chain}
+        onChange={(id) => {
+          setChain(id);
+          setPaidTx(null);
+        }}
+        disabled={busy}
+      />
 
       {ready ? (
         <Card style={styles.ready}>
@@ -347,10 +328,6 @@ const styles = StyleSheet.create({
   inlineText: { fontSize: 13 },
   note: { fontSize: 13, lineHeight: 19, marginTop: 10 },
   multiline: { minHeight: 88, textAlignVertical: 'top' },
-  chains: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chain: { flexBasis: '45%', flexGrow: 1, borderWidth: 1, borderRadius: 12, padding: 12 },
-  chainName: { fontSize: 14, fontWeight: '600' },
-  chainSymbol: { fontSize: 12, marginTop: 2 },
   action: { marginTop: 24 },
   resultAction: { marginTop: 12 },
   ready: { marginTop: 24 },
