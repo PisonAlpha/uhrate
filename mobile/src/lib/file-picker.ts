@@ -11,29 +11,41 @@ export interface PickedFile extends UploadFile {
   isImage: boolean;
 }
 
-// The web uploaders accept any type, one file at a time, so these do too.
-// Screens set their own size limit (see fileSizeError).
+// The web uploaders accept any type, one file at a time (several for bulk
+// verification), so these do too. Screens set their own size limit (see
+// fileSizeError).
 
 /** Photos and videos from the device's gallery. Resolves to null if cancelled. */
 export async function pickFromLibrary(): Promise<PickedFile | null> {
+  return (await launchLibrary(false))[0] ?? null;
+}
+
+/** Several photos and videos from the gallery, for bulk verification. Empty if cancelled. */
+export function pickManyFromLibrary(): Promise<PickedFile[]> {
+  return launchLibrary(true);
+}
+
+async function launchLibrary(multiple: boolean): Promise<PickedFile[]> {
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images', 'videos'],
     // Upload the original: verification looks at the real file, so it
     // must not be recompressed or cropped.
     quality: 1,
     allowsEditing: false,
+    allowsMultipleSelection: multiple,
   });
-  if (result.canceled || !result.assets[0]) return null;
+  if (result.canceled) return [];
 
-  const asset = result.assets[0];
-  const type = asset.mimeType ?? (asset.type === 'video' ? 'video/mp4' : 'image/jpeg');
-  return {
-    uri: asset.uri,
-    name: asset.fileName ?? nameFromUri(asset.uri),
-    type,
-    size: asset.fileSize ?? null,
-    isImage: type.startsWith('image/'),
-  };
+  return result.assets.map((asset) => {
+    const type = asset.mimeType ?? (asset.type === 'video' ? 'video/mp4' : 'image/jpeg');
+    return {
+      uri: asset.uri,
+      name: asset.fileName ?? nameFromUri(asset.uri),
+      type,
+      size: asset.fileSize ?? null,
+      isImage: type.startsWith('image/'),
+    };
+  });
 }
 
 /** Thrown by takePhoto when the user has refused camera access. */
@@ -62,25 +74,35 @@ export async function takePhoto(): Promise<PickedFile | null> {
 
 /** Any file from the device's file browser. Resolves to null if cancelled. */
 export async function pickDocument(): Promise<PickedFile | null> {
+  return (await launchDocuments(false))[0] ?? null;
+}
+
+/** Several files from the file browser, for bulk verification. Empty if cancelled. */
+export function pickManyDocuments(): Promise<PickedFile[]> {
+  return launchDocuments(true);
+}
+
+async function launchDocuments(multiple: boolean): Promise<PickedFile[]> {
   const result = await DocumentPicker.getDocumentAsync({
     type: '*/*',
     // On Android, keep the picker's content:// URI: uploads and expo-file-system
     // can read it, whereas the cache copy lands in Expo Go's own cache, which
     // expo-file-system refuses to read there. iOS needs the copy to read it.
     copyToCacheDirectory: Platform.OS !== 'android',
-    multiple: false,
+    multiple,
   });
-  if (result.canceled || !result.assets[0]) return null;
+  if (result.canceled) return [];
 
-  const asset = result.assets[0];
-  const type = asset.mimeType ?? 'application/octet-stream';
-  return {
-    uri: asset.uri,
-    name: asset.name || nameFromUri(asset.uri),
-    type,
-    size: asset.size ?? null,
-    isImage: type.startsWith('image/'),
-  };
+  return result.assets.map((asset) => {
+    const type = asset.mimeType ?? 'application/octet-stream';
+    return {
+      uri: asset.uri,
+      name: asset.name || nameFromUri(asset.uri),
+      type,
+      size: asset.size ?? null,
+      isImage: type.startsWith('image/'),
+    };
+  });
 }
 
 /** Error message if the file is over the limit, or null if it's fine (or its size is unknown). */

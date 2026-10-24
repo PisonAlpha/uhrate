@@ -18,6 +18,7 @@ const ITEMS: HubEntry[] = [
     title: 'Enterprise',
     description: 'Verify many files at once.',
     icon: 'layers-outline',
+    href: '/enterprise',
   },
   {
     title: 'Developer API',

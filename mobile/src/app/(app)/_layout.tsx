@@ -15,6 +15,7 @@ export default function AppLayout() {
       <Stack.Screen name="documents" />
       <Stack.Screen name="pricing" />
       <Stack.Screen name="developer" />
+      <Stack.Screen name="enterprise" />
     </Stack>
   );
 }
