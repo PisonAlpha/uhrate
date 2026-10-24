@@ -4,19 +4,15 @@ import { HubItem, type HubEntry } from '@/components/hub-item';
 import { Screen } from '@/components/screen';
 import { useColors } from '@/theme';
 
-// Each fills in as its roadmap item lands: Pricing D31, Identity D28,
-// Enterprise D29, Developer API D30, Contact D35, About and legal D36/E41.
+// Each fills in as its roadmap item lands: Pricing D31, Enterprise D29,
+// Developer API D30, Contact D35, About and legal D36/E41. Identity badges
+// (D28) are left out while the web has no badge page.
 const ITEMS: HubEntry[] = [
   {
     title: 'Pricing',
     description: 'Free to use. A small fee only when you go on-chain.',
     icon: 'pricetag-outline',
     href: '/pricing',
-  },
-  {
-    title: 'Identity badge',
-    description: 'Apply for a verified identity badge.',
-    icon: 'shield-checkmark-outline',
   },
   {
     title: 'Enterprise',
@@ -27,6 +23,7 @@ const ITEMS: HubEntry[] = [
     title: 'Developer API',
     description: 'Create and manage API keys.',
     icon: 'code-slash-outline',
+    href: '/developer',
   },
   {
     title: 'Contact',
