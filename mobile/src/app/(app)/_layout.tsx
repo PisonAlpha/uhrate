@@ -12,6 +12,7 @@ export default function AppLayout() {
       <Stack.Screen name="legal" />
       <Stack.Screen name="media" />
       <Stack.Screen name="seal" />
+      <Stack.Screen name="documents" />
       <Stack.Screen name="pricing" />
     </Stack>
   );

@@ -17,6 +17,7 @@ const REGISTRIES: HubEntry[] = [
     title: 'Documents',
     description: 'Register any document permanently on-chain.',
     icon: 'document-text-outline',
+    href: '/documents',
   },
   {
     title: 'Legal',
