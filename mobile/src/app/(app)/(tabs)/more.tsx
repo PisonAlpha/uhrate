@@ -30,6 +30,7 @@ const ITEMS: HubEntry[] = [
     title: 'Contact',
     description: 'Get in touch with the UHRATE team.',
     icon: 'mail-outline',
+    href: '/contact',
   },
   {
     title: 'About and legal',

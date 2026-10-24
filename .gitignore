@@ -42,3 +42,6 @@ next-env.d.ts
 
 # supabase cli
 supabase/.temp/
+
+# website fix list for the project owner (not committed)
+WEBSITE-FIXES.md
