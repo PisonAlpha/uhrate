@@ -34,8 +34,9 @@ const ITEMS: HubEntry[] = [
   },
   {
     title: 'About and legal',
-    description: 'Tokenomics, whitepaper, privacy policy and terms.',
+    description: 'What UHRATE is, the whitepaper, privacy policy and terms.',
     icon: 'information-circle-outline',
+    href: '/about',
   },
 ];
 

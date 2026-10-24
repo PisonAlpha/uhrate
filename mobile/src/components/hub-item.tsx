@@ -14,15 +14,16 @@ export interface HubEntry {
 }
 
 // One row in a hub tab (Registry, More): icon, title and description,
-// opening its page, or greyed out with "Coming soon".
-export function HubItem({ entry }: { entry: HubEntry }) {
+// opening its page (or running `onPress`, e.g. to open a link), or greyed
+// out with "Coming soon".
+export function HubItem({ entry, onPress }: { entry: HubEntry; onPress?: () => void }) {
   const router = useRouter();
   const colors = useColors();
-  const available = entry.href !== undefined;
+  const available = entry.href !== undefined || onPress !== undefined;
 
   return (
     <Pressable
-      onPress={() => entry.href && router.push(entry.href)}
+      onPress={() => (onPress ? onPress() : entry.href && router.push(entry.href))}
       disabled={!available}
       accessibilityRole="button"
       style={({ pressed }) => [
