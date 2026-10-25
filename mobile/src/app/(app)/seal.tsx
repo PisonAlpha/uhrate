@@ -5,6 +5,7 @@ import { verifyFile } from '@/services/verify';
 import { ApiError, errorMessage } from '@/services/api';
 import type { PickedFile } from '@/lib/file-picker';
 import { formatAddress, ratingTone } from '@/lib/format';
+import { shareJson } from '@/lib/share-file';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -14,6 +15,7 @@ import { FilePicker } from '@/components/file-picker';
 import { PageHeader } from '@/components/page-header';
 import { Pill } from '@/components/pill';
 import { RecordRow } from '@/components/record-card';
+import { ShareFileButton } from '@/components/share-file-button';
 import { Screen } from '@/components/screen';
 import { useColors } from '@/theme';
 import type { VerifyResponse } from '@/types/verify';
@@ -132,6 +134,29 @@ export default function SealScreen() {
                 pathname: '/verify',
                 params: { code: result.data.certificate_id, t: String(Date.now()) },
               })
+            }
+            style={styles.secondAction}
+          />
+          <ShareFileButton
+            title="Save or share certificate"
+            // Same file the web's "Download Seal Certificate" saves.
+            onShare={() =>
+              shareJson(
+                `uhrate_seal_${result.data.certificate_id}.json`,
+                {
+                  certificate_id: result.data.certificate_id,
+                  file_name: result.data.file_name,
+                  file_type: result.data.file_type,
+                  sha256_hash: result.data.sha256_hash,
+                  trust_score: result.data.trust_score,
+                  rating: result.data.rating,
+                  sealed_on: sealChain.name,
+                  tx_hash: seal.txHash,
+                  sealed_at: seal.sealedAt,
+                  platform: 'UHRATE — The decentralized notary for the digital world',
+                },
+                'Seal certificate'
+              )
             }
             style={styles.secondAction}
           />

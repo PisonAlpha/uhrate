@@ -7,6 +7,7 @@ import { ApiError, errorMessage } from '@/services/api';
 import { isValidEmail } from '@/lib/validation';
 import { sha256OfFile } from '@/lib/file-hash';
 import { formatAddress } from '@/lib/format';
+import { shareJson } from '@/lib/share-file';
 import type { PickedFile } from '@/lib/file-picker';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
@@ -18,6 +19,7 @@ import { PageHeader } from '@/components/page-header';
 import { RecordRow } from '@/components/record-card';
 import { Screen } from '@/components/screen';
 import { SelectField } from '@/components/select-field';
+import { ShareFileButton } from '@/components/share-file-button';
 import { TextField } from '@/components/text-field';
 import { useColors } from '@/theme';
 import { PLATFORM_FEE_USD } from '@/wallet/fee';
@@ -218,6 +220,14 @@ export default function DocumentsScreen() {
             variant="secondary"
             onPress={() => Linking.openURL(`${selectedChain.explorer}/tx/${result.tx_hash}`)}
             style={styles.action}
+          />
+          <ShareFileButton
+            title="Save or share registry certificate"
+            // Same file the web's "Download Registry Certificate" saves.
+            onShare={() =>
+              shareJson(`uhrate_registry_${result.registry_id}.json`, result, 'Registry certificate')
+            }
+            style={styles.secondAction}
           />
           <Button title="Register another document" onPress={startOver} style={styles.secondAction} />
         </Card>

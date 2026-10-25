@@ -14,12 +14,14 @@ import {
   type PickedFile,
 } from '@/lib/file-picker';
 import { creditsLabel, ratingTone } from '@/lib/format';
+import { shareCsv } from '@/lib/share-file';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { ErrorMessage } from '@/components/error-message';
 import { PageHeader } from '@/components/page-header';
 import { Pill } from '@/components/pill';
 import { Screen } from '@/components/screen';
+import { ShareFileButton } from '@/components/share-file-button';
 import { monoFont, useColors } from '@/theme';
 
 // Same limit per file as the web page.
@@ -247,9 +249,31 @@ export default function EnterpriseScreen() {
             </Card>
           ))}
           {!running && (
-            <Text style={[styles.note, { color: colors.textMuted }]}>
-              Verified files are also in your history on Home.
-            </Text>
+            <>
+              <ShareFileButton
+                title="Save or share CSV"
+                variant="primary"
+                // Same columns and file name as the web's "Download CSV".
+                onShare={() =>
+                  shareCsv(
+                    'uhrate-bulk-verification.csv',
+                    [
+                      ['File Name', 'Rating', 'Trust Score', 'Certificate ID', 'Status'],
+                      ...results.map((r) =>
+                        r.ok
+                          ? [r.fileName, r.rating, String(r.trustScore), r.certificateId, 'success']
+                          : [r.fileName, '—', '0', '—', 'error']
+                      ),
+                    ],
+                    'Bulk verification results'
+                  )
+                }
+                style={styles.action}
+              />
+              <Text style={[styles.note, { color: colors.textMuted }]}>
+                Verified files are also in your history on Home.
+              </Text>
+            </>
           )}
         </>
       )}
