@@ -9,6 +9,7 @@ import { ErrorMessage } from '@/components/error-message';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { authStyles } from '@/components/auth-styles';
+import { LegalNotice } from '@/components/legal-notice';
 import { useColors } from '@/theme';
 
 export default function Register() {
@@ -132,6 +133,8 @@ export default function Register() {
       <Pressable onPress={() => router.push('/login')} disabled={loading}>
         <Text style={[authStyles.link, { color: colors.text }]}>Already have an account? Sign in</Text>
       </Pressable>
+
+      <LegalNotice action="creating an account" />
     </Screen>
   );
 }

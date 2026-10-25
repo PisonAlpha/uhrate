@@ -70,6 +70,9 @@ function RootNavigator() {
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
       </Stack.Protected>
+      {/* Open to everyone: linked from Register and Login as well as About. */}
+      <Stack.Screen name="privacy" />
+      <Stack.Screen name="terms" />
     </Stack>
   );
 }

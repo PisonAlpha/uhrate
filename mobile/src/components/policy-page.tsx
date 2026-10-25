@@ -1,5 +1,6 @@
 import { Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { PageHeader } from '@/components/page-header';
@@ -8,10 +9,12 @@ import { useColors } from '@/theme';
 import type { Policy } from '@/content/types';
 
 // A legal text (Privacy Policy, Terms of Service) copied from the website,
-// with a way to reach the team at the end.
+// with a way to reach the team at the end once signed in (Contact is in
+// the signed-in area).
 export function PolicyPage({ policy }: { policy: Policy }) {
   const router = useRouter();
   const colors = useColors();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Screen muted scroll>
@@ -27,7 +30,9 @@ export function PolicyPage({ policy }: { policy: Policy }) {
           ))}
         </Card>
       ))}
-      <Button title="Contact us" variant="secondary" onPress={() => router.push('/contact')} style={styles.action} />
+      {isAuthenticated && (
+        <Button title="Contact us" variant="secondary" onPress={() => router.push('/contact')} style={styles.action} />
+      )}
     </Screen>
   );
 }

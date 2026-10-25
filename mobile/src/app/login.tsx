@@ -10,6 +10,7 @@ import { ErrorMessage } from '@/components/error-message';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { authStyles } from '@/components/auth-styles';
+import { LegalNotice } from '@/components/legal-notice';
 import { useColors } from '@/theme';
 import { useWallet, walletErrorMessage } from '@/wallet/use-wallet';
 
@@ -121,6 +122,8 @@ export default function Login() {
       <Pressable onPress={() => router.push('/register')} disabled={busy}>
         <Text style={[authStyles.link, { color: colors.text }]}>Don&apos;t have an account? Create one free</Text>
       </Pressable>
+
+      <LegalNotice action="continuing" />
     </Screen>
   );
 }
