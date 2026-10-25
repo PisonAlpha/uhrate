@@ -40,6 +40,12 @@ export default function Login() {
 
   const handleWalletLogin = async () => {
     if (!window.ethereum) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        const currentUrl = window.location.href;
+        window.location.href = `https://metamask.app.link/dapp/${currentUrl.replace('https://', '')}`;
+        return;
+      }
       setError('MetaMask not found. Please install MetaMask to use wallet login.');
       return;
     }

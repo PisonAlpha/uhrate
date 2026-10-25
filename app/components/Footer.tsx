@@ -84,22 +84,40 @@ export default function Footer() {
             </div>
           </div>
         </div>
-                {/* Partners */}
+                 {/* Partners Ticker */}
         <div className="border-t border-gray-100 pt-6 mb-6">
-          <p className="text-xs text-gray-400 mb-3 text-center">Partners & Ecosystem</p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <a
-              href="https://iq.wiki/wiki/uhrate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all no-underline"
-            >
-              <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white text-xs font-black">IQ</span>
-              </div>
-              <span className="text-xs font-semibold text-gray-700">IQ.wiki</span>
-              <span className="text-xs text-gray-400">— Listed</span>
-            </a>
+          <p className="text-xs text-gray-400 mb-4 text-center font-semibold uppercase tracking-wider">Partners & Ecosystem</p>
+          <div className="overflow-hidden relative">
+            <div className="flex animate-marquee gap-8 whitespace-nowrap">
+              {[
+                { name: 'IQ.wiki', desc: 'Listed', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ' },
+                { name: 'CryptoPulse', desc: 'Web3 SocialFi', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP' },
+                { name: 'ATT Global', desc: 'Web3 Advertising', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT' },
+                { name: 'CoinGecko', desc: 'Listed', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: '🦎' },
+                { name: 'CoinMarketCap', desc: 'Listed', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC' },
+                { name: 'IQ.wiki', desc: 'Listed', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ' },
+                { name: 'CryptoPulse', desc: 'Web3 SocialFi', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP' },
+                { name: 'ATT Global', desc: 'Web3 Advertising', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT' },
+                { name: 'CoinGecko', desc: 'Listed', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: '🦎' },
+                { name: 'CoinMarketCap', desc: 'Listed', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC' },
+              ].map((partner, i) => (
+                <a
+                  key={i}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all no-underline flex-shrink-0"
+                >
+                  <div className={`w-7 h-7 ${partner.bg} rounded-lg flex items-center justify-center`}>
+                    <span className="text-white text-xs font-black">{partner.text}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900">{partner.name}</p>
+                    <p className="text-xs text-gray-400">{partner.desc}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 

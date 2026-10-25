@@ -1,212 +1,294 @@
-'use client';
-import Nav from '../components/Nav';
-import Footer from '../components/Footer';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from "react";
+import { ethers } from "ethers";
 
-const SWAP_WALLET = '0x6c55d7594a3a85cc142095153faeb9f5042c7863';
-const UHR_CONTRACT = '0xFD8723F83F5A441EdB231F2ef1f89113B481E447';
-const USDT_BEP20 = '0x55d398326f99059fF775485246999027B3197955';
-const SWAP_PRICE = 0.02;
-const BNB_CHAIN_ID = '0x38';
+const SWAP_CONTRACT_ADDRESS = "0xb30EBA845C4169bee13C049FcC928d9543e3cD58";
+const UHR_TOKEN_ADDRESS = "0xFD8723F83F5A441EdB231F2ef1f89113B481E447";
+const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
 
-export default function Swap() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [usdtAmount, setUsdtAmount] = useState('');
-  const [uhrAmount, setUhrAmount] = useState('');
+const SWAP_ABI = [
+  "function buyUHR(uint256 uhrAmount) external",
+  "function getUHRBalance() external view returns (uint256)",
+  "function getUSDTCost(uint256 uhrAmount) external pure returns (uint256)",
+  "function paused() external view returns (bool)",
+];
+
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) external returns (bool)",
+  "function allowance(address owner, address spender) external view returns (uint256)",
+  "function balanceOf(address account) external view returns (uint256)",
+];
+
+type Step = "connect" | "approve" | "buy" | "success";
+
+const BSC_CHAIN_ID = "0x38";
+const BSC_PARAMS = {
+  chainId: BSC_CHAIN_ID,
+  chainName: "BNB Smart Chain",
+  nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+  blockExplorerUrls: ["https://bscscan.com"],
+};
+
+function shortAddr(addr: string) {
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+export default function SwapPage() {
+  const [step, setStep] = useState<Step>("connect");
+  const [account, setAccount] = useState("");
+  const [uhrInput, setUhrInput] = useState("");
+  const [usdtCost, setUsdtCost] = useState("0.00");
+  const [userUsdtBalance, setUserUsdtBalance] = useState("—");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<'connect' | 'swap' | 'success'>('connect');
+  const [approveTxHash, setApproveTxHash] = useState<string | null>(null);
+  const [buyTxHash, setBuyTxHash] = useState<string | null>(null);
+  const [confirmedUhrAmount, setConfirmedUhrAmount] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
 
-  useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_accounts' }).then((accounts: string[]) => {
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0]);
-          setStep('swap');
-        }
-      });
-    }
+  const fetchUserBalance = useCallback(async (addr: string) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum as ethers.Eip1193Provider);
+      const usdt = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, provider);
+      const raw: bigint = await usdt.balanceOf(addr);
+      setUserUsdtBalance((Number(raw) / 1e18).toFixed(2));
+    } catch {}
   }, []);
 
-  const connectWallet = async () => {
+  useEffect(() => {
+    const val = parseFloat(uhrInput);
+    if (!isNaN(val) && val > 0) {
+      setUsdtCost((val * 0.02).toFixed(2));
+    } else {
+      setUsdtCost("0.00");
+    }
+  }, [uhrInput]);
+
+  async function connectWallet() {
+    setError("");
     if (!window.ethereum) {
-      setError('MetaMask not found. Please install MetaMask.');
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = "https://metamask.app.link/dapp/uhrate.online/swap";
+        return;
+      }
+      setError("MetaMask not found. Please install MetaMask extension.");
       return;
     }
     setLoading(true);
-    setError(null);
     try {
       try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: BNB_CHAIN_ID }],
-        });
-      } catch (switchError: any) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: BNB_CHAIN_ID,
-              chainName: 'BNB Smart Chain',
-              nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-              rpcUrls: ['https://bsc-dataseed.binance.org/'],
-              blockExplorerUrls: ['https://bscscan.com/'],
-            }],
-          });
-        }
+        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BSC_CHAIN_ID }] });
+      } catch (switchErr: unknown) {
+        const e = switchErr as { code?: number };
+        if (e?.code === 4902) {
+          await window.ethereum.request({ method: "wallet_addEthereumChain", params: [BSC_PARAMS] });
+        } else throw switchErr;
       }
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      setWalletAddress(accounts[0]);
-      setStep('swap');
-    } catch (err: any) {
-      setError(err.code === 4001 ? 'Connection cancelled.' : 'Failed to connect wallet.');
+      const accounts: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
+      setAccount(accounts[0]);
+      await fetchUserBalance(accounts[0]);
+      setStep("approve");
+    } catch (err: unknown) {
+      const e = err as { code?: number; message?: string };
+      setError(e?.code === 4001 ? "Connection cancelled." : "Failed to connect wallet.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleUsdtChange = (val: string) => {
-    setUsdtAmount(val);
-    const usdt = parseFloat(val) || 0;
-    setUhrAmount(usdt > 0 ? Math.floor(usdt / SWAP_PRICE).toLocaleString() : '');
-  };
+  async function approveUSDT() {
+    setError("");
+    const val = parseFloat(uhrInput);
+    if (isNaN(val) || val <= 0) { setError("Enter a valid UHR amount."); return; }
+    if (!Number.isInteger(val)) { setError("UHR amount must be a whole number."); return; }
 
-  const executeSwap = async () => {
-    if (!walletAddress || !usdtAmount || parseFloat(usdtAmount) <= 0) {
-      setError('Please enter a valid USDT amount.');
-      return;
-    }
     setLoading(true);
-    setError(null);
+    setStatusMsg("Confirm USDT approval in MetaMask…");
     try {
-      const amount = parseFloat(usdtAmount);
-      const amountWei = BigInt(Math.floor(amount * 1e18)).toString(16);
-      const transferFn = '0xa9059cbb';
-      const toAddress = SWAP_WALLET.slice(2).padStart(64, '0');
-      const amountHex = amountWei.padStart(64, '0');
-      const data = transferFn + toAddress + amountHex;
+      const provider = new ethers.BrowserProvider(window.ethereum as ethers.Eip1193Provider);
+      const signer = await provider.getSigner();
+      const usdt = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
 
-      const tx = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: walletAddress,
-          to: USDT_BEP20,
-          data,
-          gas: '0x186A0',
-        }],
-      });
+      const uhrWei = ethers.parseEther(uhrInput);
+      const usdtWei = (uhrWei * BigInt(2e16)) / BigInt(1e18);
 
-      setTxHash(tx);
-      setStep('success');
-    } catch (err: any) {
-      if (err.code === 4001) {
-        setError('Transaction cancelled.');
-      } else {
-        setError('Transaction failed. Make sure you have enough USDT (BEP20).');
+      const existing: bigint = await usdt.allowance(account, SWAP_CONTRACT_ADDRESS);
+      if (existing >= usdtWei) {
+        setConfirmedUhrAmount(uhrInput);
+        setApproveTxHash("already_approved");
+        setStep("buy");
+        setStatusMsg("");
+        setLoading(false);
+        return;
       }
+
+      const tx = await usdt.approve(SWAP_CONTRACT_ADDRESS, usdtWei);
+      setStatusMsg(`Approval submitted — waiting for confirmation…`);
+      await tx.wait();
+      setApproveTxHash(tx.hash);
+      setConfirmedUhrAmount(uhrInput);
+      setStep("buy");
+      setStatusMsg("");
+    } catch (err: unknown) {
+      const e = err as { code?: number; reason?: string; message?: string };
+      setError(e?.code === 4001 ? "Approval cancelled." : e?.reason ?? e?.message ?? "Approval failed.");
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  async function buyUHR() {
+    setError("");
+    setLoading(true);
+    setStatusMsg("Confirm swap transaction in MetaMask…");
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum as ethers.Eip1193Provider);
+      const signer = await provider.getSigner();
+      const swap = new ethers.Contract(SWAP_CONTRACT_ADDRESS, SWAP_ABI, signer);
+
+      const uhrWei = ethers.parseEther(confirmedUhrAmount);
+      const tx = await swap.buyUHR(uhrWei);
+      setStatusMsg("Transaction submitted — waiting for confirmation…");
+      await tx.wait();
+      setBuyTxHash(tx.hash);
+      await fetchUserBalance(account);
+      setStep("success");
+      setStatusMsg("");
+    } catch (err: unknown) {
+      const e = err as { code?: number; reason?: string; message?: string; data?: { message?: string } };
+      setError(
+        e?.code === 4001 ? "Transaction cancelled." :
+        e?.reason ?? e?.data?.message ?? e?.message ?? "Transaction failed."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function reset() {
+    setStep("approve");
+    setUhrInput("");
+    setUsdtCost("0.00");
+    setError("");
+    setApproveTxHash(null);
+    setBuyTxHash(null);
+    setConfirmedUhrAmount("");
+    setStatusMsg("");
+    fetchUserBalance(account);
+  }
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button onClick={() => window.location.href = '/'} className="flex items-center gap-3 bg-transparent border-0 cursor-pointer p-0">
+    <main className="min-h-screen bg-white overflow-x-hidden">
+
+      {/* Nav */}
+      <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 bg-transparent border-0 cursor-pointer p-0">
             <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold">UH</span>
             </div>
-            <span className="font-bold text-gray-900">UHRATE</span>
+            <span className="font-bold text-gray-900 text-lg">UHRATE</span>
           </button>
           <div className="flex items-center gap-3">
-            <button onClick={() => window.location.href = '/presale'} className="text-sm text-red-600 font-semibold bg-transparent border-0 cursor-pointer">🔥 Presale</button>
-            <button onClick={() => window.location.href = '/tokenomics'} className="text-sm text-gray-600 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Tokenomics</button>
+            <button onClick={() => window.location.href = '/tokenomics'} className="text-sm text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer">Tokenomics</button>
+            <button onClick={() => window.location.href = '/seal'} className="px-4 py-2 bg-black text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-colors border-0 cursor-pointer">Seal a Document</button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto px-6 py-16">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-gray-900 mb-2">Buy UHR Token</h1>
-          <p className="text-gray-500">Swap USDT for UHR at a fixed price</p>
+      <div className="max-w-lg mx-auto px-4 py-16">
+
+        {/* Hero */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold mb-6">
+            🔄 UHR Token Swap
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-black text-gray-900 mb-4">Buy UHR Tokens</h1>
+          <p className="text-gray-500 text-base">Fixed price · $0.02 per UHR · Instant on-chain delivery</p>
         </div>
 
-        {/* Price comparison */}
+        {/* Stats */}
         <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-            <p className="text-xs text-red-500 font-semibold mb-1">🔥 PRESALE PRICE</p>
-            <p className="text-2xl font-black text-red-600">$0.01</p>
-            <p className="text-xs text-red-400">per UHR</p>
-            <button onClick={() => window.location.href = '/presale'} className="mt-2 text-xs text-red-600 underline bg-transparent border-0 cursor-pointer">
-              Join Presale →
-            </button>
+          <div className="bg-gray-50 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-gray-900">$0.02</p>
+            <p className="text-xs text-gray-500 mt-1">UHR Price</p>
           </div>
-          <div className="bg-black rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-400 font-semibold mb-1">SWAP PRICE</p>
-            <p className="text-2xl font-black text-white">$0.02</p>
-            <p className="text-xs text-gray-400">per UHR</p>
-            <p className="text-xs text-green-400 mt-2">Current Rate</p>
+          <div className="bg-gray-50 rounded-2xl p-4 text-center">
+            <p className="text-2xl font-black text-gray-900">Instant</p>
+            <p className="text-xs text-gray-500 mt-1">Token Delivery</p>
           </div>
         </div>
 
-        {/* Swap Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-6">
-          {step === 'connect' && (
+        {/* Main Card */}
+        <div className="bg-white border-2 border-gray-200 rounded-3xl p-8 mb-6">
+
+          {/* CONNECT */}
+          {step === "connect" && (
             <div className="text-center">
-              <div className="text-5xl mb-4">🔄</div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Connect Wallet to Swap</h2>
-              <p className="text-gray-500 text-sm mb-8">Connect MetaMask on BNB Smart Chain. Swap USDT (BEP20) for UHR tokens at $0.02 per UHR.</p>
-              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-              <button onClick={connectWallet} disabled={loading} className="w-full py-4 bg-black text-white rounded-xl text-base font-bold hover:bg-gray-800 transition-colors disabled:opacity-50">
-                {loading ? 'Connecting...' : '🦊 Connect MetaMask'}
+              <div className="text-5xl mb-4">🦊</div>
+              <h2 className="text-xl font-black text-gray-900 mb-2">Connect Your Wallet</h2>
+              <p className="text-gray-500 text-sm mb-8">Connect MetaMask on BNB Smart Chain. You will need USDT (BEP20) to buy UHR.</p>
+              {error && <p className="text-red-500 text-sm mb-4 p-3 bg-red-50 rounded-xl">{error}</p>}
+              <button onClick={connectWallet} disabled={loading} className="w-full py-4 bg-black text-white rounded-xl text-base font-black hover:bg-gray-800 transition-colors disabled:opacity-50">
+                {loading ? "Connecting…" : "🦊 Connect MetaMask"}
               </button>
             </div>
           )}
 
-          {step === 'swap' && (
+          {/* APPROVE */}
+          {step === "approve" && (
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900">Swap USDT → UHR</h2>
-                <div className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full font-mono">
-                  {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
-                </div>
+              <div className="flex items-center gap-2 text-xs text-gray-400 mb-6">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                Connected: <span className="font-mono text-gray-600">{shortAddr(account)}</span>
+                {userUsdtBalance !== "—" && <span className="ml-auto text-gray-400">USDT Balance: <strong className="text-gray-700">${userUsdtBalance}</strong></span>}
               </div>
 
-              <div className="space-y-3 mb-6">
+              <h2 className="text-xl font-black text-gray-900 mb-6">Buy UHR Tokens</h2>
+
+              <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-sm text-gray-500 mb-2 block">You Pay</label>
+                  <label className="text-sm text-gray-500 mb-2 block">You Pay (USDT BEP20)</label>
                   <div className="relative">
                     <input
                       type="number"
-                      value={usdtAmount}
-                      onChange={e => handleUsdtChange(e.target.value)}
+                      value={usdtCost === "0.00" ? "" : usdtCost}
+                      onChange={e => {
+                        const usdt = parseFloat(e.target.value) || 0;
+                        setUsdtCost(e.target.value);
+                        setUhrInput(usdt > 0 ? String(Math.floor(usdt / 0.02)) : "");
+                      }}
                       placeholder="0.00"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-4 text-xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-black pr-20"
+                      min="0"
+                      className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-xl font-bold focus:outline-none focus:border-black transition-colors pr-20 placeholder-gray-300"
                     />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                      <span className="text-gray-500 font-semibold text-sm">USDT</span>
-                    </div>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">USDT</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-center">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-lg">↓</div>
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">↓</div>
                 </div>
 
                 <div>
-                  <label className="text-sm text-gray-500 mb-2 block">You Receive</label>
+                  <label className="text-sm text-gray-500 mb-2 block">You Receive (UHR) — Instantly</label>
                   <div className="relative">
                     <input
-                      type="text"
-                      value={uhrAmount}
-                      readOnly
+                      type="number"
+                      value={uhrInput}
+                      onChange={e => {
+                        setUhrInput(e.target.value);
+                        const val = parseFloat(e.target.value) || 0;
+                        setUsdtCost(val > 0 ? (val * 0.02).toFixed(2) : "0.00");
+                      }}
                       placeholder="0"
-                      className="w-full border border-gray-100 bg-gray-50 rounded-xl px-4 py-4 text-xl font-black text-black focus:outline-none pr-16"
+                      min="0"
+                      className="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-xl font-black focus:outline-none focus:border-black transition-colors pr-16 placeholder-gray-300"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm">UHR</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">UHR</span>
                   </div>
                 </div>
               </div>
@@ -214,11 +296,15 @@ export default function Swap() {
               <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Rate</span>
-                  <span className="text-gray-900 font-medium">1 USDT = 50 UHR</span>
+                  <span className="text-gray-900">1 USDT = 50 UHR</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Price per UHR</span>
-                  <span className="text-gray-900 font-bold">$0.02</span>
+                  <span className="text-gray-500">Price</span>
+                  <span className="font-bold text-gray-900">$0.02 per UHR</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Delivery</span>
+                  <span className="text-green-600 font-bold">⚡ Instant</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Network</span>
@@ -226,69 +312,116 @@ export default function Swap() {
                 </div>
               </div>
 
+              {statusMsg && <p className="text-sm text-blue-600 bg-blue-50 rounded-xl px-4 py-3 mb-4">{statusMsg}</p>}
               {error && <p className="text-red-500 text-sm mb-4 p-3 bg-red-50 rounded-xl">{error}</p>}
 
-              <button
-                onClick={executeSwap}
-                disabled={loading || !usdtAmount || parseFloat(usdtAmount) <= 0}
-                className="w-full py-4 bg-black text-white rounded-xl text-base font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Processing...' : `Swap for ${uhrAmount || '0'} UHR →`}
+              <button onClick={approveUSDT} disabled={loading || !uhrInput || parseFloat(uhrInput) <= 0} className="w-full py-4 bg-black text-white rounded-xl text-base font-black hover:bg-gray-800 transition-colors disabled:opacity-50">
+                {loading ? "Approving…" : `Step 1: Approve ${usdtCost !== "0.00" ? usdtCost : "0"} USDT`}
+              </button>
+              <p className="text-xs text-gray-400 text-center mt-3">First approve USDT spending, then buy UHR in the next step</p>
+            </div>
+          )}
+
+          {/* BUY */}
+          {step === "buy" && (
+            <div>
+              <div className="flex items-center gap-2 text-xs text-gray-400 mb-6">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                Connected: <span className="font-mono text-gray-600">{shortAddr(account)}</span>
+              </div>
+              <h2 className="text-xl font-black text-gray-900 mb-4">Confirm Swap</h2>
+
+              <div className="p-3 bg-green-50 border border-green-200 rounded-xl text-center mb-6">
+                <p className="text-green-700 text-sm font-semibold">✓ USDT Approved — Ready to buy!</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">You Send</span>
+                  <span className="font-bold text-gray-900">{(parseFloat(confirmedUhrAmount) * 0.02).toFixed(2)} USDT</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">You Receive</span>
+                  <span className="font-bold text-gray-900">{confirmedUhrAmount} UHR</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Price</span>
+                  <span className="text-gray-900">$0.02 / UHR</span>
+                </div>
+              </div>
+
+              {approveTxHash && approveTxHash !== "already_approved" && (
+                <a href={`https://bscscan.com/tx/${approveTxHash}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 bg-blue-50 rounded-xl px-4 py-2 mb-4 hover:bg-blue-100 transition-colors">
+                  <span>Approval TX</span>
+                  <span className="font-mono underline">{approveTxHash.slice(0, 10)}…{approveTxHash.slice(-6)} ↗</span>
+                </a>
+              )}
+              {approveTxHash === "already_approved" && (
+                <p className="text-xs text-green-600 mb-4">✓ Existing allowance sufficient — no approval needed.</p>
+              )}
+
+              {statusMsg && <p className="text-sm text-blue-600 bg-blue-50 rounded-xl px-4 py-3 mb-4">{statusMsg}</p>}
+              {error && <p className="text-red-500 text-sm mb-4 p-3 bg-red-50 rounded-xl">{error}</p>}
+
+              <button onClick={buyUHR} disabled={loading} className="w-full py-4 bg-black text-white rounded-xl text-base font-black hover:bg-gray-800 transition-colors disabled:opacity-50">
+                {loading ? "Processing…" : `Step 2: Buy ${confirmedUhrAmount} UHR → Instant`}
               </button>
             </div>
           )}
 
-          {step === 'success' && (
+          {/* SUCCESS */}
+          {step === "success" && (
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✓</div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Swap Complete!</h2>
-              <p className="text-gray-500 text-sm mb-6">Your USDT has been sent. UHR tokens will be delivered to your wallet shortly.</p>
-              <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
-                <p className="text-xs text-gray-500 mb-1">Transaction Hash</p>
-                <a href={`https://bscscan.com/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-blue-600 hover:underline break-all">
-                  {txHash}
+              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🎉</div>
+              <h2 className="text-2xl font-black text-gray-900 mb-2">Swap Complete!</h2>
+              <p className="text-gray-500 mb-6">
+                <span className="font-bold text-gray-900">{confirmedUhrAmount} UHR</span> tokens have been sent to your wallet.
+              </p>
+
+              {buyTxHash && (
+                <a href={`https://bscscan.com/tx/${buyTxHash}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between text-xs text-blue-600 bg-blue-50 rounded-xl px-4 py-3 mb-4 hover:bg-blue-100 transition-colors">
+                  <span>Swap Transaction</span>
+                  <span className="font-mono underline">{buyTxHash.slice(0, 10)}…{buyTxHash.slice(-6)} ↗</span>
                 </a>
+              )}
+
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 text-left">
+                <p className="text-xs font-semibold text-gray-700 mb-1">📌 Add UHR to MetaMask:</p>
+                <p className="font-mono text-xs text-gray-500 break-all">{UHR_TOKEN_ADDRESS}</p>
               </div>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-800 text-left">
-                <p className="font-bold mb-1">📌 Add UHR to MetaMask:</p>
-                <p className="font-mono text-xs break-all">{UHR_CONTRACT}</p>
-              </div>
+
               <div className="flex gap-3">
-                <button onClick={() => { setStep('swap'); setTxHash(null); setUsdtAmount(''); setUhrAmount(''); }} className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  Swap More
-                </button>
-                <button onClick={() => window.open(`https://bscscan.com/tx/${txHash}`, '_blank')} className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">
-                  View on BSCScan
-                </button>
+                <button onClick={reset} className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Buy More</button>
+                <button onClick={() => window.location.href = '/seal'} className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">Seal a Document →</button>
               </div>
             </div>
           )}
         </div>
 
-               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700 mb-6">
-          ⚠️ Only send USDT on BNB Smart Chain (BEP20). Verify the contract address before transacting.
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
+        {/* How it works */}
+        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mb-6">
           <h3 className="font-bold text-gray-900 mb-4">What is UHR used for?</h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[
-              { icon: '💸', title: 'Cheaper Deployments', desc: 'Pay just $0.10 in UHR to deploy documents on-chain instead of $0.20 in ETH/BNB — 50% cheaper.' },
-              { icon: '🔥', title: 'Fee Burn', desc: '10% of all UHR collected as platform fees is permanently burned — reducing supply over time.' },
-             
+              { step: "1", title: "Buy UHR", desc: "Get UHR tokens at $0.02 each from this swap" },
+              { step: "2", title: "Seal Documents", desc: "Pay with UHR to seal documents on the blockchain — save 50% vs paying with ETH/BNB" },
+              { step: "3", title: "Verify Anywhere", desc: "Your sealed documents can be verified by anyone, anywhere, forever" },
             ].map(item => (
-              <div key={item.title} className="flex items-start gap-3 py-2 border-b border-gray-50">
-                <span className="text-xl flex-shrink-0">{item.icon}</span>
+              <div key={item.step} className="flex items-start gap-3">
+                <div className="w-7 h-7 bg-black text-white rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">{item.step}</div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">{item.title}</p>
-                  <p className="text-xs text-gray-500">{item.desc}</p>
+                  <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
+                  <p className="text-gray-500 text-xs">{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+          ⚠️ Only send USDT on BNB Smart Chain (BEP20). Swap contract: <span className="font-mono text-xs break-all">{SWAP_CONTRACT_ADDRESS}</span>
+        </div>
       </div>
-          <Footer />
     </main>
   );
 }

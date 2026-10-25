@@ -15,6 +15,8 @@ export default function Home() {
   const [registryOpen, setRegistryOpen] = useState(false);
   const [tokenOpen, setTokenOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<'identity' | 'verify'>('identity');
+  const [appModalOpen, setAppModalOpen] = useState(false);
+  const [appPlatform, setAppPlatform] = useState<'android' | 'ios' | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('uhrate_user');
@@ -35,8 +37,44 @@ export default function Home() {
     setUser(null);
   };
 
+  const openAppModal = (platform: 'android' | 'ios') => {
+    setAppPlatform(platform);
+    setAppModalOpen(true);
+  };
+
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
+
+      {/* ── COMING SOON MODAL ── */}
+      {appModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" onClick={() => setAppModalOpen(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="relative bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-5xl mb-4">{appPlatform === 'android' ? '🤖' : '🍎'}</div>
+            <h3 className="text-2xl font-black text-gray-900 mb-2">Coming Soon</h3>
+            <p className="text-gray-500 mb-2">
+              The UHRATE {appPlatform === 'android' ? 'Android' : 'iOS'} app is under development.
+            </p>
+            <p className="text-sm text-gray-400 mb-6">
+              Seal, verify, and lookup files from your phone — launching soon.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setAppModalOpen(false)}
+                className="w-full py-3 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors"
+              >
+                Got it
+              </button>
+              <button
+                onClick={() => setAppModalOpen(false)}
+                className="w-full py-3 border border-gray-200 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Notify me when it launches
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── NAVIGATION ── */}
       <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
@@ -57,7 +95,7 @@ export default function Home() {
               {registryOpen && (
                 <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2 w-56 z-50">
                   <p className="text-xs text-gray-400 px-3 py-1 font-semibold uppercase tracking-wider">Platform</p>
-                                    {[
+                  {[
                     { icon: '🔏', label: 'Seal', href: '/seal' },
                     { icon: '📄', label: 'Document Registry', href: '/registry' },
                     { icon: '🎓', label: 'Education Registry', href: '/education' },
@@ -89,7 +127,9 @@ export default function Home() {
                     { icon: '🔥', label: 'Presale — $0.01/UHR', href: '/presale' },
                     { icon: '🔄', label: 'Buy UHR — $0.02/UHR', href: '/swap' },
                     { icon: '📊', label: 'Tokenomics', href: '/tokenomics' },
+                    { icon: '🗺️', label: 'Roadmap', href: '/roadmap' },
                     { icon: '📄', label: 'Whitepaper', href: '/whitepaper' },
+                    { icon: '📈', label: 'Investors', href: '/investors' },
                   ].map(item => (
                     <button key={item.href} onClick={() => { window.location.href = item.href; setTokenOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg bg-transparent border-0 cursor-pointer text-left">
                       <span>{item.icon}</span>{item.label}
@@ -101,7 +141,7 @@ export default function Home() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-            <button onClick={() => window.location.href = '/presale'} className="px-4 py-2 text-sm text-white font-bold bg-red-500 hover:bg-red-600 rounded-xl transition-colors">🔥 Presale</button>
+            <button onClick={() => window.location.href = '/swap'} className="px-4 py-2 text-sm text-white font-bold bg-black hover:bg-gray-800 rounded-xl transition-colors">🔄 Buy UHR</button>
             {user ? (
               <div className="flex items-center gap-2">
                 <button onClick={() => window.location.href = '/dashboard'} className="px-4 py-2 text-sm text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors bg-transparent cursor-pointer">Dashboard</button>
@@ -149,7 +189,9 @@ export default function Home() {
               { label: '🔥 Presale — $0.01/UHR', href: '/presale' },
               { label: '🔄 Buy UHR — $0.02/UHR', href: '/swap' },
               { label: '📊 Tokenomics', href: '/tokenomics' },
+              { label: '🗺️ Roadmap', href: '/roadmap' },
               { label: '📄 Whitepaper', href: '/whitepaper' },
+              { label: '📈 Investors', href: '/investors' },
             ].map(item => (
               <button key={item.href} onClick={() => { window.location.href = item.href; setMobileMenuOpen(false); }} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">{item.label}</button>
             ))}
@@ -169,13 +211,12 @@ export default function Home() {
         )}
       </header>
 
-      {/* ── PRESALE BANNER ── */}
       <div className="bg-black text-white py-2.5 px-4 text-center text-sm">
-        <span className="text-yellow-400 font-bold">🔥 UHR Presale Live</span>
+        <span className="text-white font-bold">🔄 Buy UHR Tokens</span>
         <span className="text-gray-400 mx-2">·</span>
-        <span className="text-gray-300">Buy UHR at $0.01 — 50% cheaper than swap price</span>
+        <span className="text-gray-300">Fixed price $0.02 per UHR — instant on-chain delivery</span>
         <span className="text-gray-400 mx-2">·</span>
-        <button onClick={() => window.location.href = '/presale'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">Join Presale →</button>
+        <button onClick={() => window.location.href = '/swap'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">Buy UHR →</button>
       </div>
 
       {/* ── HERO ── */}
@@ -221,7 +262,7 @@ export default function Home() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {[
+            {[
               { value: totalVerifications > 0 ? totalVerifications.toLocaleString() + '+' : '...', label: 'Files Identified' },
               { value: '4', label: 'Blockchains' },
               { value: '6', label: 'AI Models' },
@@ -400,14 +441,14 @@ export default function Home() {
               Pay with <strong>ETH, BNB, Base, or Polygon</strong> — or save 50% by paying with <strong>UHR token</strong>
             </p>
             <div className="flex gap-3 justify-center">
-              <button onClick={() => window.location.href = '/presale'} className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors">🔥 Get UHR at Presale Price →</button>
+              <button onClick={() => window.location.href = '/swap'} className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-colors">🔄 Buy UHR Tokens →</button>
               <button onClick={() => window.location.href = '/register'} className="px-4 py-2 border border-gray-200 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-50 transition-colors">Create Free Account</button>
             </div>
           </div>
         </div>
       </section>
 
-            {/* ── THREE PRODUCTS ── */}
+      {/* ── THREE PRODUCTS ── */}
       <section className="py-16 px-4 bg-white border-b border-gray-100">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
@@ -443,7 +484,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-full text-yellow-400 text-xs font-bold mb-6 uppercase tracking-wider">
-                🔥 Presale Live — $0.01/UHR
+                🔄 Buy UHR — $0.02/UHR
               </div>
               <h2 className="text-3xl sm:text-4xl font-black mb-4">Invest in the trust infrastructure of the internet</h2>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -451,7 +492,6 @@ export default function Home() {
               </p>
               <div className="space-y-3 mb-8">
                 {[
-                  { label: 'Presale Price', value: '$0.01 per UHR' },
                   { label: 'Swap Price', value: '$0.02 per UHR' },
                   { label: 'Total Supply', value: '1,000,000,000 UHR' },
                   { label: 'Network', value: 'BNB Smart Chain (BEP20)' },
@@ -464,7 +504,7 @@ export default function Home() {
                 ))}
               </div>
               <div className="flex gap-3 flex-wrap">
-                <button onClick={() => window.location.href = '/presale'} className="px-6 py-3 bg-yellow-400 text-black font-black rounded-xl text-sm hover:bg-yellow-300 transition-colors">Join Presale →</button>
+                <button onClick={() => window.location.href = '/swap'} className="px-6 py-3 bg-white text-black font-black rounded-xl text-sm hover:bg-gray-100 transition-colors">Buy UHR →</button>
                 <button onClick={() => window.location.href = '/tokenomics'} className="px-6 py-3 border border-white/20 text-white font-semibold rounded-xl text-sm hover:bg-white/10 transition-colors">Tokenomics</button>
                 <button onClick={() => window.location.href = '/whitepaper'} className="px-6 py-3 border border-white/20 text-white font-semibold rounded-xl text-sm hover:bg-white/10 transition-colors">Whitepaper</button>
               </div>
@@ -488,7 +528,7 @@ export default function Home() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-white border-b border-gray-100">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-black text-gray-900 mb-4">Start protecting your files today.</h2>
           <p className="text-gray-500 mb-8">Give your documents a permanent identity. Check any file for authenticity. Free to start — forever.</p>
@@ -499,9 +539,121 @@ export default function Home() {
             <button onClick={() => document.getElementById('verify-section')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl text-sm hover:border-gray-400 transition-colors">
               🔍 Check File Authenticity
             </button>
-            <button onClick={() => window.location.href = '/presale'} className="px-8 py-4 bg-red-500 text-white font-bold rounded-2xl text-sm hover:bg-red-600 transition-colors">
-              🔥 Join Presale
+            <button onClick={() => window.location.href = '/swap'} className="px-8 py-4 bg-black text-white font-bold rounded-2xl text-sm hover:bg-gray-800 transition-colors">
+              🔄 Buy UHR
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── MOBILE APP SECTION ── */}
+      <section className="py-20 px-4 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold mb-6 uppercase tracking-wider">
+                📱 Mobile App
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">
+                UHRATE in your pocket
+              </h2>
+              <p className="text-gray-500 mb-8 leading-relaxed">
+                Seal, verify, and lookup files from anywhere. The UHRATE mobile app brings the full power of blockchain document identity to your phone — Android and iOS.
+              </p>
+              <ul className="space-y-3 mb-10">
+                {[
+                  'Seal any file directly from your phone',
+                  'Verify documents on the go',
+                  'Instant blockchain confirmation',
+                  'Access your full seal history',
+                ].map(f => (
+                  <li key={f} className="flex items-center gap-3 text-sm text-gray-700">
+                    <span className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex gap-4 flex-wrap">
+                {/* Google Play Button */}
+                <button
+                  onClick={() => openAppModal('android')}
+                  className="flex items-center gap-3 px-5 py-3 bg-black text-white rounded-2xl hover:bg-gray-800 transition-colors border-0 cursor-pointer"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M3.18 23.76c.35.2.74.24 1.12.12l12.2-6.89-2.64-2.64-10.68 9.41zm16.28-9.18L16.8 12l2.66-2.58-9.96-5.62c-.38-.22-.82-.24-1.2-.06l10.16 10.84zm-16.28-9.34L13.86 14.4l2.64-2.64L4.3.12C3.92-.08 3.53-.04 3.18.16c-.58.33-.58 1.1 0 1.44l-.58 3.64zm15.36 5.44L16.8 12l1.94-1.92c.64-.36.64-1.28 0-1.64l-2.08-1.18L14 9.92l2.66 2.66-2.66 2.66 2.66 2.66 2.08-1.18c.64-.36.64-1.28 0-1.64z"/>
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-xs text-gray-300 leading-none">Get it on</p>
+                    <p className="text-sm font-bold leading-tight">Google Play</p>
+                  </div>
+                </button>
+
+                {/* App Store Button */}
+                <button
+                  onClick={() => openAppModal('ios')}
+                  className="flex items-center gap-3 px-5 py-3 bg-black text-white rounded-2xl hover:bg-gray-800 transition-colors border-0 cursor-pointer"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-xs text-gray-300 leading-none">Download on the</p>
+                    <p className="text-sm font-bold leading-tight">App Store</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Phone mockup */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative">
+                {/* Phone frame */}
+                <div className="w-64 h-[520px] bg-black rounded-[3rem] border-4 border-gray-800 shadow-2xl overflow-hidden relative">
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl z-10" />
+                  {/* Screen content */}
+                  <div className="bg-white h-full pt-8 px-4 pb-4 flex flex-col">
+                    {/* App header */}
+                    <div className="flex items-center gap-2 mb-4 pt-2">
+                      <div className="w-6 h-6 bg-black rounded-md flex items-center justify-center">
+                        <span className="text-white text-xs font-black">UH</span>
+                      </div>
+                      <span className="font-black text-gray-900 text-sm">UHRATE</span>
+                    </div>
+                    {/* Mock seal card */}
+                    <div className="bg-black rounded-2xl p-4 mb-3">
+                      <p className="text-white text-xs font-bold mb-1">🔏 Seal Document</p>
+                      <p className="text-gray-400 text-xs">Drop any file to give it a permanent blockchain identity</p>
+                      <div className="mt-3 border border-dashed border-gray-600 rounded-xl p-3 text-center">
+                        <p className="text-gray-500 text-xs">Tap to upload</p>
+                      </div>
+                    </div>
+                    {/* Mock verify card */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-3">
+                      <p className="text-gray-900 text-xs font-bold mb-1">🧬 Verify File</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="flex-1 bg-green-100 rounded-lg p-2">
+                          <p className="text-green-700 text-xs font-bold">Trust Score</p>
+                          <p className="text-green-900 text-lg font-black">94</p>
+                        </div>
+                        <div className="flex-1 bg-gray-100 rounded-lg p-2">
+                          <p className="text-gray-500 text-xs">AI Detection</p>
+                          <p className="text-gray-900 text-xs font-bold">Original</p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Bottom nav mock */}
+                    <div className="mt-auto border-t border-gray-100 pt-3 flex justify-around">
+                      {['🔏', '🧬', '🔍', '👤'].map((icon, i) => (
+                        <div key={i} className={`text-lg ${i === 0 ? 'opacity-100' : 'opacity-30'}`}>{icon}</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {/* Glow effect */}
+                <div className="absolute -inset-4 bg-black/5 rounded-[4rem] -z-10 blur-xl" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -559,10 +711,12 @@ export default function Home() {
               <p className="font-semibold text-gray-900 text-sm mb-3">Token</p>
               <div className="space-y-2">
                 {[
-                  { label: '🔥 Presale — $0.01/UHR', href: '/presale' },
                   { label: '🔄 Buy UHR — $0.02/UHR', href: '/swap' },
                   { label: 'Tokenomics', href: '/tokenomics' },
+                  { label: '🗺️ Roadmap', href: '/roadmap' },
                   { label: 'Whitepaper', href: '/whitepaper' },
+                  { label: 'Investors', href: '/investors' },
+                  { label: 'Analytics', href: '/analytics' },
                 ].map(item => (
                   <button key={item.href} onClick={() => window.location.href = item.href} className="block text-xs text-gray-500 hover:text-gray-900 bg-transparent border-0 cursor-pointer text-left">{item.label}</button>
                 ))}
@@ -573,7 +727,6 @@ export default function Home() {
               <div className="space-y-2">
                 {[
                   { label: 'Dashboard', href: '/dashboard' },
-
                   { label: 'Contact', href: '/contact' },
                   { label: 'Terms of Service', href: '/terms' },
                   { label: 'Privacy Policy', href: '/privacy' },
@@ -582,32 +735,60 @@ export default function Home() {
                 ))}
                 <p className="text-xs text-gray-400 pt-2">uhrate.online</p>
               </div>
+              {/* App download in footer */}
+              <div className="mt-4">
+                <p className="text-xs text-gray-400 mb-2">Mobile App</p>
+                <div className="flex flex-col gap-1.5">
+                  <button onClick={() => openAppModal('android')} className="flex items-center gap-2 px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border-0 cursor-pointer w-full">
+                    <span className="text-xs">🤖</span>
+                    <span className="text-xs font-semibold">Google Play</span>
+                  </button>
+                  <button onClick={() => openAppModal('ios')} className="flex items-center gap-2 px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border-0 cursor-pointer w-full">
+                    <span className="text-xs">🍎</span>
+                    <span className="text-xs font-semibold">App Store</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Partners Ticker */}
+          <div className="border-t border-gray-100 pt-6 mb-6">
+            <p className="text-xs text-gray-400 mb-4 text-center font-semibold uppercase tracking-wider">Partners & Ecosystem</p>
+            <div className="overflow-hidden relative">
+              <div className="flex animate-marquee gap-8 whitespace-nowrap">
+                {[
+                  { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ', desc: 'Listed' },
+                  { name: 'CryptoPulse', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP', desc: 'Web3 SocialFi' },
+                  { name: 'ATT Global', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT', desc: 'Web3 Advertising' },
+                  { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: 'G', desc: 'Listed' },
+                  { name: 'CoinMarketCap', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC', desc: 'Listed' },
+                  { name: 'IQ.wiki', url: 'https://iq.wiki/wiki/uhrate', bg: 'bg-blue-600', text: 'IQ', desc: 'Listed' },
+                  { name: 'CryptoPulse', url: 'https://www.cryptopulse.top/', bg: 'bg-purple-600', text: 'CP', desc: 'Web3 SocialFi' },
+                  { name: 'ATT Global', url: 'https://www.attglobal.io/', bg: 'bg-orange-500', text: 'ATT', desc: 'Web3 Advertising' },
+                  { name: 'CoinGecko', url: 'https://www.coingecko.com/', bg: 'bg-green-500', text: 'G', desc: 'Listed' },
+                  { name: 'CoinMarketCap', url: 'https://coinmarketcap.com/', bg: 'bg-blue-500', text: 'CMC', desc: 'Listed' },
+                ].map((partner, i) => (
+                  <a key={i} href={partner.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all no-underline flex-shrink-0">
+                    <div className={`w-7 h-7 ${partner.bg} rounded-lg flex items-center justify-center`}>
+                      <span className="text-white text-xs font-black">{partner.text}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">{partner.name}</p>
+                      <p className="text-xs text-gray-400">{partner.desc}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div className="border-t border-gray-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-gray-400">© 2026 UHRATE. All rights reserved.</p>
             <p className="text-xs text-gray-400">The decentralized notary for the digital world · BNB Smart Chain</p>
           </div>
         </div>
       </footer>
-
-      {/* Floating Partner Badge */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <a
-          href="https://iq.wiki/wiki/uhrate"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all no-underline group"
-        >
-          <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-black">IQ</span>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-gray-900">Listed on IQ.wiki</p>
-            <p className="text-xs text-gray-400 group-hover:text-blue-600 transition-colors">View our profile →</p>
-          </div>
-        </a>
-      </div>
 
     </main>
   );
