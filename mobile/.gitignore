@@ -32,6 +32,8 @@ yarn-error.*
 
 # local env files
 .env*.local
+# The root .gitignore ignores every .env*; the example is meant to be committed.
+!.env.example
 
 # typescript
 *.tsbuildinfo

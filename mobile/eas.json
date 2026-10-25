@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "android": { "buildType": "apk" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://uhrate.online",
+        "EXPO_PUBLIC_ENABLE_ONCHAIN": "false",
+        "EXPO_PUBLIC_ENABLE_TESTNET": "false"
+      }
+    },
+    "production": {
+      "environment": "production",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://uhrate.online",
+        "EXPO_PUBLIC_ENABLE_ONCHAIN": "false",
+        "EXPO_PUBLIC_ENABLE_TESTNET": "false"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

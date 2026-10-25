@@ -7,7 +7,11 @@
     "icon": "./assets/images/icon.png",
     "scheme": "uhrate",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "online.uhrate.app"
+    },
     "android": {
+      "package": "online.uhrate.app",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
