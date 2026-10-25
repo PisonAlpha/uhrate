@@ -23,7 +23,7 @@ export const educationRegistry: RegistryConfig = {
   title: 'Education registry',
   registerIntro:
     'Register a degree or certificate permanently on the blockchain. Add the certificate to fill in the details automatically, or type them yourself.',
-  searchIntro: 'Check that a degree or certificate is registered on UHRATE. Search is free.',
+  searchIntro: 'Check that a degree or certificate is registered on UHRATE.',
   fileNoun: 'certificate',
   maxFileMB: 20,
   fields: [

@@ -18,3 +18,12 @@
  *   or a tunnel URL.
  */
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+
+/**
+ * Seal, registering in the registries and the Pricing screen: everything that
+ * charges the on-chain fee from the user's wallet. Off unless
+ * EXPO_PUBLIC_ENABLE_ONCHAIN=true. Store builds leave it off so the app sells
+ * nothing and points nowhere to pay (app store rules, roadmap E38); those
+ * features stay on the website. The code is kept so this can be turned back on.
+ */
+export const ONCHAIN_ENABLED = process.env.EXPO_PUBLIC_ENABLE_ONCHAIN === 'true';

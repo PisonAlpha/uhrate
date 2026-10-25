@@ -6,13 +6,24 @@ import { RegistrySearch } from '@/components/registry-search';
 import { Screen } from '@/components/screen';
 import { SegmentedControl } from '@/components/segmented-control';
 import type { RegistryConfig } from '@/registries/types';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 
 type Mode = 'register' | 'verify';
 
 // A registry's page, opened from the Registry tab: Register | Verify, as on
-// the web's /education, /legal and /media pages.
+// the web's /education, /legal and /media pages. Registering charges the
+// on-chain fee, so without ONCHAIN_ENABLED the page is search only.
 export function RegistryPage({ config }: { config: RegistryConfig }) {
   const [mode, setMode] = useState<Mode>('register');
+
+  if (!ONCHAIN_ENABLED) {
+    return (
+      <Screen muted form>
+        <PageHeader title={config.title} />
+        <RegistrySearch config={config} />
+      </Screen>
+    );
+  }
 
   return (
     <Screen muted form>

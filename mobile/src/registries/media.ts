@@ -21,7 +21,7 @@ export const mediaRegistry: RegistryConfig = {
   title: 'Media registry',
   registerIntro:
     'Register a photo, video, recording or article permanently on the blockchain, so its origin can be proven later. Add the file to fill in the details automatically, or type them yourself.',
-  searchIntro: 'Check that a piece of media is registered on UHRATE. Search is free.',
+  searchIntro: 'Check that a piece of media is registered on UHRATE.',
   fileNoun: 'file',
   maxFileMB: 100,
   fields: [

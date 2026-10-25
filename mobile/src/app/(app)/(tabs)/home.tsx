@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, AppState, RefreshControl, StyleSheet } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 import { useProfile } from '@/hooks/use-profile';
 import { fetchDashboard } from '@/services/dashboard';
 import { ApiError, errorMessage } from '@/services/api';
@@ -140,12 +141,14 @@ export default function Home() {
             <Pill label={planLabel(profile.role)} style={styles.inlinePill} />
           </View>
           <Button title="Verify a file" onPress={() => router.push('/verify')} style={styles.cardButton} />
-          <Button
-            title="Seal a file on the blockchain"
-            variant="secondary"
-            onPress={() => router.push('/seal')}
-            style={styles.secondButton}
-          />
+          {ONCHAIN_ENABLED && (
+            <Button
+              title="Seal a file on the blockchain"
+              variant="secondary"
+              onPress={() => router.push('/seal')}
+              style={styles.secondButton}
+            />
+          )}
         </Card>
       )}
 

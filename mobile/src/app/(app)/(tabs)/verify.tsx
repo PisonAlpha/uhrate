@@ -43,19 +43,21 @@ type Mode = 'verify' | 'lookup';
 
 // The Verify tab holds two tools: Verify (D20, also covering D21) and Look up
 // (D23). The QR scanner returns here with `code` (and `t`, so the same code
-// can be scanned twice) to open Look up and run it.
+// can be scanned twice) to open Look up and run it; `mode=lookup` just opens
+// Look up.
 export default function VerifyTab() {
   const colors = useColors();
-  const { code, t } = useLocalSearchParams<{ code?: string; t?: string }>();
+  const { code, t, mode: modeParam } = useLocalSearchParams<{ code?: string; t?: string; mode?: string }>();
   const [mode, setMode] = useState<Mode>('verify');
   const [scanned, setScanned] = useState<LookupCode | null>(null);
 
   useEffect(() => {
+    if (modeParam === 'lookup') setMode('lookup');
     const parsed = code ? parseLookupCode(code) : null;
     if (!parsed) return;
     setMode('lookup');
     setScanned(parsed);
-  }, [code, t]);
+  }, [code, t, modeParam]);
 
   return (
     <Screen muted form>

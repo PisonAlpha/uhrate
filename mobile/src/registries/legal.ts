@@ -23,7 +23,7 @@ export const legalRegistry: RegistryConfig = {
   title: 'Legal registry',
   registerIntro:
     'Register a contract, deed or other legal document permanently on the blockchain. Add the document to fill in the details automatically, or type them yourself.',
-  searchIntro: 'Check that a legal document is registered on UHRATE. Search is free.',
+  searchIntro: 'Check that a legal document is registered on UHRATE.',
   fileNoun: 'document',
   maxFileMB: 50,
   fields: [

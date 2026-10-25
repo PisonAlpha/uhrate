@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 import { CHAINS } from '@/constants/chains';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -84,7 +85,7 @@ function FeatureList({ items }: { items: string[] }) {
 // web's /pricing page: nothing is sold here. The fee itself is paid in
 // Seal and the registries. Store rules (E38) are why there is no UHR or
 // other purchase on this screen.
-export default function PricingScreen() {
+function PricingScreen() {
   const router = useRouter();
   const colors = useColors();
 
@@ -152,6 +153,11 @@ export default function PricingScreen() {
       </View>
     </Screen>
   );
+}
+
+// Pricing describes the on-chain fee, so it only exists with ONCHAIN_ENABLED.
+export default function PricingRoute() {
+  return ONCHAIN_ENABLED ? <PricingScreen /> : <Redirect href="/home" />;
 }
 
 const styles = StyleSheet.create({

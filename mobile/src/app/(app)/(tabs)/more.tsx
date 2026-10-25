@@ -3,17 +3,21 @@ import { BrandHeader } from '@/components/brand-header';
 import { HubItem, type HubEntry } from '@/components/hub-item';
 import { Screen } from '@/components/screen';
 import { useColors } from '@/theme';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 
-// Each fills in as its roadmap item lands: Pricing D31, Enterprise D29,
+// Each fills in as its roadmap item lands: Pricing D31 (only with
+// ONCHAIN_ENABLED, since the app then charges nothing), Enterprise D29,
 // Developer API D30, Contact D35, About and legal D36/E41. Identity badges
 // (D28) are left out while the web has no badge page.
+const PRICING: HubEntry = {
+  title: 'Pricing',
+  description: 'Free to use. A small fee only when you go on-chain.',
+  icon: 'pricetag-outline',
+  href: '/pricing',
+};
+
 const ITEMS: HubEntry[] = [
-  {
-    title: 'Pricing',
-    description: 'Free to use. A small fee only when you go on-chain.',
-    icon: 'pricetag-outline',
-    href: '/pricing',
-  },
+  ...(ONCHAIN_ENABLED ? [PRICING] : []),
   {
     title: 'Enterprise',
     description: 'Verify many files at once.',

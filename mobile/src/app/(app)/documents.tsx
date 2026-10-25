@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { View, Text, Pressable, Linking, StyleSheet, type TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { findRegisteredDocument, registerDocument, type DocumentRegisterResponse } from '@/services/documents';
 import { ApiError, errorMessage } from '@/services/api';
@@ -9,6 +9,7 @@ import { sha256OfFile } from '@/lib/file-hash';
 import { formatAddress } from '@/lib/format';
 import { shareJson } from '@/lib/share-file';
 import type { PickedFile } from '@/lib/file-picker';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -49,7 +50,7 @@ type FieldName = 'file' | 'ownerName' | 'ownerEmail' | 'documentType';
 // then the fee from the user's wallet (C15) and the record saved. Checking a
 // document is Look up on the Verify tab (D23), as the web has it on a
 // separate /registry/lookup page.
-export default function DocumentsScreen() {
+function DocumentsScreen() {
   const router = useRouter();
   const colors = useColors();
   const wallet = useWallet();
@@ -421,6 +422,11 @@ export default function DocumentsScreen() {
       </Card>
     </Screen>
   );
+}
+
+// The Document registry charges the on-chain fee, so it only exists with ONCHAIN_ENABLED.
+export default function DocumentsRoute() {
+  return ONCHAIN_ENABLED ? <DocumentsScreen /> : <Redirect href="/home" />;
 }
 
 const styles = StyleSheet.create({

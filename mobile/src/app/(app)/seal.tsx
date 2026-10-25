@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Text, ActivityIndicator, Linking, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { verifyFile } from '@/services/verify';
 import { ApiError, errorMessage } from '@/services/api';
 import type { PickedFile } from '@/lib/file-picker';
 import { formatAddress, ratingTone } from '@/lib/format';
 import { shareJson } from '@/lib/share-file';
+import { ONCHAIN_ENABLED } from '@/constants/config';
 import { CHAINS, DEFAULT_CHAIN, type ChainId } from '@/constants/chains';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
@@ -35,7 +36,7 @@ interface Seal {
 // credit), then pay the platform fee with the certificate as the
 // transaction data, as the web's /seal page does. Like the web, nothing
 // else is saved: the transaction itself is the seal.
-export default function SealScreen() {
+function SealScreen() {
   const router = useRouter();
   const colors = useColors();
   const wallet = useWallet();
@@ -236,6 +237,11 @@ export default function SealScreen() {
       )}
     </Screen>
   );
+}
+
+// Seal charges the on-chain fee, so it only exists with ONCHAIN_ENABLED.
+export default function SealRoute() {
+  return ONCHAIN_ENABLED ? <SealScreen /> : <Redirect href="/home" />;
 }
 
 const styles = StyleSheet.create({

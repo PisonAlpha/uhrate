@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, Linking, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { fetchTotalVerifications } from '@/services/stats';
-import { API_BASE_URL } from '@/constants/config';
+import { API_BASE_URL, ONCHAIN_ENABLED } from '@/constants/config';
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { HubItem } from '@/components/hub-item';
@@ -12,6 +12,8 @@ import { useColors } from '@/theme';
 
 // The rest of the web home page's content. Presale, investment and token
 // sale sections are left out on purpose (E38 store rules; presale is over).
+// Without ONCHAIN_ENABLED, Seal and its how-it-works steps are left out too,
+// since sealing then happens on the website only.
 const TOOLS = [
   {
     title: 'Seal',
@@ -86,6 +88,7 @@ export default function AboutScreen() {
       .catch(() => {});
   }, []);
 
+  const tools = ONCHAIN_ENABLED ? TOOLS : TOOLS.filter((t) => t.title !== 'Seal');
   const stats = [
     { value: total !== null ? `${total.toLocaleString()}+` : '…', label: 'Files identified' },
     { value: '4', label: 'Blockchains' },
@@ -99,8 +102,9 @@ export default function AboutScreen() {
 
       <Text style={[styles.headline, { color: colors.text }]}>Every document deserves a permanent identity.</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        UHRATE is the decentralized notary for the digital world. Give any file — document, image, video, audio — a
-        permanent, immutable blockchain identity that proves its existence, ownership, and authenticity forever.
+        {ONCHAIN_ENABLED
+          ? 'UHRATE is the decentralized notary for the digital world. Give any file — document, image, video, audio — a permanent, immutable blockchain identity that proves its existence, ownership, and authenticity forever.'
+          : 'UHRATE is the decentralized notary for the digital world. Check whether any file — document, image, video, audio — is original, AI-generated or manipulated, and look up documents, credentials and media recorded on the blockchain.'}
       </Text>
 
       <View style={styles.stats}>
@@ -112,16 +116,22 @@ export default function AboutScreen() {
         ))}
       </View>
 
-      <Text style={[styles.section, { color: colors.text }]}>Three tools. One platform.</Text>
-      {TOOLS.map((t) => (
+      <Text style={[styles.section, { color: colors.text }]}>
+        {ONCHAIN_ENABLED ? 'Three tools. One platform.' : 'Two tools. One app.'}
+      </Text>
+      {tools.map((t) => (
         <Card key={t.title} style={styles.item}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{t.title}</Text>
           <Text style={[styles.itemBody, { color: colors.textMuted }]}>{t.desc}</Text>
         </Card>
       ))}
       <View style={styles.actions}>
-        <Button title="Seal a file" onPress={() => router.push('/seal')} />
-        <Button title="Verify or look up a file" variant="secondary" onPress={() => router.navigate('/verify')} />
+        {ONCHAIN_ENABLED && <Button title="Seal a file" onPress={() => router.push('/seal')} />}
+        <Button
+          title="Verify or look up a file"
+          variant={ONCHAIN_ENABLED ? 'secondary' : 'primary'}
+          onPress={() => router.navigate('/verify')}
+        />
       </View>
 
       <Text style={[styles.section, { color: colors.text }]}>Why every file needs a permanent identity</Text>
@@ -133,18 +143,22 @@ export default function AboutScreen() {
         </Card>
       ))}
 
-      <Text style={[styles.section, { color: colors.text }]}>How digital identity works</Text>
-      {STEPS.map((s, i) => (
-        <View key={s.title} style={styles.step}>
-          <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.stepNumberText, { color: colors.background }]}>{i + 1}</Text>
-          </View>
-          <View style={styles.stepText}>
-            <Text style={[styles.itemTitle, { color: colors.text }]}>{s.title}</Text>
-            <Text style={[styles.itemBody, { color: colors.textMuted }]}>{s.desc}</Text>
-          </View>
-        </View>
-      ))}
+      {ONCHAIN_ENABLED && (
+        <>
+          <Text style={[styles.section, { color: colors.text }]}>How digital identity works</Text>
+          {STEPS.map((s, i) => (
+            <View key={s.title} style={styles.step}>
+              <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.stepNumberText, { color: colors.background }]}>{i + 1}</Text>
+              </View>
+              <View style={styles.stepText}>
+                <Text style={[styles.itemTitle, { color: colors.text }]}>{s.title}</Text>
+                <Text style={[styles.itemBody, { color: colors.textMuted }]}>{s.desc}</Text>
+              </View>
+            </View>
+          ))}
+        </>
+      )}
 
       <Text style={[styles.section, { color: colors.text }]}>Documents</Text>
       <HubItem
