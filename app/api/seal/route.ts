@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { generateDigitalDNA, generateCertificateId } from '@/lib/hasher';
 import { analyzeFile } from '@/lib/deepfake';
 import { sealFile } from '@/lib/sealer';
+import { uploadCertificateToIPFS } from '@/lib/ipfs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,8 +19,10 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Generate digital DNA
     const dna = generateDigitalDNA(buffer, file.name, file.type);
 
+    // Check if already sealed
     const { data: existing } = await supabaseAdmin
       .from('verifications')
       .select('*')
@@ -35,11 +38,13 @@ export async function POST(request: NextRequest) {
       trustScore = existing.trust_score;
       rating = existing.rating;
     } else {
+      // Run AI analysis
       const analysis = await analyzeFile(buffer, file.name, file.type, dna.sha256);
       certificateId = generateCertificateId();
       trustScore = analysis.trust_score;
       rating = analysis.rating;
 
+      // Save to verifications
       await supabaseAdmin.from('verifications').insert({
         certificate_id: certificateId,
         file_name: file.name,
@@ -57,6 +62,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Seal the file
     const sealed = await sealFile(buffer, file.type, file.name, {
       certificateId,
       sha256Hash: dna.sha256,
@@ -65,24 +71,14 @@ export async function POST(request: NextRequest) {
       watermark,
     });
 
-    // Generate hash of the SEALED file and store it for cross-device lookup
-    const sealedHash = require('crypto').createHash('sha256').update(sealed.sealedBuffer).digest('hex');
-    
-    // Store sealed file hash in verifications table
-    try {
-      await supabaseAdmin
-        .from('verifications')
-        .update({ sealed_file_hash: sealedHash })
-        .eq('certificate_id', certificateId);
-    } catch {}
-
+    // Get original file name without extension
     const nameParts = file.name.split('.');
     nameParts.pop();
     const baseName = nameParts.join('.');
     const sealedFileName = `${baseName}_UHRATE_${certificateId.split('-').pop()}.${sealed.extension}`;
 
-    const uint8Array = new Uint8Array(sealed.sealedBuffer);
-    return new NextResponse(uint8Array, {
+    // Return sealed file as download
+    return new NextResponse(sealed.sealedBuffer, {
       status: 200,
       headers: {
         'Content-Type': sealed.mimeType,

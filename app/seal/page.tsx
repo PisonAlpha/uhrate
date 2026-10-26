@@ -19,8 +19,6 @@ export default function SealFile() {
   const [payWithUHR, setPayWithUHR] = useState(false);
   const [deployResult, setDeployResult] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
-  const [withWatermark, setWithWatermark] = useState(true);
-  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('uhrate_user');
@@ -47,7 +45,7 @@ export default function SealFile() {
       formData.append('file', f);
       if (user?.email) formData.append('userEmail', user.email);
 
-      const response = await fetch('/api/verify', { method: 'POST', body: formData });
+            const response = await fetch('/api/verify', { method: 'POST', body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setResult(data);
@@ -64,41 +62,6 @@ export default function SealFile() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop, maxFiles: 1, maxSize: 50 * 1024 * 1024,
   });
-
-  const downloadSealedFile = async () => {
-    if (!file || !result) return;
-    setDownloading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('watermark', withWatermark.toString());
-      if (user?.email) formData.append('userEmail', user.email);
-
-      const response = await fetch('/api/seal', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error('Sealing failed');
-
-      const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
-      const fileNameMatch = disposition.match(/filename="(.+)"/);
-      const fileName = fileNameMatch ? fileNameMatch[1] : `sealed_${result.data.certificate_id}.${file.name.split('.').pop()}`;
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || 'Download failed. Please try again.');
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   const sealOnBlockchain = async () => {
     if (!window.ethereum) {
@@ -148,7 +111,8 @@ export default function SealFile() {
           ['function transfer(address to, uint256 amount) returns (bool)'],
           signer
         );
-        const uhrAmount = ethers.parseUnits('10', 18);
+        // Get UHR price (approximate $0.10 worth)
+        const uhrAmount = ethers.parseUnits('10', 18); // approximate 10 UHR = $0.10
         const tx = await uhrContract.transfer(PAYMENT_WALLET, uhrAmount);
         await tx.wait();
         txHash = tx.hash;
@@ -175,6 +139,7 @@ export default function SealFile() {
         } catch {}
 
         const feeWei = '0x' + BigInt(Math.floor(PLATFORM_FEE_USD / nativePrice * 1e18)).toString(16);
+
         txHash = await window.ethereum.request({
           method: 'eth_sendTransaction',
           params: [{
@@ -186,20 +151,6 @@ export default function SealFile() {
           }],
         });
       }
-
-      // Save blockchain tx to database
-      try {
-        await fetch('/api/billing/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            txHash,
-            chainId: selectedChain,
-            userEmail: user?.email || '',
-            documentId: result.data.certificate_id,
-          }),
-        });
-      } catch {}
 
       setDeployResult({ txHash, chain: selectedChain });
       setStep('sealed');
@@ -227,7 +178,7 @@ export default function SealFile() {
       sealed_on: deployResult ? chain.name : 'Not sealed on blockchain',
       tx_hash: deployResult?.txHash || null,
       sealed_at: new Date().toISOString(),
-      platform: 'UHRATE - The decentralized notary for the digital world',
+      platform: 'UHRATE — The decentralized notary for the digital world',
     };
     const blob = new Blob([JSON.stringify(cert, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -242,13 +193,14 @@ export default function SealFile() {
       <Nav />
 
       <div className="max-w-3xl mx-auto px-4 py-12">
+        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-xs font-bold mb-4 uppercase tracking-wider">
-            Permanent Digital Identity
+            🔏 Permanent Digital Identity
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-3">Seal Your File</h1>
+          <h1 className="text-4xl font-black text-gray-900 mb-3">Seal</h1>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Give any file a permanent, immutable digital identity. The sealed file carries its UHRATE identity wherever it goes.
+            Give any file a permanent, immutable digital identity on the blockchain. Timestamped proof of existence, ownership, and authenticity — verifiable by anyone, forever.
           </p>
         </div>
 
@@ -270,7 +222,7 @@ export default function SealFile() {
                   current === thisStep ? 'bg-black text-white' :
                   'bg-gray-200 text-gray-500'
                 )}>
-                  {current > thisStep ? 'checkmark' : i + 1}
+                  {current > thisStep ? '✓' : i + 1}
                 </div>
                 <span className={"text-xs " + (current === thisStep ? 'text-gray-900 font-semibold' : 'text-gray-400')}>{s.label}</span>
                 {i < 3 && <div className="w-6 h-px bg-gray-200" />}
@@ -296,10 +248,10 @@ export default function SealFile() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <div className="text-5xl">seal</div>
+                  <div className="text-5xl">🔏</div>
                   <div>
                     <p className="font-bold text-gray-700 text-lg">Drop your file to seal it</p>
-                    <p className="text-sm text-gray-400 mt-1">Images, videos, audio, documents — max 50MB</p>
+                    <p className="text-sm text-gray-400 mt-1">Any file type — max 50MB</p>
                   </div>
                 </div>
               )}
@@ -308,11 +260,12 @@ export default function SealFile() {
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { icon: 'dna', title: 'Digital DNA', desc: 'Unique SHA-256 fingerprint' },
-                { icon: 'ai', title: 'AI Analysis', desc: 'Deepfake and manipulation detection' },
-                { icon: 'chain', title: 'Sealed File', desc: 'Download with identity embedded' },
+                { icon: '🧬', title: 'Digital DNA', desc: 'Unique SHA-256 fingerprint generated' },
+                { icon: '🤖', title: 'AI Analysis', desc: 'Deepfake & manipulation detection' },
+                { icon: '⛓️', title: 'On-Chain Seal', desc: 'Permanent blockchain record' },
               ].map(item => (
                 <div key={item.title} className="text-center p-4 bg-gray-50 rounded-xl">
+                  <div className="text-2xl mb-2">{item.icon}</div>
                   <p className="font-bold text-gray-900 text-sm">{item.title}</p>
                   <p className="text-xs text-gray-500">{item.desc}</p>
                 </div>
@@ -321,13 +274,13 @@ export default function SealFile() {
           </div>
         )}
 
-        {/* Scanned Step */}
+        {/* Scanned Step — Choose blockchain and seal */}
         {step === 'scanned' && result && (
           <div className="space-y-4">
             {/* File summary */}
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">check</div>
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">✓</div>
                 <div>
                   <p className="font-bold text-gray-900">{result.data.file_name}</p>
                   <p className="text-sm text-gray-500">Trust Score: <span className="font-bold text-gray-900">{result.data.trust_score}/100</span> · {result.data.rating}</p>
@@ -337,118 +290,64 @@ export default function SealFile() {
                 <p className="text-xs text-gray-500 mb-1">Digital DNA (SHA-256)</p>
                 <p className="font-mono text-xs text-gray-700 break-all">{result.data.sha256_hash}</p>
               </div>
-              <div className="mt-3 p-3 bg-blue-50 rounded-xl">
-                <p className="text-xs text-gray-500 mb-1">Certificate ID</p>
-                <p className="font-mono text-sm text-blue-600 font-bold">{result.data.certificate_id}</p>
-              </div>
             </div>
 
-            {/* DOWNLOAD SEALED FILE */}
-            <div className="bg-white border-2 border-black rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-2">Download Sealed File</h3>
-              <p className="text-sm text-gray-500 mb-4">Your file with UHRATE identity embedded — the sealed file can be verified anywhere by uploading it to Lookup.</p>
+            {/* Choose chain */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+              <h3 className="font-bold text-gray-900 mb-4">Choose Blockchain Network</h3>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {SUPPORTED_CHAINS.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => { setSelectedChain(c.id); setPayWithUHR(false); }}
+                    className={"p-3 border-2 rounded-xl text-left transition-all " + (
+                      selectedChain === c.id && !payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400'
+                    )}
+                  >
+                    <p className="font-semibold text-gray-900 text-sm">{c.icon} {c.name}</p>
+                    <p className="text-xs text-gray-500">Gas {c.gasEstimate}</p>
+                  </button>
+                ))}
+              </div>
 
-              {/* Watermark choice */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <button
-                  onClick={() => setWithWatermark(true)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
-                >
-                  <p className="text-sm font-bold text-gray-900">With Badge</p>
-                  <p className="text-xs text-gray-500">Small UHRATE stamp in corner</p>
-                  <p className="text-xs text-green-600 mt-1">Visible proof of sealing</p>
+              <h3 className="font-bold text-gray-900 mb-3">Platform Fee</h3>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button onClick={() => setPayWithUHR(false)} className={"p-4 border-2 rounded-xl transition-all " + (!payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}>
+                  <p className="font-black text-gray-900 text-xl">${PLATFORM_FEE_USD}</p>
+                  <p className="text-xs text-gray-500">Pay with {chain.symbol}</p>
                 </button>
-                <button
-                  onClick={() => setWithWatermark(false)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
-                >
-                  <p className="text-sm font-bold text-gray-900">Metadata Only</p>
-                  <p className="text-xs text-gray-500">Identity hidden in file data</p>
-                  <p className="text-xs text-blue-600 mt-1">No visual change</p>
+                <button onClick={() => setPayWithUHR(true)} className={"p-4 border-2 rounded-xl transition-all relative " + (payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}>
+                  <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-black text-white text-xs rounded-full font-bold">50% OFF</div>
+                  <p className="font-black text-gray-900 text-xl">${PLATFORM_FEE_UHR_USD}</p>
+                  <p className="text-xs text-gray-500">Pay with UHR token</p>
                 </button>
               </div>
+
+              <div className="p-4 bg-gray-50 rounded-xl space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Network</span>
+                  <span className="font-medium">{chain.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Platform Fee</span>
+                  <span className="font-bold">{payWithUHR ? `$${PLATFORM_FEE_UHR_USD} in UHR` : `$${PLATFORM_FEE_USD} in ${chain.symbol}`}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Gas Fee</span>
+                  <span className="text-gray-700">{chain.gasEstimate} (paid to network)</span>
+                </div>
+              </div>
+
+              {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
 
               <button
-                onClick={downloadSealedFile}
-                disabled={downloading}
-                className="w-full py-3.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                onClick={sealOnBlockchain}
+                disabled={loading}
+                className="w-full py-4 bg-black text-white rounded-xl text-base font-black hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
-                {downloading ? 'Preparing sealed file...' : 'Download Sealed File'}
+                {loading ? 'Sealing on blockchain...' : `🔏 Seal on ${chain.name} — $${payWithUHR ? PLATFORM_FEE_UHR_USD + ' UHR' : PLATFORM_FEE_USD + ' ' + chain.symbol}`}
               </button>
-              <p className="text-xs text-gray-400 text-center mt-2">Free download — UHRATE identity embedded in the file</p>
-            </div>
-
-            {/* BLOCKCHAIN DEPLOYMENT */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-2">Permanent Blockchain Record (Optional)</h3>
-              <p className="text-sm text-gray-500 mb-4">Add an immutable on-chain record for maximum proof. Pay platform fee + gas.</p>
-
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-2">Select Network</p>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  {SUPPORTED_CHAINS.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => { setSelectedChain(c.id); setPayWithUHR(false); }}
-                      className={"p-3 rounded-xl border-2 text-left transition-all " + (
-                        selectedChain === c.id && !payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400'
-                      )}
-                    >
-                      <p className="text-sm font-semibold text-gray-900">{c.icon} {c.name}</p>
-                      <p className="text-xs text-gray-500">Gas {c.gasEstimate}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-sm font-semibold text-gray-700 mb-2">Platform Fee</p>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  <button
-                    onClick={() => setPayWithUHR(false)}
-                    className={"p-3 rounded-xl border-2 text-left transition-all " + (!payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
-                  >
-                    <p className="text-sm font-bold text-gray-900">${PLATFORM_FEE_USD}</p>
-                    <p className="text-xs text-gray-500">Pay with {chain?.symbol}</p>
-                  </button>
-                  <button
-                    onClick={() => setPayWithUHR(true)}
-                    className={"p-3 rounded-xl border-2 text-left transition-all relative " + (payWithUHR ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400')}
-                  >
-                    <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white text-xs rounded-full font-bold">50% OFF</div>
-                    <p className="text-sm font-bold text-gray-900">${PLATFORM_FEE_UHR_USD}</p>
-                    <p className="text-xs text-gray-500">Pay with UHR token</p>
-                  </button>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-xl space-y-2 text-sm mb-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Network</span>
-                    <span className="font-medium">{chain?.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Platform Fee</span>
-                    <span className="font-bold">{payWithUHR ? `$${PLATFORM_FEE_UHR_USD} in UHR` : `$${PLATFORM_FEE_USD} in ${chain?.symbol}`}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Gas Fee</span>
-                    <span className="text-gray-700">{chain?.gasEstimate} (paid to network)</span>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-4">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  onClick={sealOnBlockchain}
-                  disabled={loading}
-                  className="w-full py-3.5 border-2 border-black text-black rounded-xl text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Deploying to blockchain...' : `Deploy to ${chain?.name} — Pay $${payWithUHR ? PLATFORM_FEE_UHR_USD + ' UHR' : PLATFORM_FEE_USD + ' ' + chain?.symbol}`}
-                </button>
-                <p className="text-xs text-gray-400 text-center mt-2">Optional — the downloaded sealed file already carries UHRATE identity</p>
-              </div>
+              <p className="text-xs text-gray-400 text-center mt-2">You pay both platform fee and network gas. UHRATE charges no hidden fees.</p>
             </div>
           </div>
         )}
@@ -457,8 +356,8 @@ export default function SealFile() {
         {step === 'sealing' && (
           <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
             <div className="w-16 h-16 border-4 border-black border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-            <h2 className="text-xl font-black text-gray-900 mb-2">Deploying to {chain?.name}...</h2>
-            <p className="text-gray-500">Waiting for blockchain confirmation.</p>
+            <h2 className="text-xl font-black text-gray-900 mb-2">Sealing on {chain.name}...</h2>
+            <p className="text-gray-500">Waiting for blockchain confirmation. Please don't close this window.</p>
           </div>
         )}
 
@@ -466,73 +365,53 @@ export default function SealFile() {
         {step === 'sealed' && deployResult && (
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">seal</div>
-              <h2 className="text-2xl font-black text-gray-900 mb-2">File Sealed on Blockchain!</h2>
-              <p className="text-gray-600 mb-4">Permanent on-chain record created on {SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.name}.</p>
-              <button
-                onClick={() => window.open(`${SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.explorer}/tx/${deployResult.txHash}`, '_blank')}
-                className="inline-block px-6 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors border-0 cursor-pointer"
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🔏</div>
+              <h2 className="text-2xl font-black text-gray-900 mb-2">File Sealed!</h2>
+              <p className="text-gray-600 mb-4">
+                Your file now has a permanent digital identity on {SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.name}. Verifiable by anyone, forever.
+              </p>
+              <a
+                href={`${SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.explorer}/tx/${deployResult.txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors"
               >
-                View on Blockchain Explorer
-              </button>
-              <div className="mt-4 p-3 bg-gray-50 rounded-xl text-left">
-                <p className="text-xs text-gray-500 mb-1">Blockchain Transaction Hash</p>
-                <p className="font-mono text-xs text-blue-600 break-all">{deployResult.txHash}</p>
-              </div>
-            </div>
-
-            {/* Certificate ID — show prominently */}
-            <div className="bg-black text-white rounded-2xl p-6 shadow-sm">
-              <p className="text-xs text-gray-400 mb-1">Your Certificate ID — save this for lookup</p>
-              <p className="font-mono text-lg font-black text-yellow-400 break-all mb-3">{result?.data?.certificate_id}</p>
-              <p className="text-xs text-gray-400">Use this ID to verify this file from any device at uhrate.online/lookup</p>
+                View on Blockchain Explorer ↗
+              </a>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4">Download Your Sealed File</h3>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <button
-                  onClick={() => setWithWatermark(true)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (withWatermark ? 'border-black bg-gray-50' : 'border-gray-200')}
-                >
-                  <p className="text-sm font-bold text-gray-900">With Badge</p>
-                  <p className="text-xs text-gray-500">Small UHRATE stamp in corner</p>
-                </button>
-                <button
-                  onClick={() => setWithWatermark(false)}
-                  className={"p-3 border-2 rounded-xl text-left transition-all " + (!withWatermark ? 'border-black bg-gray-50' : 'border-gray-200')}
-                >
-                  <p className="text-sm font-bold text-gray-900">Metadata Only</p>
-                  <p className="text-xs text-gray-500">No visual change</p>
-                </button>
+              <h3 className="font-bold text-gray-900 mb-4">Your Seal Certificate</h3>
+              <div className="space-y-3">
+                {[
+                  { label: 'Certificate ID', value: result.data.certificate_id, mono: true },
+                  { label: 'SHA-256 Hash', value: result.data.sha256_hash.slice(0, 32) + '...', mono: true },
+                  { label: 'Sealed On', value: SUPPORTED_CHAINS.find(c => c.id === deployResult.chain)?.name },
+                  { label: 'Transaction', value: deployResult.txHash.slice(0, 20) + '...', mono: true },
+                  { label: 'Sealed At', value: new Date().toLocaleString() },
+                ].map(item => (
+                  <div key={item.label} className="flex justify-between py-2 border-b border-gray-50">
+                    <span className="text-sm text-gray-500">{item.label}</span>
+                    <span className={"text-sm font-medium " + (item.mono ? 'font-mono text-blue-600' : 'text-gray-900')}>{item.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={downloadSealedFile}
-                  disabled={downloading}
-                  className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  {downloading ? 'Preparing...' : 'Download Sealed File'}
+              <div className="flex gap-3 mt-4">
+                <button onClick={downloadCertificate} className="flex-1 py-3 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">
+                  ↓ Download Seal Certificate
                 </button>
-                <button onClick={downloadCertificate} className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-                  Download Certificate JSON
+                <button onClick={() => { setStep('upload'); setFile(null); setResult(null); setDeployResult(null); setError(null); }} className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                  Seal Another File
                 </button>
               </div>
             </div>
 
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
-              <p className="text-sm text-blue-700 mb-2">Verify this sealed file anytime</p>
+              <p className="text-sm text-blue-700 mb-2">Want anyone to verify this seal?</p>
               <button onClick={() => window.location.href = '/lookup'} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
-                Go to Lookup
+                🔍 Go to Lookup →
               </button>
             </div>
-
-            <button
-              onClick={() => { setStep('upload'); setFile(null); setResult(null); setDeployResult(null); setError(null); }}
-              className="w-full py-3 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-            >
-              Seal Another File
-            </button>
           </div>
         )}
       </div>
