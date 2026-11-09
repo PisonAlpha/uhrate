@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateDigitalDNA, generateCertificateId } from '@/lib/hasher';
 import { analyzeFile } from '@/lib/deepfake';
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const sealedFileName = `${baseName}_UHRATE_${certificateId.split('-').pop()}.${sealed.extension}`;
 
     // Return sealed file as download
-    return new NextResponse(sealed.sealedBuffer, {
+    return new NextResponse(sealed.sealedBuffer as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': sealed.mimeType,
