@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 
@@ -28,8 +28,6 @@ export default function Nav({ active }: NavProps) {
       <div className="bg-black text-white py-2 px-4 text-center text-xs">
         <span className="text-yellow-400 font-bold">🔥 UHR Presale Live</span>
         <span className="text-gray-400 mx-2">·</span>
-        <span className="text-gray-300">Buy UHR at $0.01 before listing at $0.02</span>
-        <span className="text-gray-400 mx-2">·</span>
         <button onClick={() => window.location.href = '/presale'} className="text-yellow-400 font-bold hover:text-yellow-300 bg-transparent border-0 cursor-pointer underline">
           Join →
         </button>
@@ -54,6 +52,9 @@ export default function Nav({ active }: NavProps) {
           </button>
           <button onClick={() => window.location.href = '/lookup'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'lookup' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
             🔍 Lookup
+          </button>
+          <button onClick={() => window.location.href = '/campaign'} className={"px-3 py-2 text-sm rounded-lg bg-transparent border-0 cursor-pointer " + (active === 'campaign' ? 'text-gray-900 bg-gray-100 font-semibold' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')}>
+            🏆 Campaign
           </button>
 
           {/* Registry Dropdown */}
@@ -86,12 +87,10 @@ export default function Nav({ active }: NavProps) {
               <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1">
                 {[
                   { icon: '🔥', label: 'Presale — $0.01', href: '/presale' },
-                  { icon: '💱', label: 'Buy UHR — $0.02', href: '/swap' },
                   { icon: '📊', label: 'Tokenomics', href: '/tokenomics' },
                   { icon: '🗺️', label: 'Roadmap', href: '/roadmap' },
                   { icon: '📄', label: 'Whitepaper', href: '/whitepaper' },
                   { icon: '📈', label: 'Investors', href: '/investors' },
-
                 ].map(item => (
                   <button key={item.href} onClick={() => window.location.href = item.href} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 bg-transparent border-0 cursor-pointer flex items-center gap-2">
                     <span>{item.icon}</span>{item.label}
@@ -135,12 +134,13 @@ export default function Nav({ active }: NavProps) {
             { label: '🔏 Seal', href: '/seal' },
             { label: '✅ Verify', href: '/scan' },
             { label: '🔍 Lookup', href: '/lookup' },
+            { label: '🏆 Campaign', href: '/campaign' },
             { label: '📄 Document Registry', href: '/registry' },
             { label: '🎓 Education Registry', href: '/education' },
             { label: '⚖️ Legal Registry', href: '/legal' },
             { label: '📰 Media Registry', href: '/media' },
-            { label: '📁 Bulk Verification', href: '/enterprise' },
-            { label: '🔌 Developer API', href: '/api-marketplace' },
+            { label: '🔌 Bulk Verification', href: '/enterprise' },
+            { label: '📌 Developer API', href: '/api-marketplace' },
           ].map(item => (
             <button key={item.href} onClick={() => window.location.href = item.href} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">
               {item.label}
@@ -149,12 +149,10 @@ export default function Nav({ active }: NavProps) {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-1 mt-3">Token</p>
           {[
             { label: '🔥 Presale — $0.01/UHR', href: '/presale' },
-            { label: '💱 Buy UHR — $0.02', href: '/swap' },
             { label: '📊 Tokenomics', href: '/tokenomics' },
             { label: '🗺️ Roadmap', href: '/roadmap' },
             { label: '📄 Whitepaper', href: '/whitepaper' },
             { label: '📈 Investors', href: '/investors' },
-
           ].map(item => (
             <button key={item.href} onClick={() => window.location.href = item.href} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl bg-transparent border-0 cursor-pointer">
               {item.label}
